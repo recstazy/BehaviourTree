@@ -1,0 +1,179 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using UnityEditor;
+using UnityEngine;
+
+namespace Recstazy.BehaviourTree.EditorScripts
+{
+    internal class BTNodeInspector : EditorWindow
+    {
+        public static event System.Action OnClosed;
+
+        #region Fields
+
+        private static readonly Vector2 nodeOffset = new Vector3(20f, -10f);
+        private static readonly Vector2 defaultSize = new Vector2(255f, 300f);
+        private static readonly Vector2 propertyBorder = new Vector2(5f, 5f);
+
+        private BehaviourTree tree;
+        private SerializedObject serializedObject;
+        private SerializedProperty property;
+        private static BTNodeInspector currentWindow;
+        private BehaviourTreeNode currentNode;
+        private Vector2 scrollPosition;
+        
+        #endregion
+
+        #region Properties
+
+        public static int CurrentNodeIndex { get; private set; } = -1;
+        public static bool IsActive { get; private set; }
+
+        #endregion
+
+        private void OnDisable()
+        {
+            ApplyAndDisposeSerializedObject();
+            currentNode = null;
+            tree = null;
+            property = null;
+        }
+
+        public static void SetupForSelection(BehaviourTreeNode currentSelection, BehaviourTreeWindow mainWindow)
+        {
+            if (currentSelection.Index == CurrentNodeIndex) return;
+            if (CheckForNoEditor(currentSelection?.Data?.TaskImplementation)) return;
+
+            var task = currentSelection.Data.TaskImplementation;
+
+            if (task != null)
+            {
+                if (currentWindow != null)
+                {
+                    CloseInspector();
+                }
+
+                var window = GetWindow<BTNodeInspector>(true, ObjectNames.NicifyVariableName(task.GetType().Name), true);
+                window.tree = mainWindow.TreeInstance;
+                window.currentNode = currentSelection;
+                window.position = new Rect(window.GetWindowPosition(mainWindow.position.position), defaultSize);
+                currentWindow = window;
+                CurrentNodeIndex = currentSelection.Index;
+                IsActive = true;
+            }
+            else
+            {
+                if (currentWindow != null)
+                {
+                    CloseInspector();
+                }
+            }
+        }
+
+        public static void CloseInspector()
+        {
+            if (currentWindow?.tree != null)
+            {
+                OnClosed?.Invoke();
+            }
+            
+            currentWindow?.Close();
+            currentWindow = null;
+            CurrentNodeIndex = -1;
+            IsActive = false;
+        }
+
+        private static bool CheckForNoEditor(BehaviourTask task)
+        {
+            if (task == null) return true;
+            if (task.GetType().GetCustomAttribute<NoInspectorAttribute>() != null) return true;
+
+            return false;
+        }
+
+        private void OnGUI()
+        {
+            var property = CreateOrGetProperty();
+
+            if (property != null)
+            {
+                Rect propertySafeArea = position;
+                propertySafeArea.position = propertyBorder;
+                propertySafeArea.size -= 2f * propertyBorder;
+
+                property.isExpanded = true;
+                float propHeight = EditorGUI.GetPropertyHeight(property);
+                bool isBiggerThanWindow = propHeight > propertySafeArea.size.y;
+
+                var propRect = new Rect(
+                    propertySafeArea.position.x, 
+                    propertySafeArea.position.y, 
+                    isBiggerThanWindow ? propertySafeArea.width - 15f : propertySafeArea.width, 
+                    propHeight);
+
+                if (isBiggerThanWindow)
+                {
+                    var rect = position;
+                    rect.position = propertyBorder;
+                    rect.height -= propertyBorder.y * 2f;
+                    rect.width -= 5f;
+                    scrollPosition = GUI.BeginScrollView(rect, scrollPosition, propRect);
+                }
+
+                EditorGUI.PropertyField(propRect, property, true);
+
+                if (isBiggerThanWindow)
+                {
+                    GUI.EndScrollView();
+                }
+            }
+
+            ApplyAndDisposeSerializedObject();
+        }
+
+        private Vector2 GetWindowPosition(Vector2 mainWindowPosition)
+        {
+            var nodeRect = currentNode.GetTransformedRect();
+            return (Vector2)GUI.matrix.MultiplyPoint3x4(nodeRect.position + Vector2.right * nodeRect.width) + mainWindowPosition + nodeOffset;
+        }
+
+        private SerializedProperty CreateOrGetProperty()
+        {
+            if (tree != null)
+            {
+                if (serializedObject is null || property is null)
+                {
+                    serializedObject = new SerializedObject(tree);
+                    int dataIndex = -1;
+
+                    for (int i = 0; i < tree.NodeData.Data.Length; i++)
+                    {
+                        if (tree.NodeData.Data[i].Index == currentNode.Index)
+                        {
+                            dataIndex = i;
+                            break;
+                        }
+                    }
+
+                    if (dataIndex >= 0)
+                    {
+                        var datasArray = serializedObject.FindProperty("nodeData.data");
+                        property = datasArray.GetArrayElementAtIndex(dataIndex).FindPropertyRelative("taskImplementation");
+                    }
+                }
+
+                return property;
+            }
+
+            return null;
+        }
+
+        private void ApplyAndDisposeSerializedObject()
+        {
+            serializedObject?.ApplyModifiedProperties();
+            serializedObject?.Dispose();
+            serializedObject = null;
+        }
+    }
+}
