@@ -73,6 +73,16 @@ namespace Recstazy.BehaviourTree
             }
         }
 
+        public bool IsValueSet(string valueName)
+        {
+            if (TryGetValue(valueName, out var value))
+            {
+                return !Equals(value?.MainValue, null);
+            }
+
+            return false;
+        }
+
         private bool TryGetValueRuntime(string name, out ITypedValue value)
         {
             return Values.TryGetValue(name, out value);
