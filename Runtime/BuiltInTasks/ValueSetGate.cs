@@ -27,7 +27,7 @@ namespace Recstazy.BehaviourTree
         {
             if (Blackboard.TryGetValue(valueName, out var value))
             {
-                return value?.MainValue != null;
+                return !Equals(value?.MainValue, null);
             }
 
             return false;
