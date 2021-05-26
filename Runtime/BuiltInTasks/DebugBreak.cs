@@ -24,7 +24,7 @@ namespace Recstazy.BehaviourTree
         protected override IEnumerator TaskRoutine()
         {
             Succeed = true;
-            Debug.Break();
+            if (Application.isEditor) Debug.Break();
             yield return null;
         }
     }
