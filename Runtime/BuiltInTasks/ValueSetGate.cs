@@ -25,7 +25,8 @@ namespace Recstazy.BehaviourTree
 
         protected override bool CheckGateCondition()
         {
-            return Blackboard.IsValueSet(valueName);
+            var isSet = Blackboard.IsValueSet(valueName);
+            return isSet;
         }
     }
 }

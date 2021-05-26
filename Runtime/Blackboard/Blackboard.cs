@@ -77,7 +77,8 @@ namespace Recstazy.BehaviourTree
         {
             if (TryGetValue(valueName, out var value))
             {
-                return !Equals(value?.MainValue, null);
+                var result = Equals(value, null) ? false : Equals(value.MainValue, null);
+                return result;
             }
 
             return false;

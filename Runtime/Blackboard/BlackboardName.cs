@@ -27,7 +27,7 @@ namespace Recstazy.BehaviourTree
             return name;
         }
 
-        public static implicit operator string(BlackboardName value) => value is null || value.name is null ? string.Empty : value.name;
+        public static implicit operator string(BlackboardName value) => Equals(value, null) || string.IsNullOrEmpty(value.name) ? string.Empty : value.name;
         public static implicit operator BlackboardName(string value) => new BlackboardName() { name = value };
     }
 }
