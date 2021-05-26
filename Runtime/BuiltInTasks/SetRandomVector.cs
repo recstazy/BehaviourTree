@@ -27,7 +27,7 @@ namespace Recstazy.BehaviourTree
 
         public override string GetDescription()
         {
-            return $"Randomize {name} between two constants";
+            return $"Randomize {name}";
         }
 
         protected override IEnumerator TaskRoutine()
