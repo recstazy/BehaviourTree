@@ -24,16 +24,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        protected override void StoppedExternaly(bool forceSucceed)
-        {
-            mainPlayer.StopImmediate(forceSucceed);
-
-            foreach (var d in dependentPlayers)
-            {
-                d.StopImmediate(forceSucceed);
-            }
-        }
-
         protected override IEnumerator TaskRoutine()
         {
             dependentRoutines = new List<Coroutine>();

@@ -13,8 +13,6 @@ namespace Recstazy.BehaviourTree
 
         private BehaviourTask root;
         private BehaviourTask currentTask;
-        private bool forceSucceed;
-        private bool canPlay;
 
         #endregion
 
@@ -37,17 +35,10 @@ namespace Recstazy.BehaviourTree
         {
             IsRunning = true;
             currentTask = root;
-            canPlay = true;
 
             while (currentTask != null)
             {
                 yield return TaskRunRoutine(currentTask);
-
-                if (!canPlay)
-                {
-                    BranchSucceed = forceSucceed;
-                    break;
-                }
 
                 if (currentTask.Succeed)
                 {
@@ -72,12 +63,6 @@ namespace Recstazy.BehaviourTree
             IsRunning = false;
         }
 
-        public void StopImmediate(bool forceSucceed)
-        {
-            canPlay = false;
-            this.forceSucceed = forceSucceed;
-        }
-
         private IEnumerator TaskRunRoutine(BehaviourTask task)
         {
             var enumerator = task.StartTask();
@@ -85,11 +70,6 @@ namespace Recstazy.BehaviourTree
             while(enumerator.MoveNext())
             {
                 yield return enumerator.Current;
-
-                if (!canPlay)
-                {
-                    task.StopImmediate(forceSucceed);
-                }
             }
         }
     }

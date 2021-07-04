@@ -29,7 +29,8 @@ namespace Recstazy.BehaviourTree
         {
             foreach (var c in Connections)
             {
-                c?.StopImmediate(succeedAll);
+                //c?.StopImmediate(succeedAll);
+                Debug.LogError("No Finish Other Implemented");
             }
 
             Succeed = succeedSelf;

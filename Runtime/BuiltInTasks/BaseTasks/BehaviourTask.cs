@@ -20,9 +20,6 @@ namespace Recstazy.BehaviourTree
         [System.NonSerialized]
         private Blackboard blackboard;
 
-        protected bool CanRun { get; private set; } = false;
-        protected bool ForceSucceedOrFail { get; private set; }
-
         /// <summary> Return -1 in <c>GetCurrentOutIndex</c> to tell player that no out can be selected to go further </summary>
         public const int NoOut = -1;
 
@@ -76,12 +73,6 @@ namespace Recstazy.BehaviourTree
             return null;
         }
 
-        public void StopImmediate(bool succeed)
-        {
-            CanRun = false;
-            ForceSucceedOrFail = succeed;
-        }
-
         /// <summary> Coroutine which will be executed when task is running </summary>
         protected virtual IEnumerator TaskRoutine()
         {
@@ -116,9 +107,6 @@ namespace Recstazy.BehaviourTree
             CoroutineRunner.StopAllCoroutines();
         }
 
-        /// <summary> Called if task was canceled externally </summary>
-        protected virtual void StoppedExternaly(bool forceSucceed) { }
-
         private Blackboard GetBlackboard()
         {
             return blackboard;
@@ -135,19 +123,11 @@ namespace Recstazy.BehaviourTree
         internal IEnumerator StartTask()
         {
             IsRunning = true;
-            CanRun = true;
             var enumerator = TaskRoutine();
 
             while (enumerator.MoveNext())
             {
                 yield return enumerator.Current;
-
-                if (!CanRun)
-                {
-                    StoppedExternaly(ForceSucceedOrFail);
-                    Succeed = ForceSucceedOrFail;
-                    break;
-                }
             }
 
             IsRunning = false;
