@@ -63,6 +63,7 @@ namespace Recstazy.BehaviourTree
         private IEnumerator PlayBranchRoutine()
         {
             IsRunning = true;
+            BranchSucceed = false;
             _currentTask = _root;
 
             while (_currentTask != null)

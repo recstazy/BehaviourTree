@@ -199,6 +199,7 @@ namespace Recstazy.BehaviourTree
         internal IEnumerator StartTask()
         {
             IsRunning = true;
+            Succeed = true;
             _taskBodyIsRunning = true;
             _taskBodyRoutine = _coroutineRunner.StartCoroutine(TaskBodyCoroutine());
             yield return new WaitUntil(() => !_taskBodyIsRunning);
