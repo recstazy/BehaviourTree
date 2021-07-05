@@ -28,7 +28,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             do
             {
                 var conditionBranch = PlayConnectedBranch(0);
-                conditionBranch.WaitUntilFinished();
+                yield return conditionBranch.WaitUntilFinished();
                 condition = conditionBranch.BranchSucceed;
 
                 if (condition)
