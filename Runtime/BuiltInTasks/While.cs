@@ -27,16 +27,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             do
             {
-                var conditionTask = GetConnectionSafe(0);
-                var conditionBranch = new BranchPlayer(conditionTask);
-                yield return conditionBranch.PlayBranchRoutine();
+                var conditionBranch = PlayConnectedBranch(0);
+                conditionBranch.WaitUntilFinished();
                 condition = conditionBranch.BranchSucceed;
 
                 if (condition)
                 {
-                    var executedTask = GetConnectionSafe(1);
-                    var executedBranch = new BranchPlayer(executedTask);
-                    yield return executedBranch.PlayBranchRoutine();
+                    var bodyBranch = PlayConnectedBranch(1);
+                    yield return bodyBranch.WaitUntilFinished();
                 }
             }
             while (condition);

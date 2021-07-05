@@ -29,8 +29,7 @@ namespace Recstazy.BehaviourTree
         {
             foreach (var c in Connections)
             {
-                //c?.StopImmediate(succeedAll);
-                Debug.LogError("No Finish Other Implemented");
+                c?.ForceFinishTask(succeedAll);
             }
 
             Succeed = succeedSelf;
@@ -39,7 +38,7 @@ namespace Recstazy.BehaviourTree
 
         protected override int GetCurrentOutIndex()
         {
-            return -1;
+            return NoOut;
         }
     }
 }

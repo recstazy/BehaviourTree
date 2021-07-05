@@ -12,11 +12,7 @@ namespace Recstazy.BehaviourTree
     {
         #region Fields
 
-        private BranchPlayer mainPlayer;
-        private List<BranchPlayer> dependentPlayers;
-
-        private Coroutine mainTaskRoutine;
-        private List<Coroutine> dependentRoutines;
+        private BranchPlayer _mainBranch;
 
         #endregion
 
@@ -26,24 +22,17 @@ namespace Recstazy.BehaviourTree
 
         protected override IEnumerator TaskRoutine()
         {
-            dependentRoutines = new List<Coroutine>();
-            dependentPlayers = new List<BranchPlayer>();
-
-            var mainTask = GetConnectionSafe(0);
-            mainPlayer = new BranchPlayer(mainTask);
-            mainTaskRoutine = StartCoroutine(MainRunner(mainPlayer));
+            _mainBranch = PlayConnectedBranch(0);
 
             for (int i = 1; i < Connections.Count; i++)
             {
-                var player = new BranchPlayer(GetConnectionSafe(i));
-                dependentPlayers.Add(player);
-                dependentRoutines.Add(StartCoroutine(ParallelRunner(player)));
+                StartCoroutine(ParallelBranchRoutine(i));
             }
 
-            yield return new WaitUntil(() => !mainPlayer.IsRunning);
-            yield return null;
+            yield return new WaitUntil(() => !_mainBranch.IsRunning);
             StopAllCoroutines();
-            Succeed = mainPlayer.BranchSucceed;
+            StopAllBranches();
+            Succeed = _mainBranch.BranchSucceed;
         }
 
         protected override int GetCurrentOutIndex()
@@ -51,17 +40,12 @@ namespace Recstazy.BehaviourTree
             return NoOut;
         }
 
-        private IEnumerator MainRunner(BranchPlayer player)
+        private IEnumerator ParallelBranchRoutine(int index)
         {
-            yield return player.PlayBranchRoutine();
-            mainTaskRoutine = null;
-        }
-
-        private IEnumerator ParallelRunner(BranchPlayer branchPlayer)
-        {
-            while(mainTaskRoutine != null)
+            while(_mainBranch.IsRunning)
             {
-                yield return branchPlayer.PlayBranchRoutine();
+                var branch = PlayConnectedBranch(index);
+                yield return branch.WaitUntilFinished();
             }
         }
     }

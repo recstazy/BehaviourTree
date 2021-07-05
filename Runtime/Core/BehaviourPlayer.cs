@@ -142,7 +142,9 @@ namespace Recstazy.BehaviourTree
         {
             while(true)
             {
-                yield return treePlayer.PlayBranchRoutine();
+                treePlayer.Start();
+                yield return new WaitUntil(() => !treePlayer.IsRunning);
+                yield return null;
             }
         }
 

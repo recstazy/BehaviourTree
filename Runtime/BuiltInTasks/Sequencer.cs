@@ -26,8 +26,8 @@ namespace Recstazy.BehaviourTree
 
             for (int i = 0; i < Connections.Count; i++)
             {
-                branchPlayer = new BranchPlayer(GetConnectionSafe(i));
-                yield return branchPlayer.PlayBranchRoutine();
+                branchPlayer = PlayConnectedBranch(i);
+                yield return branchPlayer.WaitUntilFinished();
 
                 if (!branchPlayer.BranchSucceed)
                 {
