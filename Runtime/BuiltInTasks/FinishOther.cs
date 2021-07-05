@@ -29,7 +29,7 @@ namespace Recstazy.BehaviourTree
         {
             foreach (var c in Connections)
             {
-                c?.StopImmediate(succeedAll);
+                c?.ForceFinishTask(succeedAll);
             }
 
             Succeed = succeedSelf;
@@ -38,7 +38,7 @@ namespace Recstazy.BehaviourTree
 
         protected override int GetCurrentOutIndex()
         {
-            return -1;
+            return NoOut;
         }
     }
 }

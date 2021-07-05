@@ -16,20 +16,20 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (data?.TaskImplementation is MultioutTask multioutTask)
             {
-                return GenerateOuts(multioutTask.OutsCount);
+                return GenerateOuts(multioutTask.OutsCount, true);
             }
 
             return data?.TaskImplementation?.GetType()?.GetCustomAttributes(typeof(TaskOutAttribute), false) as TaskOutAttribute[];
         }
 
-        private static TaskOutAttribute[] GenerateOuts(int count)
+        private static TaskOutAttribute[] GenerateOuts(int count, bool generatePlusSign)
         {
             count = Mathf.Max(count, 0) + 1;
             var outs = new TaskOutAttribute[count];
 
             for (int i = 0; i < outs.Length; i++)
             {
-                outs[i] = new TaskOutAttribute(i, i.ToString());
+                outs[i] = new TaskOutAttribute(i, generatePlusSign && i == outs.Length - 1 ? "+" : i.ToString());
             }
 
             return outs;
