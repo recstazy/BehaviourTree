@@ -77,8 +77,17 @@ namespace Recstazy.BehaviourTree
         {
             if (TryGetValue(valueName, out var value))
             {
-                var result = Equals(value, null) ? false : Equals(value.MainValue, null);
-                return result;
+                if (value != null)
+                {
+                    if (value.MainValue is UnityEngine.Object unityObject)
+                    {
+                        return unityObject != null;
+                    }
+                    else
+                    {
+                        return value.MainValue != null;
+                    }
+                }
             }
 
             return false;
