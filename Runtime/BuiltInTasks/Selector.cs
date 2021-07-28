@@ -8,6 +8,7 @@ namespace Recstazy.BehaviourTree
     /// Execute outs in index order until one of them succeeds - then stop and succeed too. If no out succeeded - fail.
     /// </summary>
     [NoInspector]
+    [TaskMenu("Multiout/Selector")]
     public class Selector : MultioutTask
     {
         #region Fields

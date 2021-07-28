@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
+    [TaskMenu("Value/Math")]
     public class Math : BehaviourTask
     {
         public enum Operation { Add, Subtract, Multiply, Divide }

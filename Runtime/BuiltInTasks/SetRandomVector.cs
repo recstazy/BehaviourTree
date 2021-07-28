@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
+    [TaskMenu("Value/Set Random Vector")]
     public class SetRandomVector : BehaviourTask
     {
         #region Fields

@@ -8,6 +8,7 @@ namespace Recstazy.BehaviourTree
     /// Execute task on out 0 and execute all other outs while out 0 is running
     /// </summary>
     [NoInspector]
+    [TaskMenu("Multiout/Paraleller")]
     public class Paraleller : MultioutTask
     {
         #region Fields

@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
+    [TaskMenu("Value/Copy Value")]
     public class CopyValue : BehaviourTask
     {
         #region Fields
