@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
+    [TaskMenu("Tasks/Finish Other")]
     public class FinishOther : MultioutTask
     {
         #region Fields

@@ -8,6 +8,7 @@ namespace Recstazy.BehaviourTree
     /// Succeed if blackboard boolean is true, else fail
     /// </summary>
     [TaskOut(0)]
+    [TaskMenu("Gate/Bool Gate")]
     public class BoolGate : BaseGateTask
     {
         #region Fields

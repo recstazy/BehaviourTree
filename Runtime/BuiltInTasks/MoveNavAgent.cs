@@ -6,6 +6,7 @@ using UnityEngine.AI;
 namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
+    [TaskMenu("Navigation/Move To")]
     public class MoveNavAgent : NavAgentTask
     {
         #region Fields

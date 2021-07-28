@@ -6,6 +6,7 @@ namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
     [NoInspector]
+    [TaskMenu("Debug/Break")]
     public class DebugBreak : BehaviourTask
     {
         #region Fields

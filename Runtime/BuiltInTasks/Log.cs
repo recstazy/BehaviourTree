@@ -8,6 +8,7 @@ namespace Recstazy.BehaviourTree
     /// Log a string to console from BehaviourTree
     /// </summary>
     [TaskOut(0)]
+    [TaskMenu("Debug/Log")]
     public class Log : BehaviourTask
     {
         #region Fields

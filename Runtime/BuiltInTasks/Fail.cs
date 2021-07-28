@@ -8,6 +8,7 @@ namespace Recstazy.BehaviourTree
     /// Fail the flow anyways
     /// </summary>
     [NoInspector]
+    [TaskMenu("Tasks/Fail")]
     public class Fail : BehaviourTask
     {
         #region Fields

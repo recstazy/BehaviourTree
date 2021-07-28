@@ -32,12 +32,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (dropDownStyle == null) CreateStyle();
 
-            int newIndex = currentIndex;
-            newIndex = EditorGUI.Popup(rect, newIndex, TaskFactory.NamesEditor, dropDownStyle);
+            var name = TaskFactory.NamesEditor[currentIndex];
 
-            if (newIndex != currentIndex)
+            if (GUI.Button(rect, name, dropDownStyle))
             {
-                ChangeTask(newIndex);
+                var menu = TaskFactory.CreateGenericMenu(CurrentImplementation, TaskInMenuSelected);
+                menu.ShowAsContext();
             }
         }
 
@@ -46,6 +46,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
             dropDownStyle = new GUIStyle("ShurikenDropdown");
             dropDownStyle.padding = new RectOffset(15, 0, 0, 0);
             dropDownStyle.normal.textColor = Color.gray;
+        }
+
+        private void TaskInMenuSelected(object index)
+        {
+            int newIndex = (int)index;
+
+            if (newIndex != currentIndex)
+            {
+                ChangeTask(newIndex);
+            }
         }
 
         private void ChangeTask(int newIndex)
