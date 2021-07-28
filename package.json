@@ -1,15 +1,14 @@
 {
   "name": "com.recstazy.behaviour.tree",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "displayName": "Behaviour Tree",
   "description": "Behaviour tree node editor with blackboard and ability to write custom tasks and types",
   "unity": "2018.1",
   "unityRelease": "1f1",
-  "dependencies": {},
- "keywords": [
+  "keywords": [
     "recstazy",
-	"behaviour",
-	"tree"
+    "behaviour",
+    "tree"
   ],
   "author": {
     "name": "Recstazy",
