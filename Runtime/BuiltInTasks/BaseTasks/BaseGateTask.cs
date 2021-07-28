@@ -41,14 +41,19 @@ namespace Recstazy.BehaviourTree
         protected override IEnumerator TaskRoutine()
         {
             yield return null;
-            var condition = CheckGateCondition();
-            Succeed = invert ? !condition : condition;
+            Succeed = GetFinalCondition();
         }
 
         internal bool CheckGateConditionInEditor()
         {
             if (Blackboard is null) return false;
-            return CheckGateCondition();
+            return GetFinalCondition();
+        }
+
+        private bool GetFinalCondition()
+        {
+            var condition = CheckGateCondition();
+            return invert ? !condition : condition;
         }
     }
 }

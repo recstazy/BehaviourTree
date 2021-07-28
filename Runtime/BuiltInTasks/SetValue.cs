@@ -8,6 +8,7 @@ namespace Recstazy.BehaviourTree
     /// Set value to blackboard from behaviour tree and succeed
     /// </summary>
     [TaskOut(0)]
+    [TaskMenu("Value/Set Value")]
     public class SetValue : BehaviourTask
     {
         [SerializeField]

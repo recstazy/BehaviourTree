@@ -73,6 +73,26 @@ namespace Recstazy.BehaviourTree
             }
         }
 
+        public bool IsValueSet(string valueName)
+        {
+            if (TryGetValue(valueName, out var value))
+            {
+                if (value != null)
+                {
+                    if (value.MainValue is UnityEngine.Object unityObject)
+                    {
+                        return unityObject != null;
+                    }
+                    else
+                    {
+                        return value.MainValue != null;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private bool TryGetValueRuntime(string name, out ITypedValue value)
         {
             return Values.TryGetValue(name, out value);

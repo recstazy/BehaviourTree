@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
+    [TaskMenu("Gate/Is Set Gate")]
     public class ValueSetGate : BaseGateTask
     {
         #region Fields
@@ -25,12 +26,8 @@ namespace Recstazy.BehaviourTree
 
         protected override bool CheckGateCondition()
         {
-            if (Blackboard.TryGetValue(valueName, out var value))
-            {
-                return value?.MainValue != null;
-            }
-
-            return false;
+            var isSet = Blackboard.IsValueSet(valueName);
+            return isSet;
         }
     }
 }

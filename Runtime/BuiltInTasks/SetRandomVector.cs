@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
+    [TaskMenu("Value/Set Random Vector")]
     public class SetRandomVector : BehaviourTask
     {
         #region Fields
@@ -14,7 +15,10 @@ namespace Recstazy.BehaviourTree
         private BlackboardName name;
 
         [SerializeField]
-        private float radius = 1f;
+        private Vector3 left;
+
+        [SerializeField]
+        private Vector3 right;
 
         #endregion
 
@@ -29,7 +33,12 @@ namespace Recstazy.BehaviourTree
 
         protected override IEnumerator TaskRoutine()
         {
-            Blackboard.SetValue(name, (Vector3Value)(Random.insideUnitSphere * radius));
+            Vector3 newVector = new Vector3(
+                Random.Range(left.x, right.x), 
+                Random.Range(left.y, right.y), 
+                Random.Range(left.z, right.z));
+
+            Blackboard.SetValue(name, (Vector3Value)newVector);
             yield return null;
         }
     }

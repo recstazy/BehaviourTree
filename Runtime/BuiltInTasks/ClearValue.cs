@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
+    [TaskMenu("Value/Clear Value")]
     public class ClearValue : BehaviourTask
     {
         #region Fields

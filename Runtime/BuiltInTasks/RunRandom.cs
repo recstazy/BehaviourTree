@@ -8,6 +8,7 @@ namespace Recstazy.BehaviourTree
     /// Executes random connection
     /// </summary>
     [NoInspector]
+    [TaskMenu("Tasks/Run Random")]
     public class RunRandom : MultioutTask
     {
         #region Fields

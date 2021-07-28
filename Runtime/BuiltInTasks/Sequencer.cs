@@ -8,6 +8,7 @@ namespace Recstazy.BehaviourTree
     /// Execute outs in index order until one of them fails - then stop and fail too. If all outs succeeded - succeed.
     /// </summary>
     [NoInspector]
+    [TaskMenu("Multiout/Sequencer")]
     public class Sequencer : MultioutTask
     {
         #region Fields
@@ -20,19 +21,14 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        protected override void StoppedExternaly(bool forceSucceed)
-        {
-            branchPlayer?.StopImmediate(forceSucceed);
-        }
-
         protected override IEnumerator TaskRoutine()
         {
             bool allSucceed = true;
 
-            for (int i = 0; i < Connections.Count && CanRun; i++)
+            for (int i = 0; i < Connections.Count; i++)
             {
-                branchPlayer = new BranchPlayer(GetConnectionSafe(i));
-                yield return branchPlayer.PlayBranchRoutine();
+                branchPlayer = PlayConnectedBranch(i);
+                yield return branchPlayer.WaitUntilFinished();
 
                 if (!branchPlayer.BranchSucceed)
                 {

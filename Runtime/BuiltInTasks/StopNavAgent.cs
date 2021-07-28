@@ -6,6 +6,7 @@ using UnityEngine.AI;
 namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
+    [TaskMenu("Navigation/Stop NavAgent")]
     public class StopNavAgent : NavAgentTask
     {
         #region Fields

@@ -24,6 +24,11 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
+        public FloatValue(float value)
+        {
+            this.value = value;
+        }
+
         public CompareResult Compare(ITypedValue other)
         {
             if (other is FloatValue otherFloat)
@@ -44,5 +49,8 @@ namespace Recstazy.BehaviourTree
 
             return CompareResult.TypeError;
         }
+
+        public static implicit operator float(FloatValue value) => value.Value;
+        public static implicit operator FloatValue(float value) => new FloatValue(value);
     }
 }

@@ -8,6 +8,7 @@ namespace Recstazy.BehaviourTree
     /// Compare two blackboard values and choose corresponding out
     /// </summary>
     [TaskOut(0, "Err"), TaskOut(1, "!="), TaskOut(2, "<"), TaskOut(3, "=="), TaskOut(4, ">")]
+    [TaskMenu("Value/Compare Value")]
     public class CompareValue : BehaviourTask
     {
         #region Fields

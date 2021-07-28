@@ -5,16 +5,11 @@ using UnityEngine;
 namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
-    [TaskMenu("Value/Copy Value")]
-    public class CopyValue : BehaviourTask
+    [NoInspector]
+    [TaskMenu("Debug/Break")]
+    public class DebugBreak : BehaviourTask
     {
         #region Fields
-
-        [SerializeField]
-        private BlackboardName from;
-
-        [SerializeField]
-        private BlackboardName to;
 
         #endregion
 
@@ -24,16 +19,13 @@ namespace Recstazy.BehaviourTree
 
         public override string GetDescription()
         {
-            return $"Copy {from} to {to}";
+            return "Pause Playmode";
         }
 
         protected override IEnumerator TaskRoutine()
         {
-            if (Blackboard.TryGetValue(from, out var value))
-            {
-                Blackboard.SetValue(to, value);
-            }
-
+            Succeed = true;
+            if (Application.isEditor) Debug.Break();
             yield return null;
         }
     }

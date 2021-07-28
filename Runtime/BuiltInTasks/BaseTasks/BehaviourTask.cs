@@ -14,24 +14,27 @@ namespace Recstazy.BehaviourTree
     {
         #region Fields
 
-        [System.NonSerialized]
-        private List<BehaviourTask> connections;
-
-        [System.NonSerialized]
-        private Blackboard blackboard;
-
-        protected bool CanRun { get; private set; } = false;
-        protected bool ForceSucceedOrFail { get; private set; }
-
         /// <summary> Return -1 in <c>GetCurrentOutIndex</c> to tell player that no out can be selected to go further </summary>
         public const int NoOut = -1;
+
+        [System.NonSerialized]
+        private List<BehaviourTask> _connections;
+
+        [System.NonSerialized]
+        private Blackboard _blackboard;
+
+        private CoroutineRunner _coroutineRunner;
+        private Coroutine _taskBodyRoutine;
+        private bool _taskBodyIsRunning;
+        private HashSet<Coroutine> _currentTaskCoroutines = new HashSet<Coroutine>();
+        private HashSet<BranchPlayer> _currentTaskBranches = new HashSet<BranchPlayer>();
 
         #endregion
 
         #region Properties
 
         /// <summary> Tasks connected to this task's outs, only exists in runtime </summary>
-        public List<BehaviourTask> Connections { get => connections; set => connections = value; }
+        public List<BehaviourTask> Connections { get => _connections; set => _connections = value; }
 
         /// <summary> Was the task execution successfull? True by default </summary>
         public bool Succeed { get; protected set; } = true;
@@ -39,9 +42,8 @@ namespace Recstazy.BehaviourTree
         public bool IsRunning { get; private set; }
         public Blackboard Blackboard { get => GetBlackboard(); set => SetBlackboard(value); }
 
-        /// <summary> MonoBehaviour used to run coroutines from tasks </summary>
-        protected CoroutineRunner CoroutineRunner { get; private set; }
         internal int LastReturnedOut { get; private set; }
+        internal CoroutineRunner CoroutineRunner => _coroutineRunner;
 
         #endregion
 
@@ -53,33 +55,26 @@ namespace Recstazy.BehaviourTree
             return nextOutIndex;
         }
 
-        /// <summary> What out index to choose after task completion </summary>
-        protected virtual int GetCurrentOutIndex()
-        {
-            return 0;
-        }
-
-        /// <summary> Get actual task connected to out index. Returns null if index out of bounds </summary>
-        public BehaviourTask GetConnectionSafe(int index)
-        {
-            if (Connections != null && index >= 0 && index < Connections.Count)
-            {
-                return Connections[index];
-            }
-
-            return null;
-        }
-
         /// <summary> Provide description to show in behaviour tree </summary>
         public virtual string GetDescription()
         {
             return null;
         }
 
-        public void StopImmediate(bool succeed)
+        /// <summary> Finish task without waiting to it's end and force to succeed or fail </summary>
+        /// <param name="shouldSucceed">Should task be marked as successful after finishing</param>
+        public void ForceFinishTask(bool shouldSucceed)
         {
-            CanRun = false;
-            ForceSucceedOrFail = succeed;
+            StopCoroutineSafe(_taskBodyRoutine);
+            _taskBodyIsRunning = false;
+            AfterBodyFinished();
+            Succeed = shouldSucceed;
+        }
+
+        /// <summary> What out index to choose after task completion </summary>
+        protected virtual int GetCurrentOutIndex()
+        {
+            return 0;
         }
 
         /// <summary> Coroutine which will be executed when task is running </summary>
@@ -89,16 +84,12 @@ namespace Recstazy.BehaviourTree
             yield return null;
         }
 
-        /// <summary> Get connection with index 0 </summary>
-        protected BehaviourTask GetFirstConnection()
-        {
-            return GetConnectionSafe(0);
-        }
-
         /// <summary> Start coroutine as MonoBehaviours do </summary>
         protected Coroutine StartCoroutine(IEnumerator coroutine)
         {
-            return CoroutineRunner.StartCoroutine(coroutine);
+            var newCoroutine = _coroutineRunner.StartCoroutine(coroutine);
+            _currentTaskCoroutines.Add(newCoroutine);
+            return newCoroutine;
         }
 
         /// <summary> Check for null and stop coroutine </summary>
@@ -106,51 +97,113 @@ namespace Recstazy.BehaviourTree
         {
             if (coroutine != null)
             {
-                CoroutineRunner.StopCoroutine(coroutine);
+                if (_currentTaskCoroutines.Contains(coroutine))
+                {
+                    _currentTaskCoroutines.Remove(coroutine);
+                }
+
+                _coroutineRunner.StopCoroutine(coroutine);
             }
         }
 
-        /// <summary> Stop all coroutines started on CoroutineRunner attached to this BehaviourPlayer </summary>
+        /// <summary> Stop all coroutines started in this task </summary>
         protected void StopAllCoroutines()
         {
-            CoroutineRunner.StopAllCoroutines();
+            foreach (var c in _currentTaskCoroutines)
+            {
+                if (c != null)
+                {
+                    _coroutineRunner.StopCoroutine(c);
+                }
+            }
+
+            _currentTaskCoroutines.Clear();
         }
 
-        /// <summary> Called if task was canceled externally </summary>
-        protected virtual void StoppedExternaly(bool forceSucceed) { }
+        /// <summary> Start executing new branch starting from connected out task with index </summary>
+        /// <param name="outIndex"> Out index of this task to use as branch root node </param>
+        protected BranchPlayer PlayConnectedBranch(int outIndex)
+        {
+            var root = GetConnectionSafe(outIndex);
+
+            if (root != null)
+            {
+                var branch = new BranchPlayer(root);
+                _currentTaskBranches.Add(branch);
+                branch.Start();
+                return branch;
+            }
+
+            return null;
+        }
+
+        /// <summary> Stop running branch if it was started from this task </summary>
+        protected void StopBranch(BranchPlayer branch)
+        {
+            if (_currentTaskBranches.Contains(branch))
+            {
+                _currentTaskBranches.Remove(branch);
+                branch.Stop();
+            }
+        }
+
+        /// <summary> Stop all branches started on this task </summary>
+        protected void StopAllBranches()
+        {
+            foreach (var b in _currentTaskBranches)
+            {
+                b.Stop();
+            }
+
+            _currentTaskBranches.Clear();
+        }
 
         private Blackboard GetBlackboard()
         {
-            return blackboard;
+            return _blackboard;
         }
 
         private void SetBlackboard(Blackboard value)
         {
             if (Application.isPlaying)
             {
-                blackboard = value;
+                _blackboard = value;
             }
+        }
+
+        private IEnumerator TaskBodyCoroutine()
+        {
+            yield return TaskRoutine();
+            _taskBodyIsRunning = false;
+        }
+
+        private void AfterBodyFinished()
+        {
+            StopAllCoroutines();
+            StopAllBranches();
+            _taskBodyRoutine = null;
+            IsRunning = false;
+        }
+
+        /// <summary> Get actual task connected to out index. Returns null if index out of bounds </summary>
+        internal BehaviourTask GetConnectionSafe(int index)
+        {
+            if (Connections != null && index >= 0 && index < Connections.Count)
+            {
+                return Connections[index];
+            }
+
+            return null;
         }
 
         internal IEnumerator StartTask()
         {
             IsRunning = true;
-            CanRun = true;
-            var enumerator = TaskRoutine();
-
-            while (enumerator.MoveNext())
-            {
-                yield return enumerator.Current;
-
-                if (!CanRun)
-                {
-                    StoppedExternaly(ForceSucceedOrFail);
-                    Succeed = ForceSucceedOrFail;
-                    break;
-                }
-            }
-
-            IsRunning = false;
+            Succeed = true;
+            _taskBodyIsRunning = true;
+            _taskBodyRoutine = _coroutineRunner.StartCoroutine(TaskBodyCoroutine());
+            yield return new WaitUntil(() => !_taskBodyIsRunning);
+            AfterBodyFinished();
         }
 
         internal BehaviourTask CreateShallowCopy()
@@ -178,7 +231,7 @@ namespace Recstazy.BehaviourTree
         [RuntimeInstanced]
         internal void SetCoroutineRunner(CoroutineRunner runner)
         {
-            CoroutineRunner = runner;
+            _coroutineRunner = runner;
         }
     }
 }

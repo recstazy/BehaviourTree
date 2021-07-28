@@ -11,10 +11,11 @@ namespace Recstazy.BehaviourTree
     {
         #region Fields
 
-        private BehaviourTask root;
-        private BehaviourTask currentTask;
-        private bool forceSucceed;
-        private bool canPlay;
+        private BehaviourTask _root;
+        private BehaviourTask _currentTask;
+
+        private Coroutine _branchRountine;
+        private CoroutineRunner _coroutineRunner;
 
         #endregion
 
@@ -26,32 +27,52 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        /// <param name="root">Root task to start from</param>
-        public BranchPlayer(BehaviourTask root)
+        public IEnumerator WaitUntilFinished()
         {
-            this.root = root;
+            yield return new WaitUntil(() => !IsRunning);
+        }
+
+        internal BranchPlayer(BehaviourTask root)
+        {
+            if (root == null) throw new System.NullReferenceException("BranchPlayer root task must not be null");
+            _root = root;
+            _coroutineRunner = _root.CoroutineRunner;
+        }
+
+        internal void Start()
+        {
+            _branchRountine = _coroutineRunner.StartCoroutine(PlayBranchRoutine());
+        }
+
+        internal void Stop()
+        {
+            if (_branchRountine != null)
+            {
+                _coroutineRunner.StopCoroutine(_branchRountine);
+            }
+
+            if (_root != null)
+            {
+                _root.ForceFinishTask(false);
+            }
+
+            IsRunning = false;
         }
 
         /// <summary> Yield or start coroutine to play the branch </summary>
-        public IEnumerator PlayBranchRoutine()
+        private IEnumerator PlayBranchRoutine()
         {
             IsRunning = true;
-            currentTask = root;
-            canPlay = true;
+            BranchSucceed = false;
+            _currentTask = _root;
 
-            while (currentTask != null)
+            while (_currentTask != null)
             {
-                yield return TaskRunRoutine(currentTask);
+                yield return _currentTask.StartTask();
 
-                if (!canPlay)
+                if (_currentTask.Succeed)
                 {
-                    BranchSucceed = forceSucceed;
-                    break;
-                }
-
-                if (currentTask.Succeed)
-                {
-                    var next = currentTask.GetConnectionSafe(currentTask.GetCurrentOut());
+                    var next = _currentTask.GetConnectionSafe(_currentTask.GetCurrentOut());
 
                     if (next is null)
                     {
@@ -59,7 +80,7 @@ namespace Recstazy.BehaviourTree
                         break;
                     }
 
-                    currentTask = next;
+                    _currentTask = next;
                 }
                 else
                 {
@@ -68,29 +89,7 @@ namespace Recstazy.BehaviourTree
                 }
             }
 
-            yield return null;
             IsRunning = false;
-        }
-
-        public void StopImmediate(bool forceSucceed)
-        {
-            canPlay = false;
-            this.forceSucceed = forceSucceed;
-        }
-
-        private IEnumerator TaskRunRoutine(BehaviourTask task)
-        {
-            var enumerator = task.StartTask();
-
-            while(enumerator.MoveNext())
-            {
-                yield return enumerator.Current;
-
-                if (!canPlay)
-                {
-                    task.StopImmediate(forceSucceed);
-                }
-            }
         }
     }
 }
