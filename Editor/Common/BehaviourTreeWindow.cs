@@ -11,23 +11,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private int lastAssetID;
-        private BehaviourTree treeInstance;
-        private BehaviourTree treeAsset;
-        private BTEventProcessor eventProcessor;
-        private NodeConnector connector;
-        private BTModeManager modeManager;
-        private BTTargetWatcher watcher;
-        private BTNodeProcessor nodeProcessor;
-        private bool initialized;
+        private int _lastAssetID;
+        private BTEventProcessor _eventProcessor;
+        private NodeConnector _connector;
+        private BTModeManager _modeManager;
+        private BTTargetWatcher _watcher;
+        private BTNodeProcessor _nodeProcessor;
+        private bool _isInitialized;
 
         #endregion
 
         #region Properties
 
         public static Vector2 GraphPosition => BTEventProcessor.CurrentGraphPosition;
-        public BehaviourTree TreeInstance => treeInstance;
-        public BehaviourTree TreeAsset => treeAsset;
+        public BehaviourTree TreeInstance { get; private set; }
+        public BehaviourTree TreeAsset { get; private set; }
 
         private string Title { set => titleContent = new GUIContent($"Tree: {value}"); }
 
@@ -55,13 +53,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void OnEnable()
         {
-            if (lastAssetID != 0)
+            if (_lastAssetID != 0)
             {
-                var assetObject = EditorUtility.InstanceIDToObject(lastAssetID);
+                var assetObject = EditorUtility.InstanceIDToObject(_lastAssetID);
 
                 if (assetObject is BehaviourTree treeAsset)
                 {
-                    if (treeInstance is null || this.treeAsset != treeAsset)
+                    if (TreeInstance is null || this.TreeAsset != treeAsset)
                     {
                         InitializeWithAsset(treeAsset);
                     }
@@ -84,30 +82,30 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void OnGUI()
         {
-            if (initialized)
+            if (_isInitialized)
             {
-                watcher.OnGUI(position);
+                _watcher.OnGUI(position);
 
                 if (ProcessWatcherEvents())
                 {
                     return;
                 }
 
-                eventProcessor.BeginZoom();
-                connector.OnGUI();
+                _eventProcessor.BeginZoom();
+                _connector.OnGUI();
                 ProcessConnectorShedules();
-                nodeProcessor.OnNodesGUI();
+                _nodeProcessor.OnNodesGUI();
 
-                eventProcessor.CanSelect = !connector.IsPerformingConnection;
-                eventProcessor.OnGUI();
-                eventProcessor.Process(Event.current);
+                _eventProcessor.CanSelect = !_connector.IsPerformingConnection;
+                _eventProcessor.OnGUI();
+                _eventProcessor.Process(Event.current);
 
-                if (eventProcessor.DeleteNodesPressed)
+                if (_eventProcessor.DeleteNodesPressed)
                 {
-                    if (nodeProcessor.DeleteNodesBySelection(eventProcessor.Selection))
+                    if (_nodeProcessor.DeleteNodesBySelection(_eventProcessor.Selection))
                     {
                         UpdateTreeAssetAndSetDirty("Delete Nodes");
-                        nodeProcessor.ClearNodesDirty();
+                        _nodeProcessor.ClearNodesDirty();
                         ReinitNodesDependencies();
                     }
                 }
@@ -116,18 +114,18 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     SetAssetDirtyIfNodesDirty();
                 }
 
-                eventProcessor.EndZoom();
-                modeManager.OnGUI(position);
+                _eventProcessor.EndZoom();
+                _modeManager.OnGUI(position);
             }
         }
 
         private void EditorUpdate()
         {
-            if (initialized)
+            if (_isInitialized)
             {
                 if (BTModeManager.IsPlaymode)
                 {
-                    if (nodeProcessor.UpdateRunningNodesAndCheckChanged())
+                    if (_nodeProcessor.UpdateRunningNodesAndCheckChanged())
                     {
                         GUI.changed = true;
                     }
@@ -142,58 +140,58 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void InitializeWithAsset(BehaviourTree tree)
         {
-            if (treeInstance != null) Dispose();
+            if (TreeInstance != null) Dispose();
             if (tree is null) return;
-            if (!tree.IsRuntime) lastAssetID = tree.GetInstanceID();
+            if (!tree.IsRuntime) _lastAssetID = tree.GetInstanceID();
 
-            treeAsset = tree;
-            Title = treeAsset.name;
+            TreeAsset = tree;
+            Title = TreeAsset.name;
             InitializeTreeAssetIfEmpty();
 
             BTNodeInspector.OnClosed += UpdateAssetAfterNodeInspector;
             TaskFactory.UpdateTaskTypes();
             NodeDrawerProvider.UpdateTaskDrawers();
-            modeManager = new BTModeManager();
-            watcher = new BTTargetWatcher();
-            nodeProcessor = new BTNodeProcessor();
+            _modeManager = new BTModeManager();
+            _watcher = new BTTargetWatcher();
+            _nodeProcessor = new BTNodeProcessor();
             FetchGrapghFromAsset();
-            initialized = true;
+            _isInitialized = true;
         }
 
         private void InitializeTreeAssetIfEmpty()
         {
-            if (treeAsset.EntryNode is null)
+            if (TreeAsset.EntryNode is null)
             {
-                treeAsset.CreateEntry();
-                EditorUtility.SetDirty(treeAsset);
+                TreeAsset.CreateEntry();
+                EditorUtility.SetDirty(TreeAsset);
             }
         }
 
         private void FetchGrapghFromAsset()
         {
-            treeInstance = treeAsset.IsRuntime ? treeAsset : Instantiate(treeAsset);
-            nodeProcessor.RecreateNodes(treeInstance);
+            TreeInstance = TreeAsset.IsRuntime ? TreeAsset : Instantiate(TreeAsset);
+            _nodeProcessor.RecreateNodes(TreeInstance);
             ReinitNodesDependencies();
         }
 
         private void Dispose()
         {
             SetDirtyAndSaveSaveAll();
-            treeInstance = null;
-            treeAsset = null;
-            nodeProcessor?.Dispose();
-            nodeProcessor = null;
-            eventProcessor?.Dispose();
-            eventProcessor = null;
-            connector?.Dispose();
-            connector = null;
-            modeManager?.Dispose();
-            modeManager = null;
-            watcher?.Dispose();
-            watcher = null;
+            TreeInstance = null;
+            TreeAsset = null;
+            _nodeProcessor?.Dispose();
+            _nodeProcessor = null;
+            _eventProcessor?.Dispose();
+            _eventProcessor = null;
+            _connector?.Dispose();
+            _connector = null;
+            _modeManager?.Dispose();
+            _modeManager = null;
+            _watcher?.Dispose();
+            _watcher = null;
             BTNodeInspector.OnClosed -= UpdateAssetAfterNodeInspector;
             BTNodeInspector.CloseInspector();
-            initialized = false;
+            _isInitialized = false;
         }
 
         private void SetDirtyAndSaveSaveAll()
@@ -204,7 +202,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void SaveAssets()
         {
-            if (!treeInstance.IsRuntime)
+            if (!TreeInstance.IsRuntime)
             {
                 AssetDatabase.SaveAssets();
             }
@@ -212,7 +210,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UpdateAssetAfterNodeInspector()
         {
-            if (treeAsset != null && treeInstance != null)
+            if (TreeAsset != null && TreeInstance != null)
             {
                 UpdateTreeAssetAndSetDirty("Edit Node Task");
             }
@@ -220,34 +218,34 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UpdateTreeAssetAndSetDirty(string undoName)
         {
-            Undo.RecordObject(treeAsset, undoName);
+            Undo.RecordObject(TreeAsset, undoName);
             UpdateTreeAssetAndSetDirty();
         }
 
         private void UpdateTreeAssetAndSetDirty()
         {
-            treeAsset.NodeData = new TreeNodeData(nodeProcessor.Nodes.Select(n => n.Data).ToArray());
-            treeAsset.GraphPosition = BTEventProcessor.CurrentGraphPosition;
-            treeAsset.Zoom = EditorZoomer.Zoom;
+            TreeAsset.NodeData = new TreeNodeData(_nodeProcessor.Nodes.Select(n => n.Data).ToArray());
+            TreeAsset.GraphPosition = BTEventProcessor.CurrentGraphPosition;
+            TreeAsset.Zoom = EditorZoomer.Zoom;
 
-            if (!treeInstance.IsRuntime)
+            if (!TreeInstance.IsRuntime)
             {
-                EditorUtility.SetDirty(treeAsset);
+                EditorUtility.SetDirty(TreeAsset);
             }
         }
 
         private void CreateNewNodeInEditor()
         {
-            nodeProcessor.CreateNewNodeInEditor();
+            _nodeProcessor.CreateNewNodeInEditor();
             UpdateTreeAssetAndSetDirty("Add Node");
             FetchGrapghFromAsset();
         }
 
         private void SetAssetDirtyIfNodesDirty()
         {
-            if (nodeProcessor.NodesDirty)
+            if (_nodeProcessor.NodesDirty)
             {
-                nodeProcessor.ClearNodesDirty();
+                _nodeProcessor.ClearNodesDirty();
                 UpdateTreeAssetAndSetDirty("Change Node Task");
                 FetchGrapghFromAsset();
             }
@@ -255,22 +253,22 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void ReinitNodesDependencies()
         {
-            connector?.Dispose();
-            connector = new NodeConnector(nodeProcessor.Nodes);
+            _connector?.Dispose();
+            _connector = new NodeConnector(_nodeProcessor.Nodes);
 
-            eventProcessor?.Dispose();
-            eventProcessor = new BTEventProcessor(this, nodeProcessor.Nodes);
-            BTEventProcessor.CurrentGraphPosition = treeAsset.GraphPosition;
-            EditorZoomer.Zoom = treeAsset.Zoom;
-            eventProcessor.OnUndo = FetchGrapghFromAsset;
-            eventProcessor.OnSetDirty = UpdateTreeAssetAndSetDirty;
-            eventProcessor.OnRegisterUndoAndSetDirty = UpdateTreeAssetAndSetDirty;
-            eventProcessor.OnCreateNode = CreateNewNodeInEditor;
-            eventProcessor.OnCopy = nodeProcessor.CopySelectedToClipboard;
-            eventProcessor.OnPaste = nodeProcessor.CreateNewNodesFromClipboardUnderMouse;
-            eventProcessor.OnDuplicate = nodeProcessor.DuplicateNodes;
-            eventProcessor.OnUpdateNodes = FetchGrapghFromAsset;
-            eventProcessor.OnNodesMoved = NodesMoved;
+            _eventProcessor?.Dispose();
+            _eventProcessor = new BTEventProcessor(this, _nodeProcessor.Nodes);
+            BTEventProcessor.CurrentGraphPosition = TreeAsset.GraphPosition;
+            EditorZoomer.Zoom = TreeAsset.Zoom;
+            _eventProcessor.OnUndo = FetchGrapghFromAsset;
+            _eventProcessor.OnSetDirty = UpdateTreeAssetAndSetDirty;
+            _eventProcessor.OnRegisterUndoAndSetDirty = UpdateTreeAssetAndSetDirty;
+            _eventProcessor.OnCreateNode = CreateNewNodeInEditor;
+            _eventProcessor.OnCopy = _nodeProcessor.CopySelectedToClipboard;
+            _eventProcessor.OnPaste = _nodeProcessor.CreateNewNodesFromClipboardUnderMouse;
+            _eventProcessor.OnDuplicate = _nodeProcessor.DuplicateNodes;
+            _eventProcessor.OnUpdateNodes = FetchGrapghFromAsset;
+            _eventProcessor.OnNodesMoved = NodesMoved;
 
             GUI.changed = true;
             Repaint();
@@ -278,12 +276,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void ProcessConnectorShedules()
         {
-            bool changed = connector.IsRemovalPending || connector.IsConnectionPending;
+            bool changed = _connector.IsRemovalPending || _connector.IsConnectionPending;
             string undoMessage = null;
 
             if (changed)
             {
-                if (connector.IsConnectionPending)
+                if (_connector.IsConnectionPending)
                 {
                     undoMessage = "Create Connection";
                 }
@@ -293,14 +291,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
             }
 
-            if (connector.IsRemovalPending)
+            if (_connector.IsRemovalPending)
             {
-                nodeProcessor.RemoveConnection(connector.RemovalPending);
+                _nodeProcessor.RemoveConnection(_connector.RemovalPending);
             }
 
-            if (connector.IsConnectionPending)
+            if (_connector.IsConnectionPending)
             {
-                nodeProcessor.CreateConnection(connector.ConnectionPending);
+                _nodeProcessor.CreateConnection(_connector.ConnectionPending);
             }
 
             if (changed)
@@ -314,17 +312,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (BTModeManager.IsPlaymode)
             {
-                if (watcher.Current?.Tree != null && watcher.Current.Tree != treeInstance)
+                if (_watcher.Current?.Tree != null && _watcher.Current.Tree != TreeInstance)
                 {
-                    InitializeWithAsset(watcher.Current.Tree);
+                    InitializeWithAsset(_watcher.Current.Tree);
                     return true;
                 }
             }
             else
             {
-                if (treeInstance == null || treeInstance.IsRuntime)
+                if (TreeInstance == null || TreeInstance.IsRuntime)
                 {
-                    var asset = EditorUtility.InstanceIDToObject(lastAssetID) as BehaviourTree;
+                    var asset = EditorUtility.InstanceIDToObject(_lastAssetID) as BehaviourTree;
                     InitializeWithAsset(asset);
                     return true;
                 }
@@ -335,7 +333,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void NodesMoved(HashSet<int> listIndices)
         {
-            bool changed = nodeProcessor.AfterNodesDragged(listIndices);
+            bool changed = _nodeProcessor.AfterNodesDragged(listIndices);
             UpdateTreeAssetAndSetDirty("Move Node");
 
             if (changed)

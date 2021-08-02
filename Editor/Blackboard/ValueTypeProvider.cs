@@ -12,7 +12,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private const float _nameValueRatio = 0.3f;
+        private const float NameValueRatio = 0.3f;
         private int _currentEnumIndex = 0;
 
         #endregion
@@ -87,7 +87,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Changed = false;
 
             var currentRect = rect;
-            currentRect.width *= _nameValueRatio;
+            currentRect.width *= NameValueRatio;
             EditorGUI.LabelField(currentRect, string.IsNullOrEmpty(label) ? "Type" : label);
 
             currentRect.x += currentRect.width;

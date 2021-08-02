@@ -10,18 +10,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private static readonly Vector2 bottomBorder = Vector2.up * 0.5f;
-
-        private BehaviourTreeNode node;
-        private int outsCount = 0;
-        private bool isEntryNode;
-        private Vector2[] outsPositions;
+        private static readonly Vector2 s_bottomBorder = Vector2.up * 0.5f;
+        private int _outsCount = 0;
+        private bool _isEntryNode;
+        private Vector2[] _outsPositions;
 
         #endregion
 
         #region Properties
 
-        public BehaviourTreeNode Node => node;
+        public BehaviourTreeNode Node { get; }
         public ConnectionPin DraggedPin = null;
         public ConnectionPin MouseDownPin = null;
         public ConnectionPin MouseUpPin = null;
@@ -34,21 +32,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public NodeDrawerIO(BehaviourTreeNode node)
         {
-            this.node = node;
-            isEntryNode = node is EntryTreeNode;
+            Node = node;
+            _isEntryNode = node is EntryTreeNode;
 
-            if (!isEntryNode)
+            if (!_isEntryNode)
             {
                 InPin = new ConnectionPin(0, true);
                 InPin.GetMousePosition = () => BTEventProcessor.LastRawMousePosition;
             }
 
             var outAttributes = node.GetOuts();
-            outsCount = outAttributes is null ? 0 : outAttributes.Length;
-            OutPins = new ConnectionPin[outsCount];
-            outsPositions = new Vector2[OutPins.Length];
+            _outsCount = outAttributes is null ? 0 : outAttributes.Length;
+            OutPins = new ConnectionPin[_outsCount];
+            _outsPositions = new Vector2[OutPins.Length];
 
-            for (int i = 0; i < outsCount; i++)
+            for (int i = 0; i < _outsCount; i++)
             {
                 var attribute = outAttributes[i];
                 int index = attribute.Index;
@@ -64,7 +62,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             DraggedPin = null;
             MouseDownPin = null;
             MouseUpPin = null;
-            var nodeRect = node.GetTransformedRect();
+            var nodeRect = Node.GetTransformedRect();
 
             if (ConnectionDrawers != null)
             {
@@ -74,7 +72,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
             }
             
-            if (!isEntryNode)
+            if (!_isEntryNode)
             {
                 InPin.OnGUI(GetInPosition(nodeRect), nodeRect.width);
                 ProcessPinEvents(InPin);
@@ -85,7 +83,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             
             for (int i = 0; i < OutPins.Length; i++)
             {
-                OutPins[i].OnGUI(outsPositions[i], pinWidth);
+                OutPins[i].OnGUI(_outsPositions[i], pinWidth);
                 ProcessPinEvents(OutPins[i]);
             }
         }
@@ -109,17 +107,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private Vector2 GetInPosition(Rect nodeRect)
         {
-            return nodeRect.center + nodeRect.height * (-bottomBorder);
+            return nodeRect.center + nodeRect.height * (-s_bottomBorder);
         }
 
         private void UpdateOutsPositions(Rect nodeRect, float pinWidth)
         {
-            var pinsCount = outsPositions.Length;
+            var pinsCount = _outsPositions.Length;
             Vector2 startPosition = nodeRect.position + new Vector2(pinWidth * 0.5f, nodeRect.height);
 
             for (int i = 0; i < pinsCount; i++)
             {
-                outsPositions[i] = startPosition + Vector2.right * pinWidth * i;
+                _outsPositions[i] = startPosition + Vector2.right * pinWidth * i;
             }
         }
     }

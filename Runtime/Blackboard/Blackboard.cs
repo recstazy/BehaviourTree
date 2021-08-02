@@ -20,8 +20,8 @@ namespace Recstazy.BehaviourTree
         [SerializeField]
         private TypedValue[] _values;
 
-        private static readonly string[] _emptyNames = new string[0];
-        private static readonly string[] _reservedNames = new string[]
+        private static readonly string[] s_emptyNames = new string[0];
+        private static readonly string[] s_reservedNames = new string[]
         {
             "GameObject",
             "Transform",
@@ -132,9 +132,9 @@ namespace Recstazy.BehaviourTree
         {
             Values = new Dictionary<string, ITypedValue>()
             {
-                { _reservedNames[0], new GameObjectValue(GameObject) },
-                { _reservedNames[1], new TransformValue(Transform) },
-                { _reservedNames[2], new NavAgentValue(NavAgent) }
+                { s_reservedNames[0], new GameObjectValue(GameObject) },
+                { s_reservedNames[1], new TransformValue(Transform) },
+                { s_reservedNames[2], new NavAgentValue(NavAgent) }
             };
 
             if (_values == null) return;
@@ -191,7 +191,7 @@ namespace Recstazy.BehaviourTree
                 return Values.Where(v => !string.IsNullOrEmpty(v.Key)).Select(v => v.Key).ToArray();
             }
 
-            return _emptyNames;
+            return s_emptyNames;
         }
 
         internal string[] GetNamesTyped(params Type[] compatableTypes)
@@ -202,7 +202,7 @@ namespace Recstazy.BehaviourTree
                 return names.Where(n => compatableTypes.Contains(Values[n].GetType())).ToArray();
             }
 
-            return _emptyNames;
+            return s_emptyNames;
         }
     }
 

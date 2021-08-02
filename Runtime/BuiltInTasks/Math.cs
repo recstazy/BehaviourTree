@@ -29,10 +29,10 @@ namespace Recstazy.BehaviourTree
         [SerializeField]
         private bool _swapOrder;
 
-        private const string plus = "+";
-        private const string minus = "-";
-        private const string mul = "*";
-        private const string div = "/";
+        private const string Plus = "+";
+        private const string Minus = "-";
+        private const string Mul = "*";
+        private const string Div = "/";
 
         #endregion
 
@@ -78,13 +78,13 @@ namespace Recstazy.BehaviourTree
             switch (_operation)
             {
                 case Operation.Add:
-                    return plus;
+                    return Plus;
                 case Operation.Subtract:
-                    return minus;
+                    return Minus;
                 case Operation.Multiply:
-                    return mul;
+                    return Mul;
                 case Operation.Divide:
-                    return div;
+                    return Div;
                 default:
                     return "[Get Operation Error]";
             }

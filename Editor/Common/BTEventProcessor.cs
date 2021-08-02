@@ -9,17 +9,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     internal class BTEventProcessor
     {
+
         #region Fields
 
-        private Vector2 graphPosition;
-        private GenericMenu editorMenu;
-        private GenericMenu playerMenu;
+        private GenericMenu _editorMenu;
+        private GenericMenu _playerMenu;
 
-        private List<BehaviourTreeNode> nodes;
-        private BehaviourTreeWindow window;
-        private BTNodeSelector selector;
-        private BTHotkeys hotkeys;
-        private static int selectStartIndexOnConstruct = -1;
+        private List<BehaviourTreeNode> _nodes;
+        private BehaviourTreeWindow _window;
+        private BTNodeSelector _selector;
+        private BTHotkeys _hotkeys;
+        private static int s_selectStartIndexOnConstruct = -1;
 
         #endregion
 
@@ -41,37 +41,37 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public bool CanSelect { get; set; }
         public bool DeleteNodesPressed { get; private set; }
-        public HashSet<int> Selection => selector.Selection;
+        public HashSet<int> Selection => _selector.Selection;
 
         #endregion
 
         public BTEventProcessor(BehaviourTreeWindow window, List<BehaviourTreeNode> nodes)
         {
-            this.nodes = nodes;
-            this.window = window;
-            selector = new BTNodeSelector(nodes);
+            _nodes = nodes;
+            _window = window;
+            _selector = new BTNodeSelector(nodes);
             CreateMenu();
 
             BTHotkeys.OnDeleteNodes = () => DeleteNodesPressed = true;
             BTHotkeys.OnCopy = CopySelection;
             BTHotkeys.OnPaste = PasteToGraph;
             BTHotkeys.OnDuplicate = Duplicate;
-            hotkeys = new BTHotkeys();
+            _hotkeys = new BTHotkeys();
 
-            if (selectStartIndexOnConstruct >= 0)
+            if (s_selectStartIndexOnConstruct >= 0)
             {
                 var listindex = -1;
 
                 for (int i = 0; i < nodes.Count; i++)
                 {
-                    if (nodes[i].Index == selectStartIndexOnConstruct)
+                    if (nodes[i].Index == s_selectStartIndexOnConstruct)
                     {
                         listindex = i;
                         break;
                     }
                 }
 
-                selectStartIndexOnConstruct = -1;
+                s_selectStartIndexOnConstruct = -1;
                 var selectionSet = new BehaviourTreeNode[nodes.Count - listindex];
 
                 for (int i = listindex; i < nodes.Count; i++)
@@ -79,17 +79,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     selectionSet[i - listindex] = nodes[i];
                 }
 
-                selector.ForceSetSelection(selectionSet);
+                _selector.ForceSetSelection(selectionSet);
             }
         }
 
         public void Dispose()
         {
             BTNodeInspector.CloseInspector();
-            selector?.Dispose();
-            selector = null;
-            hotkeys?.Dispose();
-            hotkeys = null;
+            _selector?.Dispose();
+            _selector = null;
+            _hotkeys?.Dispose();
+            _hotkeys = null;
         }
 
         public void BeginZoom()
@@ -104,7 +104,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void OnGUI()
         {
-            selector.OnGUI();
+            _selector.OnGUI();
         }
 
         public void Process(Event e)
@@ -115,7 +115,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             if (!BTModeManager.IsPlaymode)
             {
-                if (hotkeys.Process(e))
+                if (_hotkeys.Process(e))
                 {
                     return;
                 }
@@ -134,18 +134,18 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void ProcessContextClick()
         {
-            var menu = BTModeManager.IsPlaymode ? playerMenu : editorMenu;
+            var menu = BTModeManager.IsPlaymode ? _playerMenu : _editorMenu;
             menu.ShowAsContext();
             Event.current.Use();
         }
 
         private void CreateMenu()
         {
-            editorMenu = new GenericMenu();
-            editorMenu.AddItem(new GUIContent("Add Node"), false, CallCreateNode);
+            _editorMenu = new GenericMenu();
+            _editorMenu.AddItem(new GUIContent("Add Node"), false, CallCreateNode);
 
-            playerMenu = new GenericMenu();
-            playerMenu.AddDisabledItem(new GUIContent("Add Node"));
+            _playerMenu = new GenericMenu();
+            _playerMenu.AddDisabledItem(new GUIContent("Add Node"));
         }
 
         private void CallCreateNode()
@@ -207,31 +207,31 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private bool ProcessNodeSelection(Event e)
         {
-            selector.ProcessEvent(e);
+            _selector.ProcessEvent(e);
             bool shouldCloseInspector = true;
 
-            if (selector.DraggedAnyNode)
+            if (_selector.DraggedAnyNode)
             {
-                OnNodesMoved?.Invoke(selector.Selection);
+                OnNodesMoved?.Invoke(_selector.Selection);
                 return true;
             }
-            else if (selector.ClickedNodeListIndex >= 0)
+            else if (_selector.ClickedNodeListIndex >= 0)
             {
-                if (selector.GetWasDoubleClickAndClear())
+                if (_selector.GetWasDoubleClickAndClear())
                 {
                     if (!BTNodeInspector.IsActive)
                     {
-                        BTNodeInspector.SetupForSelection(nodes[selector.ClickedNodeListIndex], window);
+                        BTNodeInspector.SetupForSelection(_nodes[_selector.ClickedNodeListIndex], _window);
                         shouldCloseInspector = false;
                     }
                 }
             }
-            else if (selector.MouseDownNodeIndex == BTNodeInspector.CurrentNodeIndex)
+            else if (_selector.MouseDownNodeIndex == BTNodeInspector.CurrentNodeIndex)
             {
                 shouldCloseInspector = false;
             }
 
-            if (selector.EventUsed)
+            if (_selector.EventUsed)
             {
                 if (shouldCloseInspector)
                 {
@@ -239,7 +239,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
             }
 
-            return selector.EventUsed;
+            return _selector.EventUsed;
         }
 
         private void Duplicate()
@@ -272,7 +272,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void AfterNodesPasteComplete(string undoName)
         {
-            selectStartIndexOnConstruct = NodeCopier.LastPasteStartIndex;
+            s_selectStartIndexOnConstruct = NodeCopier.LastPasteStartIndex;
             OnRegisterUndoAndSetDirty?.Invoke(undoName);
             OnUpdateNodes?.Invoke();
         }

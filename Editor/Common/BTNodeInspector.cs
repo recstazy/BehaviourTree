@@ -12,14 +12,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #region Fields
 
-        private static readonly Vector2 nodeOffset = new Vector3(20f, -10f);
-        private static readonly Vector2 defaultSize = new Vector2(255f, 300f);
-        private static readonly Vector2 propertyBorder = new Vector2(5f, 5f);
+        private static readonly Vector2 s_nodeOffset = new Vector3(20f, -10f);
+        private static readonly Vector2 s_defaultSize = new Vector2(255f, 300f);
+        private static readonly Vector2 s_propertyBorder = new Vector2(5f, 5f);
 
         private BehaviourTree tree;
         private SerializedObject serializedObject;
         private SerializedProperty property;
-        private static BTNodeInspector currentWindow;
+        private static BTNodeInspector s_currentWindow;
         private BehaviourTreeNode currentNode;
         private Vector2 scrollPosition;
         
@@ -49,7 +49,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             if (task != null)
             {
-                if (currentWindow != null)
+                if (s_currentWindow != null)
                 {
                     CloseInspector();
                 }
@@ -57,14 +57,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var window = GetWindow<BTNodeInspector>(true, ObjectNames.NicifyVariableName(task.GetType().Name), true);
                 window.tree = mainWindow.TreeInstance;
                 window.currentNode = currentSelection;
-                window.position = new Rect(window.GetWindowPosition(mainWindow.position.position), defaultSize);
-                currentWindow = window;
+                window.position = new Rect(window.GetWindowPosition(mainWindow.position.position), s_defaultSize);
+                s_currentWindow = window;
                 CurrentNodeIndex = currentSelection.Index;
                 IsActive = true;
             }
             else
             {
-                if (currentWindow != null)
+                if (s_currentWindow != null)
                 {
                     CloseInspector();
                 }
@@ -73,13 +73,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static void CloseInspector()
         {
-            if (currentWindow?.tree != null)
+            if (s_currentWindow?.tree != null)
             {
                 OnClosed?.Invoke();
             }
             
-            currentWindow?.Close();
-            currentWindow = null;
+            s_currentWindow?.Close();
+            s_currentWindow = null;
             CurrentNodeIndex = -1;
             IsActive = false;
         }
@@ -99,8 +99,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (property != null)
             {
                 Rect propertySafeArea = position;
-                propertySafeArea.position = propertyBorder;
-                propertySafeArea.size -= 2f * propertyBorder;
+                propertySafeArea.position = s_propertyBorder;
+                propertySafeArea.size -= 2f * s_propertyBorder;
 
                 property.isExpanded = true;
                 float propHeight = EditorGUI.GetPropertyHeight(property);
@@ -115,8 +115,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 if (isBiggerThanWindow)
                 {
                     var rect = position;
-                    rect.position = propertyBorder;
-                    rect.height -= propertyBorder.y * 2f;
+                    rect.position = s_propertyBorder;
+                    rect.height -= s_propertyBorder.y * 2f;
                     rect.width -= 5f;
                     scrollPosition = GUI.BeginScrollView(rect, scrollPosition, propRect);
                 }
@@ -135,7 +135,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private Vector2 GetWindowPosition(Vector2 mainWindowPosition)
         {
             var nodeRect = currentNode.GetTransformedRect();
-            return (Vector2)GUI.matrix.MultiplyPoint3x4(nodeRect.position + Vector2.right * nodeRect.width) + mainWindowPosition + nodeOffset;
+            return (Vector2)GUI.matrix.MultiplyPoint3x4(nodeRect.position + Vector2.right * nodeRect.width) + mainWindowPosition + s_nodeOffset;
         }
 
         private SerializedProperty CreateOrGetProperty()

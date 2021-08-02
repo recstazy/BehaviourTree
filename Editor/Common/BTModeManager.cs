@@ -9,11 +9,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private static readonly Vector2 labelSize = new Vector2(40, 20);
-        private const string playmodeLabel = "Player";
-        private const string editorLabel = "Editor";
-        
-        private Rect labelRect;
+        private static readonly Vector2 s_labelSize = new Vector2(40, 20);
+        private const string PlaymodeLabel = "Player";
+        private const string EditorLabel = "Editor";
+        private Rect _labelRect;
 
         #endregion
 
@@ -27,7 +26,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             EditorApplication.playModeStateChanged += PlaymodeChanged;
             IsPlaymode = Application.isPlaying;
-            labelRect = new Rect(Vector2.zero, labelSize);
+            _labelRect = new Rect(Vector2.zero, s_labelSize);
         }
 
         public void Dispose()
@@ -43,8 +42,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void OnGUI(Rect windowRect)
         {
-            labelRect.position = new Vector2(windowRect.width - labelSize.x, 0f);
-            EditorGUI.HelpBox(labelRect, IsPlaymode ? playmodeLabel : editorLabel, MessageType.None);
+            _labelRect.position = new Vector2(windowRect.width - s_labelSize.x, 0f);
+            EditorGUI.HelpBox(_labelRect, IsPlaymode ? PlaymodeLabel : EditorLabel, MessageType.None);
         }
     }
 }

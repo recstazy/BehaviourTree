@@ -11,14 +11,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private const int updatesCountToRepaint = 10;
-        private const float valueLeftPadding = 5f;
-        private const string noneCaption = "None";
-        private GUIStyle valueDrawStyle;
-        private GUIStyle nameDrawStyle;
-        private BTTargetWatcher watcher;
-        private float watcherHeight;
-        private int updatesSkipped;
+        private const int UpdatesCountToRepaint = 10;
+        private const float ValueLeftPadding = 5f;
+        private const string NoneCaption = "None";
+        private GUIStyle _valueDrawStyle;
+        private GUIStyle _nameDrawStyle;
+        private BTTargetWatcher _watcher;
+        private float _watcherHeight;
+        private int _updatesSkipped;
 
         #endregion
 
@@ -40,7 +40,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void OnDisable()
         {
-            watcher = null;
+            _watcher = null;
             EditorApplication.update -= EditorUpdate;
         }
 
@@ -48,21 +48,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (!Application.isPlaying) return;
 
-            if (GUI.changed || updatesSkipped >= updatesCountToRepaint)
+            if (GUI.changed || _updatesSkipped >= UpdatesCountToRepaint)
             {
-                updatesSkipped = 0;
+                _updatesSkipped = 0;
                 Repaint();
             }
             else
             {
-                updatesSkipped++;
+                _updatesSkipped++;
             }
         }
 
         private void OnGUI()
         {
             DrawWatcher();
-            DrawRuntimeBlackboard(watcher?.Current?.Blackboard);
+            DrawRuntimeBlackboard(_watcher?.Current?.Blackboard);
 
             if (GUI.changed)
             {
@@ -75,8 +75,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (Application.isPlaying)
             {
                 CreateWatcherIfNeeded();
-                watcher.OnGUI(position);
-                watcherHeight = watcher.Rect.height;
+                _watcher.OnGUI(position);
+                _watcherHeight = _watcher.Rect.height;
             }
         }
 
@@ -86,12 +86,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
             
             if (Application.isPlaying)
             {
-                EditorGUILayout.Space(watcherHeight);
+                EditorGUILayout.Space(_watcherHeight);
                 DrawBlackboardImmediate(blackboard);
             }
             else
             {
-                EditorGUILayout.LabelField("Below you will see blackboard runtime values", nameDrawStyle, GUILayout.ExpandWidth(true));
+                EditorGUILayout.LabelField("Below you will see blackboard runtime values", _nameDrawStyle, GUILayout.ExpandWidth(true));
             }
         }
 
@@ -119,7 +119,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var exposedFields = fields.ToArray();
                 if (exposedFields.Length == 0) continue;
 
-                EditorGUILayout.LabelField(ObjectNames.NicifyVariableName(key), nameDrawStyle, GUILayout.ExpandWidth(true));
+                EditorGUILayout.LabelField(ObjectNames.NicifyVariableName(key), _nameDrawStyle, GUILayout.ExpandWidth(true));
 
                 for (int i = 0; i < exposedFields.Length; i++)
                 {
@@ -130,20 +130,20 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     if (valueExposed is null)
                     {
-                        valueString = noneCaption;
+                        valueString = NoneCaption;
                     }
                     else if (valueExposed is Object objectValue)
                     {
-                        valueString = objectValue != null ? objectValue.name : noneCaption;
+                        valueString = objectValue != null ? objectValue.name : NoneCaption;
                     }
                     else
                     {
-                        valueString = valueExposed != null ? valueExposed.ToString() : noneCaption;
+                        valueString = valueExposed != null ? valueExposed.ToString() : NoneCaption;
                     }
 
                     EditorGUILayout.BeginHorizontal();
-                    GUILayout.Box("", GUILayout.Width(valueLeftPadding));
-                    EditorGUILayout.LabelField($"{ObjectNames.NicifyVariableName(fieldInfo.Name)} = {valueString}", valueDrawStyle, GUILayout.ExpandWidth(true));
+                    GUILayout.Box("", GUILayout.Width(ValueLeftPadding));
+                    EditorGUILayout.LabelField($"{ObjectNames.NicifyVariableName(fieldInfo.Name)} = {valueString}", _valueDrawStyle, GUILayout.ExpandWidth(true));
                     EditorGUILayout.EndHorizontal();
                 }
 
@@ -153,22 +153,22 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateStyleIfNeeded()
         {
-            if (valueDrawStyle is null || nameDrawStyle is null)
+            if (_valueDrawStyle is null || _nameDrawStyle is null)
             {
-                valueDrawStyle = new GUIStyle("box");
-                valueDrawStyle.alignment = TextAnchor.MiddleLeft;
-                nameDrawStyle = new GUIStyle("box");
-                nameDrawStyle.alignment = TextAnchor.MiddleLeft;
-                nameDrawStyle.fontStyle = FontStyle.Bold;
-                nameDrawStyle.normal.textColor = new Color(0.5f, 1f, 0.7f, 1f);
+                _valueDrawStyle = new GUIStyle("box");
+                _valueDrawStyle.alignment = TextAnchor.MiddleLeft;
+                _nameDrawStyle = new GUIStyle("box");
+                _nameDrawStyle.alignment = TextAnchor.MiddleLeft;
+                _nameDrawStyle.fontStyle = FontStyle.Bold;
+                _nameDrawStyle.normal.textColor = new Color(0.5f, 1f, 0.7f, 1f);
             }
         }
 
         private void CreateWatcherIfNeeded()
         {
-            if (watcher is null)
+            if (_watcher is null)
             {
-                watcher = new BTTargetWatcher();
+                _watcher = new BTTargetWatcher();
             }
         }
     }

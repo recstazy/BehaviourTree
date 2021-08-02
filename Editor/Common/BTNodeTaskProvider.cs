@@ -9,8 +9,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private int currentIndex;
-        private GUIStyle dropDownStyle;
+        private int _currentIndex;
+        private GUIStyle _dropDownStyle;
 
         #endregion
 
@@ -24,17 +24,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             var index = GetIndexOfTask(data.TaskImplementation);
             index = Mathf.Clamp(index, 0, TaskFactory.TypesEditor.Length - 1);
-            currentIndex = index;
+            _currentIndex = index;
             CurrentImplementation = data.TaskImplementation;
         }
 
         public void OnGUI(Rect rect)
         {
-            if (dropDownStyle == null) CreateStyle();
+            if (_dropDownStyle == null) CreateStyle();
 
-            var name = TaskFactory.NamesEditor[currentIndex];
+            var name = TaskFactory.NamesEditor[_currentIndex];
 
-            if (GUI.Button(rect, name, dropDownStyle))
+            if (GUI.Button(rect, name, _dropDownStyle))
             {
                 var menu = TaskFactory.CreateGenericMenu(CurrentImplementation, TaskInMenuSelected);
                 menu.ShowAsContext();
@@ -43,16 +43,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateStyle()
         {
-            dropDownStyle = new GUIStyle("ShurikenDropdown");
-            dropDownStyle.padding = new RectOffset(15, 0, 0, 0);
-            dropDownStyle.normal.textColor = Color.gray;
+            _dropDownStyle = new GUIStyle("ShurikenDropdown");
+            _dropDownStyle.padding = new RectOffset(15, 0, 0, 0);
+            _dropDownStyle.normal.textColor = Color.gray;
         }
 
         private void TaskInMenuSelected(object index)
         {
             int newIndex = (int)index;
 
-            if (newIndex != currentIndex)
+            if (newIndex != _currentIndex)
             {
                 ChangeTask(newIndex);
             }
@@ -60,7 +60,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void ChangeTask(int newIndex)
         {
-            currentIndex = newIndex;
+            _currentIndex = newIndex;
             CurrentImplementation = TaskFactory.CreateTaskImplementationEditor(newIndex);
         }
 

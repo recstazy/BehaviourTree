@@ -16,11 +16,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public static Vector2 ZoomOrigin { get; set; } = Vector2.zero;
         public static bool PanOrZoomChanged { get; private set; }
 
-        private const float kEditorWindowTabHeight = 21.0f;
-        private static Rect zoomArea = new Rect();
-        private static Vector2 lastMouse = Vector2.zero;
-        private static Matrix4x4 prevMatrix;
-        private static Rect possibleZoomArea;
+        private const float EditorWindowTabHeight = 21.0f;
+        private static Rect s_zoomArea = new Rect();
+        private static Vector2 s_lastMouse = Vector2.zero;
+        private static Matrix4x4 s_prevMatrix;
+        private static Rect s_possibleZoomArea;
 
         public static Rect Begin(params GUILayoutOption[] options)
         {
@@ -33,22 +33,22 @@ namespace Recstazy.BehaviourTree.EditorScripts
             // - And skipping first repaint doesn't help but skipping zoom in only first repaint works
             try
             {
-                possibleZoomArea = GUILayoutUtility.GetRect(0, 10000, 0, 10000, options);
+                s_possibleZoomArea = GUILayoutUtility.GetRect(0, 10000, 0, 10000, options);
             }
             catch (ArgumentException) { }
 
             if (Event.current.type == EventType.Repaint) //the size is correct during repaint, during layout it's 1,1
             {
-                zoomArea = possibleZoomArea;
+                s_zoomArea = s_possibleZoomArea;
             }
 
             GUI.EndGroup(); // End the group Unity begins automatically for an EditorWindow to clip out the window tab. This allows us to draw outside of the size of the EditorWindow.
 
-            Rect clippedArea = zoomArea.ScaleSizeBy(1f / Zoom, zoomArea.TopLeft());
-            clippedArea.y += kEditorWindowTabHeight;
+            Rect clippedArea = s_zoomArea.ScaleSizeBy(1f / Zoom, s_zoomArea.TopLeft());
+            clippedArea.y += EditorWindowTabHeight;
             GUI.BeginGroup(clippedArea);
 
-            prevMatrix = GUI.matrix;
+            s_prevMatrix = GUI.matrix;
             Matrix4x4 translation = Matrix4x4.TRS(clippedArea.TopLeft(), Quaternion.identity, Vector3.one);
             Matrix4x4 scale = Matrix4x4.Scale(new Vector3(Zoom, Zoom, 1.0f));
             GUI.matrix = translation * scale * translation.inverse * GUI.matrix;
@@ -58,9 +58,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static void End()
         {
-            GUI.matrix = prevMatrix; //restore the original matrix
+            GUI.matrix = s_prevMatrix; //restore the original matrix
             GUI.EndGroup();
-            GUI.BeginGroup(new Rect(0.0f, kEditorWindowTabHeight, Screen.width, Screen.height));
+            GUI.BeginGroup(new Rect(0.0f, EditorWindowTabHeight, Screen.width, Screen.height));
         }
 
         public static void HandleEvents()
@@ -71,12 +71,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 if (Event.current.type == EventType.MouseDrag && ((Event.current.button == 0 && Event.current.modifiers == EventModifiers.Alt) || Event.current.button == 2))
                 {
-                    var mouseDelta = Event.current.mousePosition - lastMouse;
+                    var mouseDelta = Event.current.mousePosition - s_lastMouse;
                     ZoomOrigin += mouseDelta;
                     Event.current.Use();
                 }
 
-                lastMouse = Event.current.mousePosition;
+                s_lastMouse = Event.current.mousePosition;
                 PanOrZoomChanged = true;
             }
 
@@ -96,7 +96,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     //we want the same content that was under the mouse pre-zoom to be there post-zoom as well
                     //in other words, the content's position *relative to the mouse* should not change
 
-                    Vector2 areaMousePos = Event.current.mousePosition - zoomArea.center;
+                    Vector2 areaMousePos = Event.current.mousePosition - s_zoomArea.center;
 
                     Vector2 contentOldMousePos = (areaMousePos / oldZoom) - (ZoomOrigin / oldZoom);
                     Vector2 contentMousePos = (areaMousePos / Zoom) - (ZoomOrigin / Zoom);
@@ -113,7 +113,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public static Vector2 GetContentOffset()
         {
             Vector2 offset = -ZoomOrigin / Zoom; //offset the midpoint
-            offset -= (zoomArea.size / 2f) / Zoom; //offset the center
+            offset -= (s_zoomArea.size / 2f) / Zoom; //offset the center
             return offset;
         }
     }

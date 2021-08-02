@@ -14,7 +14,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private SerializedProperty _property;
         private GUIContent _label;
         private Blackboard _currentBB;
-        private const float _nameValueRatio = 0.4f;
+        private const float NameValueRatio = 0.4f;
 
         #endregion
 
@@ -47,7 +47,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void DrawEnumedName()
         {
             var rect = _rect;
-            rect.width *= _nameValueRatio;
+            rect.width *= NameValueRatio;
             EditorGUI.LabelField(rect, _label);
 
             rect.x += rect.width;
