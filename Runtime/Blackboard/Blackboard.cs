@@ -20,23 +20,15 @@ namespace Recstazy.BehaviourTree
         [SerializeField]
         private TypedValue[] _values;
 
-        private static readonly string[] s_reservedNames = new string[]
-        {
-            "GameObject",
-            "Transform",
-            "NavAgent"
-        };
+        private GameObject _gameObject;
+        private NavMeshAgent _navAgent;
 
         #endregion
 
         #region Properties
 
-        /// <summary>Currently available variables, only exists in runtime.</summary>
+        /// <summary> Currently available variables </summary>
         public Dictionary<string, ITypedValue> Values { get; private set; }
-
-        public Transform Transform { get; private set; }
-        public GameObject GameObject { get; private set; }
-        public NavMeshAgent NavAgent { get; private set; }
 
         #endregion
 
@@ -121,9 +113,8 @@ namespace Recstazy.BehaviourTree
         [RuntimeInstanced]
         internal void InitializeAtRuntime(GameObject gameObject)
         {
-            GameObject = gameObject;
-            Transform = gameObject.transform;
-            NavAgent = gameObject.GetComponentInChildren<NavMeshAgent>();
+            _gameObject = gameObject;
+            _navAgent = gameObject.GetComponentInChildren<NavMeshAgent>();
             UpdateValuesDictionary(true);
         }
 
@@ -131,9 +122,9 @@ namespace Recstazy.BehaviourTree
         {
             Values = new Dictionary<string, ITypedValue>()
             {
-                { s_reservedNames[0], new GameObjectValue(GameObject) },
-                { s_reservedNames[1], new TransformValue(Transform) },
-                { s_reservedNames[2], new NavAgentValue(NavAgent) }
+                { CommonNames.GameObject, new GameObjectValue(_gameObject) },
+                { CommonNames.Transform, new TransformValue(_gameObject != null ? _gameObject.transform : null) },
+                { CommonNames.NavAgent, new NavAgentValue(_navAgent) }
             };
 
             if (_values == null) return;
