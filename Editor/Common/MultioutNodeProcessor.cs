@@ -9,21 +9,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private List<BehaviourTreeNode> nodes;
-        private HashSet<BehaviourTreeNode> multioutNodes;
+        private List<BehaviourTreeNode> _nodes;
+        private HashSet<BehaviourTreeNode> _multioutNodes;
 
         #endregion
 
         public MultioutNodeProcessor(List<BehaviourTreeNode> nodes)
         {
-            this.nodes = nodes;
-            multioutNodes = new HashSet<BehaviourTreeNode>(nodes.Where(n => n.Data.TaskImplementation is MultioutTask));
+            _nodes = nodes;
+            _multioutNodes = new HashSet<BehaviourTreeNode>(nodes.Where(n => n.Data.TaskImplementation is MultioutTask));
         }
 
         public void Dispose()
         {
-            multioutNodes = null;
-            nodes = null;
+            _multioutNodes = null;
+            _nodes = null;
         }
 
         public bool AfterConnectionAdded(NodeData data, List<TaskConnection> afterAdd)
@@ -50,9 +50,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public bool AfterNodePositionChanged(BehaviourTreeNode node, out int[] nodesChanged)
         {
-            if (multioutNodes.Count > 0)
+            if (_multioutNodes.Count > 0)
             {
-                var outedToThisNode = multioutNodes.Where(n => n.Connections.Where(c => c.InNode == node.Index).Count() > 0).ToArray();
+                var outedToThisNode = _multioutNodes.Where(n => n.Connections.Where(c => c.InNode == node.Index).Count() > 0).ToArray();
 
                 if (outedToThisNode.Length > 0)
                 {
@@ -115,8 +115,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private int SortByNodeXComparison(TaskConnection first, TaskConnection second)
         {
-            var firstPosX = nodes.FirstOrDefault(n => n.Index == first.InNode)?.MainRect.position.x;
-            var secondPosX = nodes.FirstOrDefault(n => n.Index == second.InNode)?.MainRect.position.x;
+            var firstPosX = _nodes.FirstOrDefault(n => n.Index == first.InNode)?.MainRect.position.x;
+            var secondPosX = _nodes.FirstOrDefault(n => n.Index == second.InNode)?.MainRect.position.x;
 
             if (firstPosX.HasValue && secondPosX.HasValue)
             {

@@ -13,24 +13,29 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private string name;
+        private string _name;
 
         [SerializeReference]
-        private ITypedValue value;
+        private ITypedValue _value;
 
         #endregion
 
         #region Properties
 
-        public string Name => name;
-        public ITypedValue Value => value;
+        public string Name => _name;
+        public ITypedValue Value => _value;
 
         #endregion
 
         public TypedValue(string name, ITypedValue value)
         {
-            this.name = name;
-            this.value = value;
+            _name = name;
+            _value = value;
+        }
+
+        internal void ChangeName(string newName)
+        {
+            _name = newName;
         }
     }
 }

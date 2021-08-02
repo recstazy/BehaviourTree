@@ -13,14 +13,14 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private Vector3 vectorValue;
+        private Vector3 _vectorValue;
 
         #endregion
 
         #region Properties
 
-        public Vector3 Value => vectorValue;
-        public object MainValue => vectorValue;
+        public Vector3 Value => _vectorValue;
+        public object MainValue => _vectorValue;
 
         #endregion
 
@@ -28,7 +28,7 @@ namespace Recstazy.BehaviourTree
         {
             if (other is Vector3Value vecValue)
             {
-                if (vecValue.vectorValue == vectorValue)
+                if (vecValue._vectorValue == _vectorValue)
                 {
                     return CompareResult.Equal;
                 }
@@ -38,7 +38,7 @@ namespace Recstazy.BehaviourTree
             return CompareResult.TypeError;
         }
 
-        public static implicit operator Vector3(Vector3Value value) => value.vectorValue;
-        public static implicit operator Vector3Value(Vector3 value) => new Vector3Value() { vectorValue = value };
+        public static implicit operator Vector3(Vector3Value value) => value._vectorValue;
+        public static implicit operator Vector3Value(Vector3 value) => new Vector3Value() { _vectorValue = value };
     }
 }

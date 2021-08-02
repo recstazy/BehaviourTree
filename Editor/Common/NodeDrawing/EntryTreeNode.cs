@@ -10,15 +10,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private static readonly Color entryColor = new Color(0.5f, 1f, 0.7f, 1f);
-        private static readonly Vector2 entrySize = new Vector2(100f, 30f);
-        private GUIStyle style;
+        private static readonly Color s_entryColor = new Color(0.5f, 1f, 0.7f, 1f);
+        private static readonly Vector2 s_entrySize = new Vector2(100f, 30f);
+        private GUIStyle _style;
 
         #endregion
 
         #region Properties
 
-        protected override Vector2 Size => entrySize;
+        protected override Vector2 Size => s_entrySize;
 
         #endregion
 
@@ -26,16 +26,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         protected override void DrawContent(Rect transformedRect)
         {
-            if (style == null)
+            if (_style == null)
             {
-                style = new GUIStyle(GUI.skin.label);
-                style.alignment = TextAnchor.MiddleCenter;
-                style.fontSize = 18;
-                style.fontStyle = FontStyle.Bold;
-                style.normal.textColor = entryColor;
+                _style = new GUIStyle(GUI.skin.label);
+                _style.alignment = TextAnchor.MiddleCenter;
+                _style.fontSize = 18;
+                _style.fontStyle = FontStyle.Bold;
+                _style.normal.textColor = s_entryColor;
             }
 
-            EditorGUI.LabelField(transformedRect, "Entry", style);
+            EditorGUI.LabelField(transformedRect, "Entry", _style);
         }
     }
 }

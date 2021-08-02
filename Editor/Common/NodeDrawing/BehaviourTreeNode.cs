@@ -9,51 +9,50 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private const float selectionSize = 5f;
-        private const float headerHeight = 14f;
-        private const float minDescriptionHeight = 26f;
-        private const float widthPadding = 5f;
-        private const float heightPadding = 5f;
-        private const float runninigMarkWidth = 5f;
-        private const int wrapCountTreshold = 16;
-        private const int minOutPinWidth = 20;
-        private static readonly Vector2 minSize = new Vector2(150f, headerHeight + minDescriptionHeight);
-        private static readonly Color backColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
-        private static readonly Color selectionColor = new Color(0.6f, 0.6f, 0.5f, 1f);
-        private static readonly Color runningMarkColor = new Color(0.5f, 1f, 0.7f, 1f);
+        private const float SelectionSize = 5f;
+        private const float HeaderHeight = 14f;
+        private const float MinDescriptionHeight = 26f;
+        private const float WidthPadding = 5f;
+        private const float HeightPadding = 5f;
+        private const float RunninigMarkWidth = 5f;
+        private const int WrapCountTreshold = 16;
+        private const int MinOutPinWidth = 20;
+        private static readonly Vector2 s_minSize = new Vector2(150f, HeaderHeight + MinDescriptionHeight);
+        private static readonly Color s_backColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
+        private static readonly Color s_selectionColor = new Color(0.6f, 0.6f, 0.5f, 1f);
+        private static readonly Color s_runningMarkColor = new Color(0.5f, 1f, 0.7f, 1f);
 
-        private Rect mainRect;
-        private NodeData data = null;
-        private BTNodeTaskProvider taskProvider;
-        private GUIStyle descriptionStyle;
-        private GUIContent description;
-        private bool wasRuningOnLastCheck;
+        private Rect _mainRect;
+        private BTNodeTaskProvider _taskProvider;
+        private GUIStyle _descriptionStyle;
+        private GUIContent _description;
+        private bool _wasRuningOnLastCheck;
 
         #endregion
 
         #region Properties
 
-        public NodeData Data => data;
+        public NodeData Data { get; } = null;
         public bool Selected { get; set; }
-        public Rect MainRect => mainRect;
+        public Rect MainRect => _mainRect;
         public int Index { get; private set; }
         public bool IsDirty { get; set; }
         public TaskConnection[] Connections { get; private set; }
-        public bool RuntimeIsRunning => data?.TaskImplementation is null ? false : data.TaskImplementation.IsRunning;
+        public bool RuntimeIsRunning => Data?.TaskImplementation is null ? false : Data.TaskImplementation.IsRunning;
         public bool RuntimeIsRunningChanged => CheckIsRuntimeRunningChanged();
 
         protected virtual Vector2 Size { get => DefaultGetSize(); }
-        protected virtual Color BackColor { get => backColor; }
-        protected virtual Color SelectionColor => selectionColor;
+        protected virtual Color BackColor { get => s_backColor; }
+        protected virtual Color SelectionColor => s_selectionColor;
         protected virtual bool ShouldDrawTaskProvider => true;
 
         #endregion
 
         public BehaviourTreeNode(NodeData data)
         {
-            taskProvider = new BTNodeTaskProvider(data);
-            mainRect = new Rect(data.Position, minSize);
-            this.data = data;
+            _taskProvider = new BTNodeTaskProvider(data);
+            _mainRect = new Rect(data.Position, s_minSize);
+            Data = data;
             Index = data.Index;
 
             if (data.Connections == null)
@@ -68,8 +67,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public Rect GetTransformedRect()
         {
-            mainRect.size = Size;
-            var rect = mainRect;
+            _mainRect.size = Size;
+            var rect = _mainRect;
             rect.position -= EditorZoomer.ContentOffset;
             return rect;
         }
@@ -91,14 +90,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void Drag(Vector2 delta)
         {
-            mainRect.position += delta;
+            _mainRect.position += delta;
             UpdateData();
         }
 
         protected void DrawSelection(Rect rect)
         {
             var selectionRect = rect;
-            selectionRect.size += Vector2.one * selectionSize;
+            selectionRect.size += Vector2.one * SelectionSize;
             selectionRect.center = rect.center;
             EditorGUI.DrawRect(selectionRect, SelectionColor);
         }
@@ -115,19 +114,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (ShouldDrawTaskProvider)
             {
                 var rect = transformedRect;
-                rect.x += widthPadding;
-                rect.y += heightPadding;
-                rect.height = headerHeight;
-                rect.width -= widthPadding * 2f;
+                rect.x += WidthPadding;
+                rect.y += HeightPadding;
+                rect.height = HeaderHeight;
+                rect.width -= WidthPadding * 2f;
 
                 EditorGUI.BeginDisabledGroup(BTModeManager.IsPlaymode);
-                taskProvider.OnGUI(rect);
-                var task = taskProvider.CurrentImplementation;
+                _taskProvider.OnGUI(rect);
+                var task = _taskProvider.CurrentImplementation;
                 EditorGUI.EndDisabledGroup();
 
-                if (task != data.TaskImplementation)
+                if (task != Data.TaskImplementation)
                 {
-                    data.TaskImplementation = task;
+                    Data.TaskImplementation = task;
                     IsDirty = true;
                 }
             }
@@ -136,21 +135,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
         protected void DrawDescription(Rect transformedRect)
         {
             var rect = transformedRect;
-            rect.y += headerHeight + heightPadding * 2f;
-            rect.x += widthPadding;
-            rect.width -= widthPadding * 2f;
-            rect.height = transformedRect.height - heightPadding * 3f - headerHeight;
-            EditorGUI.LabelField(rect, description, descriptionStyle);
+            rect.y += HeaderHeight + HeightPadding * 2f;
+            rect.x += WidthPadding;
+            rect.width -= WidthPadding * 2f;
+            rect.height = transformedRect.height - HeightPadding * 3f - HeaderHeight;
+            EditorGUI.LabelField(rect, _description, _descriptionStyle);
         }
 
         protected string GetNameDescription()
         {
-            return data.TaskImplementation is null ? "Empty Task" : ObjectNames.NicifyVariableName(data.TaskImplementation.GetType().Name);
+            return Data.TaskImplementation is null ? "Empty Task" : ObjectNames.NicifyVariableName(Data.TaskImplementation.GetType().Name);
         }
 
         protected virtual string GetDescription()
         {
-            var taskDescription = data.TaskImplementation?.GetDescription();
+            var taskDescription = Data.TaskImplementation?.GetDescription();
             taskDescription = string.IsNullOrEmpty(taskDescription) ? GetNameDescription() : taskDescription;
             return WrapDescription(taskDescription);
         }
@@ -160,25 +159,25 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (BTModeManager.IsPlaymode && RuntimeIsRunning)
             {
                 var rect = transformedRect;
-                rect.x -= runninigMarkWidth;
-                rect.width = runninigMarkWidth;
+                rect.x -= RunninigMarkWidth;
+                rect.width = RunninigMarkWidth;
 
-                EditorGUI.DrawRect(rect, runningMarkColor);
+                EditorGUI.DrawRect(rect, s_runningMarkColor);
             }
         }
 
         private void UpdateData()
         {
-            data.Position = mainRect.position;
+            Data.Position = _mainRect.position;
         }
 
         private void CreateStyleIfNeeded()
         {
-            if (descriptionStyle == null)
+            if (_descriptionStyle == null)
             {
-                descriptionStyle = new GUIStyle();
-                descriptionStyle.alignment = TextAnchor.MiddleCenter;
-                descriptionStyle.normal.textColor = Color.white;
+                _descriptionStyle = new GUIStyle();
+                _descriptionStyle.alignment = TextAnchor.MiddleCenter;
+                _descriptionStyle.normal.textColor = Color.white;
             }
         }
 
@@ -186,42 +185,42 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             string descriptionString = GetDescription();
 
-            if (description is null)
+            if (_description is null)
             {
-                description = new GUIContent(descriptionString);
+                _description = new GUIContent(descriptionString);
             }
             else
             {
-                description.text = descriptionString;
+                _description.text = descriptionString;
             }
         }
 
         protected Vector2 DefaultGetSize()
         {
-            if (descriptionStyle != null)
+            if (_descriptionStyle != null)
             {
-                var descriptionSize = descriptionStyle.CalcSize(description);
-                var width = Mathf.Max(minSize.x, descriptionSize.x + widthPadding * 2f);
+                var descriptionSize = _descriptionStyle.CalcSize(_description);
+                var width = Mathf.Max(s_minSize.x, descriptionSize.x + WidthPadding * 2f);
 
-                int outsCount = data.Connections is null ? 0 : data.Connections.Length;
+                int outsCount = Data.Connections is null ? 0 : Data.Connections.Length;
                 float currentOutPinWidth = width / outsCount;
 
-                if (currentOutPinWidth < minOutPinWidth)
+                if (currentOutPinWidth < MinOutPinWidth)
                 {
-                    width = minOutPinWidth * outsCount;
+                    width = MinOutPinWidth * outsCount;
                 }
 
-                var height = Mathf.Max(minSize.y, headerHeight + descriptionSize.y + heightPadding * 2f);
+                var height = Mathf.Max(s_minSize.y, HeaderHeight + descriptionSize.y + HeightPadding * 2f);
                 return new Vector2(width, height);
             }
 
-            return minSize;
+            return s_minSize;
         }
 
         private bool CheckIsRuntimeRunningChanged()
         {
-            bool changed = RuntimeIsRunning != wasRuningOnLastCheck;
-            wasRuningOnLastCheck = RuntimeIsRunning;
+            bool changed = RuntimeIsRunning != _wasRuningOnLastCheck;
+            _wasRuningOnLastCheck = RuntimeIsRunning;
             return changed;
         }
 
@@ -234,7 +233,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             for (int i = 0; i < parts.Length; i++)
             {
                 symbolsCount += parts[i].Length;
-                bool shouldWrap = symbolsCount >= wrapCountTreshold && i != parts.Length - 1;
+                bool shouldWrap = symbolsCount >= WrapCountTreshold && i != parts.Length - 1;
 
                 if (shouldWrap)
                 {

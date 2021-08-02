@@ -12,8 +12,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private static readonly Color backColorOpen = new Color(0.1f, 0.175f, 0.1f, 0.5f);
-        private static readonly Color backColorClosed = new Color(0.175f, 0.1f, 0.1f, 0.5f);
+        private static readonly Color s_backColorOpen = new Color(0.1f, 0.175f, 0.1f, 0.5f);
+        private static readonly Color s_backColorClosed = new Color(0.175f, 0.1f, 0.1f, 0.5f);
 
         #endregion
 
@@ -32,11 +32,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 if (Data.TaskImplementation is BaseGateTask gateTask)
                 {
                     bool result = gateTask.CheckGateConditionInEditor();
-                    return result ? backColorOpen : backColorClosed;
+                    return result ? s_backColorOpen : s_backColorClosed;
                 }
             }
             
-            return backColorOpen;
+            return s_backColorOpen;
         }
     }
 }

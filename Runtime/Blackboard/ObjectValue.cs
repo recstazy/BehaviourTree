@@ -14,14 +14,14 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private T value;
+        private T _value;
 
         #endregion
 
         #region Properties
 
         /// <summary> Actual contained value </summary>
-        public T Value => value;
+        public T Value => _value;
 
         public object MainValue => Value;
 
@@ -35,7 +35,7 @@ namespace Recstazy.BehaviourTree
         /// </summary>
         public ObjectValue(T value)
         {
-            this.value = value;
+            _value = value;
         }
 
         public CompareResult Compare(ITypedValue other)
@@ -53,7 +53,7 @@ namespace Recstazy.BehaviourTree
         {
             if (other is ObjectValue<T> otherGeneric)
             {
-                return otherGeneric.value.Equals(Value) ? CompareResult.Equal : CompareResult.NotEqual;
+                return otherGeneric._value.Equals(Value) ? CompareResult.Equal : CompareResult.NotEqual;
             }
 
             return CompareResult.TypeError;

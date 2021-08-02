@@ -14,19 +14,19 @@ namespace Recstazy.BehaviourTree
 
         [SerializeField]
         [HideInInspector]
-        private int outsCount;
+        private int _outsCount;
 
         #endregion
 
         #region Properties
 
-        public int OutsCount => outsCount;
+        public int OutsCount => _outsCount;
 
         #endregion
 
         internal void ChangeOutsCount(int newCount)
         {
-            outsCount = newCount;
+            _outsCount = newCount;
         }
     }
 }

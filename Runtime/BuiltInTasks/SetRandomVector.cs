@@ -12,13 +12,13 @@ namespace Recstazy.BehaviourTree
 
         [SerializeField]
         [ValueType(typeof(Vector3Value))]
-        private BlackboardName name;
+        private BlackboardName _name;
 
         [SerializeField]
-        private Vector3 left;
+        private Vector3 _left;
 
         [SerializeField]
-        private Vector3 right;
+        private Vector3 _right;
 
         #endregion
 
@@ -28,17 +28,17 @@ namespace Recstazy.BehaviourTree
 
         public override string GetDescription()
         {
-            return $"Randomize {name}";
+            return $"Randomize {_name}";
         }
 
         protected override IEnumerator TaskRoutine()
         {
             Vector3 newVector = new Vector3(
-                Random.Range(left.x, right.x), 
-                Random.Range(left.y, right.y), 
-                Random.Range(left.z, right.z));
+                Random.Range(_left.x, _right.x), 
+                Random.Range(_left.y, _right.y), 
+                Random.Range(_left.z, _right.z));
 
-            Blackboard.SetValue(name, (Vector3Value)newVector);
+            Blackboard.SetValue(_name, (Vector3Value)newVector);
             yield return null;
         }
     }

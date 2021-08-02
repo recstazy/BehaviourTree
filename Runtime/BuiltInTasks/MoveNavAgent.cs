@@ -13,11 +13,11 @@ namespace Recstazy.BehaviourTree
 
         [ValueType(typeof(Vector3Value), typeof(TransformValue), typeof(GameObjectValue))]
         [SerializeField]
-        private BlackboardName destination;
+        private BlackboardName _destination;
 
         [SerializeField]
         [Tooltip("Wait until agent reached destination")]
-        private bool waitForFinished = false;
+        private bool _waitForFinished = false;
 
         #endregion
 
@@ -27,12 +27,12 @@ namespace Recstazy.BehaviourTree
 
         public override string GetDescription()
         {
-            return $"Move to {destination}";
+            return $"Move to {_destination}";
         }
 
         protected override IEnumerator NavAgentTaskRoutine(NavMeshAgent navAgent)
         {
-            if (Blackboard.TryGetValue(destination, out var destinationValue))
+            if (Blackboard.TryGetValue(_destination, out var destinationValue))
             {
                 Vector3? destination = null;
 
@@ -61,7 +61,7 @@ namespace Recstazy.BehaviourTree
                 }
             }
 
-            if (waitForFinished)
+            if (_waitForFinished)
             {
                 yield return new WaitUntil(() => IsReachedDestination(navAgent));
             }

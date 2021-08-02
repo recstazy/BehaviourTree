@@ -9,19 +9,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private Pin source;
-        private Pin target;
-        private const float tangent = 30f;
-        private const float width = 3f;
-        private static readonly Color activeColor = Color.white;
-        private static readonly Color disabledColor = new Color(1f, 1f, 1f, 0.5f);
+        private const float Tangent = 30f;
+        private const float Width = 3f;
+        private static readonly Color s_activeColor = Color.white;
+        private static readonly Color s_disabledColor = new Color(1f, 1f, 1f, 0.5f);
 
         #endregion
 
         #region Properties
 
-        public Pin Source { get => source; }
-        public Pin Target { get => target; }
+        public Pin Source { get; }
+        public Pin Target { get; }
         public bool SourceIsOutput { get; private set; }
         public bool RuntimeIsRunning { get; set; }
         public int OutPin { get; set; }
@@ -30,16 +28,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public PinConnectionDrawer(Pin source, Pin target, bool sourceIsOutput)
         {
-            this.source = source;
-            this.target = target;
+            Source = source;
+            Target = target;
             SourceIsOutput = sourceIsOutput;
         }
 
         public void OnGUI()
         {
-            Vector2 sourceTangent = source.Rect.center + tangent * Vector2.up * (SourceIsOutput ? 1f : -1f);
-            Vector2 targetTangent = target.Rect.center + tangent * Vector2.down * (SourceIsOutput ? 1f : -1f);
-            Handles.DrawBezier(Source.Rect.center, Target.Rect.center, sourceTangent, targetTangent, GetCurrentColor(), null, width);
+            Vector2 sourceTangent = Source.Rect.center + Tangent * Vector2.up * (SourceIsOutput ? 1f : -1f);
+            Vector2 targetTangent = Target.Rect.center + Tangent * Vector2.down * (SourceIsOutput ? 1f : -1f);
+            Handles.DrawBezier(Source.Rect.center, Target.Rect.center, sourceTangent, targetTangent, GetCurrentColor(), null, Width);
             RuntimeIsRunning = false;
         }
 
@@ -47,9 +45,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (BTModeManager.IsPlaymode)
             {
-                return RuntimeIsRunning ? activeColor : disabledColor;
+                return RuntimeIsRunning ? s_activeColor : s_disabledColor;
             }
-            else return activeColor;
+            else return s_activeColor;
         }
     }
 }

@@ -11,15 +11,15 @@ namespace Recstazy.BehaviourTree
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
     public class TaskOutAttribute : Attribute
     {
-        public readonly string name;
-        public readonly int index;
+        public readonly string Name;
+        public readonly int Index;
 
         /// <param name="index">Out index</param>
         /// <param name="name">Out name (optional)</param>
         public TaskOutAttribute(int index, string name = "")
         {
-            this.name = name;
-            this.index = index;
+            Name = name;
+            Index = index;
         }
     }
 }

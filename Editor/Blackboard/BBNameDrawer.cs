@@ -10,11 +10,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private Rect rect;
-        private SerializedProperty property;
-        private GUIContent label;
-        private Blackboard currentBB;
-        private const float nameValueRatio = 0.4f;
+        private Rect _rect;
+        private SerializedProperty _property;
+        private GUIContent _label;
+        private Blackboard _currentBB;
+        private const float NameValueRatio = 0.4f;
 
         #endregion
 
@@ -29,14 +29,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            rect = position;
-            this.property = property;
-            this.label = label;
-            currentBB = GetBlackboard();
+            _rect = position;
+            _property = property;
+            _label = label;
+            _currentBB = GetBlackboard();
 
-            if (currentBB is null)
+            if (_currentBB is null)
             {
-                EditorGUI.LabelField(rect, "[No blackboard]");
+                EditorGUI.LabelField(_rect, "[No blackboard]");
             }
             else
             {
@@ -46,20 +46,20 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void DrawEnumedName()
         {
-            var rect = this.rect;
-            rect.width *= nameValueRatio;
-            EditorGUI.LabelField(rect, label);
+            var rect = _rect;
+            rect.width *= NameValueRatio;
+            EditorGUI.LabelField(rect, _label);
 
             rect.x += rect.width;
-            rect.width = this.rect.width - rect.width;
+            rect.width = _rect.width - rect.width;
 
             var valueTypings = fieldInfo.GetCustomAttributes(typeof(ValueTypeAttribute), true) as ValueTypeAttribute[];
             bool hasTyping = valueTypings != null && valueTypings.Length > 0;
-            string[] names = hasTyping ? currentBB.GetNamesTyped(valueTypings[0].CompatableTypes) : currentBB.GetNames();
+            string[] names = hasTyping ? _currentBB.GetNamesTyped(valueTypings[0].CompatableTypes) : _currentBB.GetNames();
 
             if (names != null && names.Length > 0)
             {
-                var currentNameProp = property.FindPropertyRelative("name");
+                var currentNameProp = _property.FindPropertyRelative("_name");
                 int currentNameIndex = Array.IndexOf(names, currentNameProp.stringValue);
                 currentNameIndex = Mathf.Clamp(currentNameIndex, 0, names.Length - 1);
 
@@ -75,7 +75,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private Blackboard GetBlackboard()
         {
-            var sObject = property.serializedObject;
+            var sObject = _property.serializedObject;
 
             if (sObject.targetObject is IBlackboardProvider bbProvider)
             {

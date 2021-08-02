@@ -14,60 +14,60 @@ namespace Recstazy.BehaviourTree
 
         [SerializeField]
         [ValueType(typeof(FloatValue))]
-        private BlackboardName a;
+        private BlackboardName _a;
 
         [SerializeField]
-        private Operation operation;
+        private Operation _operation;
 
         [SerializeField]
-        private float b;
+        private float _b;
 
         [SerializeField]
         [ValueType(typeof(FloatValue))]
-        private BlackboardName output;
+        private BlackboardName _output;
 
         [SerializeField]
-        private bool swapOrder;
+        private bool _swapOrder;
 
-        private const string plus = "+";
-        private const string minus = "-";
-        private const string mul = "*";
-        private const string div = "/";
+        private const string Plus = "+";
+        private const string Minus = "-";
+        private const string Mul = "*";
+        private const string Div = "/";
 
         #endregion
 
         public override string GetDescription()
         {
-            var aString = a.ToString();
-            var bString = b.ToString();
-            return $"{output} = {(swapOrder ? bString : aString)} {GetOperationString()} {(swapOrder ? aString : bString)}";
+            var aString = _a.ToString();
+            var bString = _b.ToString();
+            return $"{_output} = {(_swapOrder ? bString : aString)} {GetOperationString()} {(_swapOrder ? aString : bString)}";
         }
 
         protected override IEnumerator TaskRoutine()
         {
-            if (Blackboard.TryGetValue(a, out FloatValue value))
+            if (Blackboard.TryGetValue(_a, out FloatValue value))
             {
                 float aValue = value.Value;
 
-                switch (operation)
+                switch (_operation)
                 {
                     case Operation.Add:
-                        aValue += b;
+                        aValue += _b;
                         break;
                     case Operation.Subtract:
-                        aValue = swapOrder ? b - aValue : aValue - b;
+                        aValue = _swapOrder ? _b - aValue : aValue - _b;
                         break;
                     case Operation.Multiply:
-                        aValue *= b;
+                        aValue *= _b;
                         break;
                     case Operation.Divide:
-                        aValue = swapOrder ? b / aValue : aValue / b;
+                        aValue = _swapOrder ? _b / aValue : aValue / _b;
                         break;
                     default:
                         break;
                 }
 
-                Blackboard.SetValue(output, (FloatValue)aValue);
+                Blackboard.SetValue(_output, (FloatValue)aValue);
             }
 
             yield break;
@@ -75,16 +75,16 @@ namespace Recstazy.BehaviourTree
 
         private string GetOperationString()
         {
-            switch (operation)
+            switch (_operation)
             {
                 case Operation.Add:
-                    return plus;
+                    return Plus;
                 case Operation.Subtract:
-                    return minus;
+                    return Minus;
                 case Operation.Multiply:
-                    return mul;
+                    return Mul;
                 case Operation.Divide:
-                    return div;
+                    return Div;
                 default:
                     return "[Get Operation Error]";
             }

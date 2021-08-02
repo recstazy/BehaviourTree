@@ -10,31 +10,31 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private const float leftSpacing = 15f;
-        private const float rectHeight = 20f;
-        private const float labelWidth = 30f;
-        private const float dropDownWidth = 200f;
-        private const float noTreeWidth = 100f;
-        private static readonly Color backColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
+        private const float LeftSpacing = 15f;
+        private const float RectHeight = 20f;
+        private const float LabelWidth = 30f;
+        private const float DropDownWidth = 200f;
+        private const float NoTreeWidth = 100f;
 
-        private static bool isPlaying;
-        private static BehaviourPlayer[] allPlayers;
-        private static string[] playersNames;
-        private static int currentIndex;
-        private int lastIndex;
+        private static readonly Color s_backColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
+        private static bool s_isPlaying;
+        private static BehaviourPlayer[] s_allPlayers;
+        private static string[] s_playersNames;
+        private static int s_currentIndex;
 
-        private Rect rect;
-        private GUIStyle labelStyle;
-        private GUIStyle dropDownStyle;
-        private BehaviourPlayer current;
+        private int _lastIndex;
+        private Rect _rect;
+        private GUIStyle _labelStyle;
+        private GUIStyle _dropDownStyle;
+        private BehaviourPlayer _current;
 
         #endregion
 
         #region Properties
 		
         public static BehaviourPlayer CurrentPlayer { get; private set; }
-        public BehaviourPlayer Current { get => current; set { current = value; CurrentPlayer = value; } }
-        public Rect Rect => rect;
+        public BehaviourPlayer Current { get => _current; set { _current = value; CurrentPlayer = value; } }
+        public Rect Rect => _rect;
 
         #endregion
 
@@ -43,23 +43,23 @@ namespace Recstazy.BehaviourTree.EditorScripts
         static BTTargetWatcher()
         {
             EditorApplication.playModeStateChanged += PlaymodeChanged;
-            PlaymodeChanged(isPlaying ? PlayModeStateChange.EnteredPlayMode : PlayModeStateChange.ExitingPlayMode);
+            PlaymodeChanged(s_isPlaying ? PlayModeStateChange.EnteredPlayMode : PlayModeStateChange.ExitingPlayMode);
         }
 
         public static void UpdateIsPlaymode()
         {
-            isPlaying = Application.isPlaying;
+            s_isPlaying = Application.isPlaying;
         }
 
         private static void UpdatePlayers()
         {
-            allPlayers = new BehaviourPlayer[1].Concat(Object.FindObjectsOfType<BehaviourPlayer>()).ToArray();
-            playersNames = allPlayers.Select(a => a is null ? "Empty" : a.gameObject.name).ToArray();
+            s_allPlayers = new BehaviourPlayer[1].Concat(Object.FindObjectsOfType<BehaviourPlayer>()).ToArray();
+            s_playersNames = s_allPlayers.Select(a => a is null ? "Empty" : a.gameObject.name).ToArray();
 
             if (CurrentPlayer != null)
             {
-                int newIndex = System.Array.IndexOf(allPlayers, CurrentPlayer);
-                currentIndex = Mathf.Clamp(newIndex, 0, allPlayers.Length);
+                int newIndex = System.Array.IndexOf(s_allPlayers, CurrentPlayer);
+                s_currentIndex = Mathf.Clamp(newIndex, 0, s_allPlayers.Length);
             }
         }
 
@@ -67,13 +67,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (state == PlayModeStateChange.EnteredPlayMode)
             {
-                isPlaying = true;
+                s_isPlaying = true;
                 UpdatePlayers();
                 BehaviourPlayer.OnInstancedOrDestroyed += UpdatePlayers;
             }
             else if (state == PlayModeStateChange.ExitingPlayMode)
             {
-                isPlaying = false;
+                s_isPlaying = false;
                 BehaviourPlayer.OnInstancedOrDestroyed -= UpdatePlayers;
                 ClearStaticData();
             }
@@ -81,22 +81,22 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private static void ClearStaticData()
         {
-            playersNames = null;
-            allPlayers = null;
-            currentIndex = 0;
+            s_playersNames = null;
+            s_allPlayers = null;
+            s_currentIndex = 0;
         }
 
         #endregion
 
         public BTTargetWatcher()
         {
-            rect.height = rectHeight;
+            _rect.height = RectHeight;
             
-            if (isPlaying)
+            if (s_isPlaying)
             {
                 UpdatePlayers();
-                currentIndex = Mathf.Clamp(currentIndex, 0, allPlayers.Length - 1);
-                Current = allPlayers[currentIndex];
+                s_currentIndex = Mathf.Clamp(s_currentIndex, 0, s_allPlayers.Length - 1);
+                Current = s_allPlayers[s_currentIndex];
             }
         }
 
@@ -107,36 +107,36 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void OnGUI(Rect windowRect)
         {
-            if (isPlaying)
+            if (s_isPlaying)
             {
-                rect.width = windowRect.width;
+                _rect.width = windowRect.width;
 
-                if (labelStyle == null)
+                if (_labelStyle == null)
                 {
                     CreateGUI();
                 }
 
-                EditorGUI.DrawRect(rect, backColor);
-                Rect currentRect = rect;
-                currentRect.position += Vector2.right * leftSpacing;
-                currentRect.width = labelWidth;
-                EditorGUI.LabelField(currentRect, "Target", labelStyle);
+                EditorGUI.DrawRect(_rect, s_backColor);
+                Rect currentRect = _rect;
+                currentRect.position += Vector2.right * LeftSpacing;
+                currentRect.width = LabelWidth;
+                EditorGUI.LabelField(currentRect, "Target", _labelStyle);
 
                 currentRect.position += Vector2.right * (currentRect.width + 10f);
-                currentRect.width = dropDownWidth;
+                currentRect.width = DropDownWidth;
 
-                int newIndex = currentIndex;
-                newIndex = EditorGUI.Popup(currentRect, newIndex, playersNames, dropDownStyle);
+                int newIndex = s_currentIndex;
+                newIndex = EditorGUI.Popup(currentRect, newIndex, s_playersNames, _dropDownStyle);
 
-                if (newIndex != lastIndex)
+                if (newIndex != _lastIndex)
                 {
                     ChangeTarget(newIndex);
                 }
 
-                if (currentIndex != 0 && Current?.Tree is null)
+                if (s_currentIndex != 0 && Current?.Tree is null)
                 {
                     currentRect.x += currentRect.width;
-                    currentRect.width = noTreeWidth;
+                    currentRect.width = NoTreeWidth;
                     EditorGUI.HelpBox(currentRect, "No Tree", MessageType.Error);
                 }
             }
@@ -146,14 +146,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (index != 0)
             {
-                currentIndex = index;
+                s_currentIndex = index;
 
-                if (currentIndex >= 0)
+                if (s_currentIndex >= 0)
                 {
-                    Current = allPlayers[currentIndex];
+                    Current = s_allPlayers[s_currentIndex];
                 }
 
-                lastIndex = currentIndex;
+                _lastIndex = s_currentIndex;
             }
 
             GUI.changed = true;
@@ -161,12 +161,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateGUI()
         {
-            labelStyle = new GUIStyle();
-            labelStyle.alignment = TextAnchor.MiddleCenter;
-            labelStyle.normal.textColor = Color.white;
+            _labelStyle = new GUIStyle();
+            _labelStyle.alignment = TextAnchor.MiddleCenter;
+            _labelStyle.normal.textColor = Color.white;
 
-            dropDownStyle = (GUIStyle)"ToolbarCreateAddNewDropDown";
-            dropDownStyle.alignment = TextAnchor.MiddleCenter;
+            _dropDownStyle = (GUIStyle)"ToolbarCreateAddNewDropDown";
+            _dropDownStyle.alignment = TextAnchor.MiddleCenter;
         }
 
         private void ClearRuntimeData()

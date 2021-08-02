@@ -9,7 +9,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private MultioutNodeProcessor multioutProcessor;
+        private MultioutNodeProcessor _multioutProcessor;
 
         #endregion
 
@@ -24,12 +24,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             Nodes.Clear();
             NodesDirty = false;
-            multioutProcessor?.Dispose();
+            _multioutProcessor?.Dispose();
         }
 
         public void RecreateNodes(BehaviourTree tree)
         {
-            multioutProcessor?.Dispose();
+            _multioutProcessor?.Dispose();
             Nodes.Clear();
             var treeData = tree.NodeData;
 
@@ -39,7 +39,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 CreateNodeAndAppendToList(data);
             }
 
-            multioutProcessor = new MultioutNodeProcessor(Nodes);
+            _multioutProcessor = new MultioutNodeProcessor(Nodes);
         }
 
         public void OnNodesGUI()
@@ -117,7 +117,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var outNode = GetNode(args.OutNode);
             var newData = outNode.Data.CreateCopy(false);
             var newConnections = CreateNewConnection(newData.Connections, args.OutPin, args.InNode);
-            multioutProcessor.AfterConnectionAdded(newData, newConnections);
+            _multioutProcessor.AfterConnectionAdded(newData, newConnections);
             newData.SetConnections(newConnections.ToArray());
             outNode = CreateNodeFromData(newData);
             UpdateNodeWithIndex(outNode.Index, outNode);
@@ -128,7 +128,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var outNode = GetNode(args.OutNode);
             var newData = outNode.Data.CreateCopy(false);
             var newConnections = RemoveExistingConnection(newData.Connections, args.OutPin);
-            multioutProcessor.AfterConnectionRemoved(newData, newConnections);
+            _multioutProcessor.AfterConnectionRemoved(newData, newConnections);
             newData.SetConnections(newConnections.ToArray());
             outNode = CreateNodeFromData(newData);
             UpdateNodeWithIndex(outNode.Index, outNode);
@@ -168,7 +168,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private bool AfterNodeDragged(int listIndex)
         {
             var node = Nodes[listIndex];
-            bool nodesChanged = multioutProcessor.AfterNodePositionChanged(node, out var nodesIndices);
+            bool nodesChanged = _multioutProcessor.AfterNodePositionChanged(node, out var nodesIndices);
 
             if (nodesChanged)
             {
@@ -212,7 +212,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 if (data.TaskImplementation is MultioutTask)
                 {
-                    multioutProcessor.UpdateMultioutConnections(data);
+                    _multioutProcessor.UpdateMultioutConnections(data);
                 }
 
                 CreateNodeAndAppendToList(data);
@@ -316,7 +316,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (node.Data.TaskImplementation is MultioutTask)
             {
-                multioutProcessor.UpdateMultioutConnections(node.Data);
+                _multioutProcessor.UpdateMultioutConnections(node.Data);
                 return true;
             }
             else

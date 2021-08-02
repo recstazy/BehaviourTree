@@ -11,7 +11,7 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private BlackboardName valueName;
+        private BlackboardName _valueName;
 
         #endregion
 
@@ -21,12 +21,12 @@ namespace Recstazy.BehaviourTree
 
         protected override string GetGateDescription()
         {
-            return $"{valueName} is set";
+            return $"{_valueName} is set";
         }
 
         protected override bool CheckGateCondition()
         {
-            var isSet = Blackboard.IsValueSet(valueName);
+            var isSet = Blackboard.IsValueSet(_valueName);
             return isSet;
         }
     }

@@ -9,9 +9,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private const float emptyPinHeight = 10f;
-        private const float textPinHeight = 15f;
-        private GUIStyle pinStyle;
+        private const float EmptyPinHeight = 10f;
+        private const float TextPinHeight = 15f;
+        private GUIStyle _pinStyle;
 
         #endregion
 
@@ -31,13 +31,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public ConnectionPin(int index, bool isInput, string description = "") : base(index)
         {
             IsInput = isInput;
-            rect.size = Vector2.one * emptyPinHeight;
+            _rect.size = Vector2.one * EmptyPinHeight;
             Description = description;
         }
 
         public override void OnGUI(Vector2 posOnNodeBorder, float width)
         {
-            if (pinStyle == null)
+            if (_pinStyle == null)
             {
                 CreateStyle();
             }
@@ -45,13 +45,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
             MouseDrag = false;
             MouseUp = false;
 
-            float height = string.IsNullOrEmpty(Description) ? emptyPinHeight : textPinHeight;
-            rect.size = new Vector2(width, height);
-            rect.center = posOnNodeBorder + height * 0.5f * Vector2.up * (IsInput ? -1f : 1f);
-            GUI.Box(rect, Description, pinStyle);
+            float height = string.IsNullOrEmpty(Description) ? EmptyPinHeight : TextPinHeight;
+            _rect.size = new Vector2(width, height);
+            _rect.center = posOnNodeBorder + height * 0.5f * Vector2.up * (IsInput ? -1f : 1f);
+            GUI.Box(_rect, Description, _pinStyle);
 
             var mousePos = GetMousePosition is null ? Vector2.positiveInfinity : GetMousePosition();
-            IsHover = rect.Contains(mousePos);
+            IsHover = _rect.Contains(mousePos);
 
             switch (Event.current.type)
             {
@@ -98,9 +98,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateStyle()
         {
-            pinStyle = new GUIStyle("EditModeSingleButton");
-            pinStyle.alignment = TextAnchor.MiddleCenter;
-            pinStyle.fontSize = 9;
+            _pinStyle = new GUIStyle("EditModeSingleButton");
+            _pinStyle.alignment = TextAnchor.MiddleCenter;
+            _pinStyle.fontSize = 9;
         }
     }
 }

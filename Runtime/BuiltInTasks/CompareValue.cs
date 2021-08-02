@@ -14,10 +14,10 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private BlackboardName ValueName;
+        private BlackboardName _valueName;
 
         [SerializeReference]
-        private ITypedValue compareWith;
+        private ITypedValue _compareWith;
 
         #endregion
 
@@ -27,14 +27,14 @@ namespace Recstazy.BehaviourTree
 
         public override string GetDescription()
         {
-            return $"Compare {ValueName}";
+            return $"Compare {_valueName}";
         }
 
         protected override int GetCurrentOutIndex()
         {
-            if (Blackboard.TryGetValue(ValueName, out var bbValue))
+            if (Blackboard.TryGetValue(_valueName, out var bbValue))
             {
-                var result = bbValue.Compare(compareWith);
+                var result = bbValue.Compare(_compareWith);
                 return (int)result;
             }
 

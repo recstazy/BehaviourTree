@@ -8,15 +8,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private string name = "";
-        protected Rect rect;
+        protected Rect _rect;
 
         #endregion
 
         #region Properties
 
-        public Rect Rect => rect;
-        public string Name { get => name; set => name = value; }
+        public Rect Rect => _rect;
+        public string Name { get; set; } = "";
         public int Index { get; protected set; }
 
         #endregion
@@ -28,7 +27,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public virtual void OnGUI(Vector2 posOnNodeBorder, float width)
         {
-            rect.center = posOnNodeBorder;
+            _rect.center = posOnNodeBorder;
         }
     }
 }

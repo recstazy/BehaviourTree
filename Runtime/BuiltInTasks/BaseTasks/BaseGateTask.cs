@@ -13,7 +13,7 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private bool invert = false;
+        private bool _invert = false;
 
         #endregion
 
@@ -35,7 +35,7 @@ namespace Recstazy.BehaviourTree
 
         public override string GetDescription()
         {
-            return $"{(invert ? "Fail" : "Succeed")} if {GetGateDescription()}";
+            return $"{(_invert ? "Fail" : "Succeed")} if {GetGateDescription()}";
         }
 
         protected override IEnumerator TaskRoutine()
@@ -53,7 +53,7 @@ namespace Recstazy.BehaviourTree
         private bool GetFinalCondition()
         {
             var condition = CheckGateCondition();
-            return invert ? !condition : condition;
+            return _invert ? !condition : condition;
         }
     }
 }

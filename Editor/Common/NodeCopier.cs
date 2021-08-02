@@ -9,8 +9,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private static NodeData[] buffer;
-        private static Vector2 bufferCenter;
+        private static NodeData[] _buffer;
+        private static Vector2 _bufferCenter;
 
         #endregion
 
@@ -24,28 +24,28 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (data is null || data.Length == 0) return;
 
-            buffer = data.Where(d => !(d.TaskImplementation is EntryTask)).Select(d => d.CreateCopy(true)).ToArray();
+            _buffer = data.Where(d => !(d.TaskImplementation is EntryTask)).Select(d => d.CreateCopy(true)).ToArray();
             Vector2 center = Vector2.zero;
 
-            for (int i = 0; i < buffer.Length; i++)
+            for (int i = 0; i < _buffer.Length; i++)
             {
-                center += buffer[i].Position;
+                center += _buffer[i].Position;
             }
 
-            center /= buffer.Length;
-            bufferCenter = center;
-            RemoveOutsideConnections(buffer);
+            center /= _buffer.Length;
+            _bufferCenter = center;
+            RemoveOutsideConnections(_buffer);
         }
 
         public static NodeData[] GetCopiedNodes()
         {
-            if (buffer is null) return null;
+            if (_buffer is null) return null;
 
-            var newData = new NodeData[buffer.Length];
+            var newData = new NodeData[_buffer.Length];
 
             for (int i = 0; i < newData.Length; i++)
             {
-                newData[i] = buffer[i].CreateCopy(true);
+                newData[i] = _buffer[i].CreateCopy(true);
             }
 
             return newData;
@@ -68,7 +68,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             int currentStartIndex = data.Min(d => d.Index);
             int deltaIndex = newStartIndex - currentStartIndex;
             var mousePos = BTEventProcessor.LastMousePosition;
-            var deltaCenter = mousePos - bufferCenter;
+            var deltaCenter = mousePos - _bufferCenter;
 
             foreach (var d in data)
             {

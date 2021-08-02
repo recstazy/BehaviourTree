@@ -11,28 +11,28 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private const KeyCode altModifier = KeyCode.LeftAlt;
-        private const KeyCode deleteNodesKey = KeyCode.Delete;
-        private const KeyCode controlModifier = KeyCode.LeftControl;
-        private const KeyCode copyKey = KeyCode.C;
-        private const KeyCode pasteKey = KeyCode.V;
-        private const KeyCode duplicateKey = KeyCode.D;
+        private const KeyCode AltModifier = KeyCode.LeftAlt;
+        private const KeyCode DeleteNodesKey = KeyCode.Delete;
+        private const KeyCode ControlModifier = KeyCode.LeftControl;
+        private const KeyCode CopyKey = KeyCode.C;
+        private const KeyCode PasteKey = KeyCode.V;
+        private const KeyCode DuplicateKey = KeyCode.D;
 
-        private static Dictionary<KeyCode, bool> pressStates;
-        private Dictionary<Func<bool>, Action> actions;
-        private Func<bool> currentHotkey;
+        private static Dictionary<KeyCode, bool> s_pressStates;
+        private Dictionary<Func<bool>, Action> _actions;
+        private Func<bool> _currentHotkey;
 
-        private Func<bool> copyHotkey => () => ControlModifierPressed && pressStates[copyKey];
-        private Func<bool> pasteHotkey => () => ControlModifierPressed && pressStates[pasteKey];
-        private Func<bool> duplicateHotkey => () => ControlModifierPressed && pressStates[duplicateKey];
-        private Func<bool> deleteHotkey => () => pressStates[deleteNodesKey];
+        private Func<bool> CopyHotkey => () => ControlModifierPressed && s_pressStates[CopyKey];
+        private Func<bool> PasteHotkey => () => ControlModifierPressed && s_pressStates[PasteKey];
+        private Func<bool> DuplicateHotkey => () => ControlModifierPressed && s_pressStates[DuplicateKey];
+        private Func<bool> DeleteHotkey => () => s_pressStates[DeleteNodesKey];
 
         #endregion
 
         #region Properties
 
-        public static bool ControlModifierPressed => pressStates[controlModifier];
-        public static bool AltModifierPressed => pressStates[altModifier];
+        public static bool ControlModifierPressed => s_pressStates[ControlModifier];
+        public static bool AltModifierPressed => s_pressStates[AltModifier];
         public static bool DeleteConnectionPressed => AltModifierPressed;
 
         public static Action OnDeleteNodes { get; set; }
@@ -40,28 +40,28 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public static Action OnPaste { get; set; }
         public static Action OnDuplicate { get; set; }
 
-        private bool HotkeyPressedNow => currentHotkey != null;
+        private bool HotkeyPressedNow => _currentHotkey != null;
 
         #endregion
 
         public BTHotkeys()
         {
-            pressStates = new Dictionary<KeyCode, bool>
+            s_pressStates = new Dictionary<KeyCode, bool>
             {
-                { controlModifier, false },
-                { altModifier, false },
-                { deleteNodesKey, false },
-                { copyKey, false },
-                { pasteKey, false },
-                { duplicateKey, false },
+                { ControlModifier, false },
+                { AltModifier, false },
+                { DeleteNodesKey, false },
+                { CopyKey, false },
+                { PasteKey, false },
+                { DuplicateKey, false },
             };
 
-            actions = new Dictionary<Func<bool>, Action>
+            _actions = new Dictionary<Func<bool>, Action>
             {
-                { deleteHotkey, OnDeleteNodes },
-                { copyHotkey, OnCopy },  
-                { pasteHotkey, OnPaste },
-                { duplicateHotkey, OnDuplicate },
+                { DeleteHotkey, OnDeleteNodes },
+                { CopyHotkey, OnCopy },  
+                { PasteHotkey, OnPaste },
+                { DuplicateHotkey, OnDuplicate },
             };
         }
 
@@ -71,9 +71,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             OnCopy = null;
             OnPaste = null;
             OnDuplicate = null;
-            actions = null;
-            pressStates = null;
-            currentHotkey = null;
+            _actions = null;
+            s_pressStates = null;
+            _currentHotkey = null;
         }
 
         public bool Process(Event e)
@@ -84,9 +84,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     {
                         if (!HotkeyPressedNow)
                         {
-                            if (pressStates.ContainsKey(e.keyCode))
+                            if (s_pressStates.ContainsKey(e.keyCode))
                             {
-                                pressStates[e.keyCode] = true;
+                                s_pressStates[e.keyCode] = true;
                                 e.Use();
                                 return CallActionIfPressed();
                             }
@@ -96,9 +96,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     }
                 case EventType.KeyUp:
                     {
-                        if (pressStates.ContainsKey(e.keyCode))
+                        if (s_pressStates.ContainsKey(e.keyCode))
                         {
-                            pressStates[e.keyCode] = false;
+                            s_pressStates[e.keyCode] = false;
                             e.Use();
                             CheckLastActionReleased();
                         }
@@ -112,11 +112,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private bool CallActionIfPressed()
         {
-            foreach (var a in actions)
+            foreach (var a in _actions)
             {
                 if (a.Key.Invoke())
                 {
-                    currentHotkey = a.Key;
+                    _currentHotkey = a.Key;
                     a.Value?.Invoke();
                     return true;
                 }
@@ -129,9 +129,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (HotkeyPressedNow)
             {
-                if (!currentHotkey.Invoke())
+                if (!_currentHotkey.Invoke())
                 {
-                    currentHotkey = null;
+                    _currentHotkey = null;
                     return;
                 }
             }
