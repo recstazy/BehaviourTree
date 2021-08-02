@@ -20,7 +20,6 @@ namespace Recstazy.BehaviourTree
         [SerializeField]
         private TypedValue[] _values;
 
-        private static readonly string[] s_emptyNames = new string[0];
         private static readonly string[] s_reservedNames = new string[]
         {
             "GameObject",
@@ -182,27 +181,6 @@ namespace Recstazy.BehaviourTree
                     Values.Add(v.Name, v.Value);
                 }
             }
-        }
-
-        internal string[] GetNames()
-        {
-            if (Values != null && Values.Count > 0)
-            {
-                return Values.Where(v => !string.IsNullOrEmpty(v.Key)).Select(v => v.Key).ToArray();
-            }
-
-            return s_emptyNames;
-        }
-
-        internal string[] GetNamesTyped(params Type[] compatableTypes)
-        {
-            if (compatableTypes != null && compatableTypes.Length > 0)
-            {
-                var names = GetNames();
-                return names.Where(n => compatableTypes.Contains(Values[n].GetType())).ToArray();
-            }
-
-            return s_emptyNames;
         }
     }
 
