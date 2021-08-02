@@ -59,7 +59,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 if (assetObject is BehaviourTree treeAsset)
                 {
-                    if (TreeInstance is null || this.TreeAsset != treeAsset)
+                    if (TreeInstance is null || TreeAsset != treeAsset)
                     {
                         InitializeWithAsset(treeAsset);
                     }

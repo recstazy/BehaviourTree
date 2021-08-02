@@ -39,7 +39,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _nodes = nodes;
             _ios = new List<NodeDrawerIO>();
 
-            foreach (var n in this._nodes)
+            foreach (var n in _nodes)
             {
                 CreateIO(n);
             }

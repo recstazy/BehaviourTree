@@ -62,8 +62,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public bool GetWasDoubleClickAndClear()
         {
-            bool wasDoubleClick = this._wasDoubleClick;
-            this._wasDoubleClick = false;
+            bool wasDoubleClick = _wasDoubleClick;
+            _wasDoubleClick = false;
             return wasDoubleClick;
         }
 
@@ -71,7 +71,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (nodes is null || nodes.Length == 0) return;
 
-            var listIndices = nodes.Select(n => this._nodes.IndexOf(n)).ToArray();
+            var listIndices = nodes.Select(n => _nodes.IndexOf(n)).ToArray();
             _isMultiSelecting = nodes.Length > 1;
             UpdateNodesSelection(listIndices);
         }
