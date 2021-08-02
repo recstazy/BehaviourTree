@@ -16,7 +16,7 @@ namespace Recstazy.BehaviourTree
 
         [SerializeField]
         [ValueType(typeof(NavAgentValue))]
-        protected BlackboardName navAgent = CommonNames.NavAgent;
+        protected BlackboardName _navAgent = CommonNames.NavAgent;
 
         #endregion
 
@@ -26,7 +26,7 @@ namespace Recstazy.BehaviourTree
 
         protected override IEnumerator TaskRoutine()
         {
-            if (Blackboard.TryGetValue<NavAgentValue>(navAgent, out var navAgentValue))
+            if (Blackboard.TryGetValue<NavAgentValue>(_navAgent, out var navAgentValue))
             {
                 if (navAgentValue != null && navAgentValue.Value != null)
                 {

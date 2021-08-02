@@ -22,8 +22,6 @@ namespace Recstazy.BehaviourTree
 
         [System.NonSerialized]
         private Blackboard _blackboard;
-
-        private CoroutineRunner _coroutineRunner;
         private Coroutine _taskBodyRoutine;
         private bool _taskBodyIsRunning;
         private HashSet<Coroutine> _currentTaskCoroutines = new HashSet<Coroutine>();
@@ -43,7 +41,7 @@ namespace Recstazy.BehaviourTree
         public Blackboard Blackboard { get => GetBlackboard(); set => SetBlackboard(value); }
 
         internal int LastReturnedOut { get; private set; }
-        internal CoroutineRunner CoroutineRunner => _coroutineRunner;
+        internal CoroutineRunner CoroutineRunner { get; private set; }
 
         #endregion
 
@@ -87,7 +85,7 @@ namespace Recstazy.BehaviourTree
         /// <summary> Start coroutine as MonoBehaviours do </summary>
         protected Coroutine StartCoroutine(IEnumerator coroutine)
         {
-            var newCoroutine = _coroutineRunner.StartCoroutine(coroutine);
+            var newCoroutine = CoroutineRunner.StartCoroutine(coroutine);
             _currentTaskCoroutines.Add(newCoroutine);
             return newCoroutine;
         }
@@ -102,7 +100,7 @@ namespace Recstazy.BehaviourTree
                     _currentTaskCoroutines.Remove(coroutine);
                 }
 
-                _coroutineRunner.StopCoroutine(coroutine);
+                CoroutineRunner.StopCoroutine(coroutine);
             }
         }
 
@@ -113,7 +111,7 @@ namespace Recstazy.BehaviourTree
             {
                 if (c != null)
                 {
-                    _coroutineRunner.StopCoroutine(c);
+                    CoroutineRunner.StopCoroutine(c);
                 }
             }
 
@@ -201,7 +199,7 @@ namespace Recstazy.BehaviourTree
             IsRunning = true;
             Succeed = true;
             _taskBodyIsRunning = true;
-            _taskBodyRoutine = _coroutineRunner.StartCoroutine(TaskBodyCoroutine());
+            _taskBodyRoutine = CoroutineRunner.StartCoroutine(TaskBodyCoroutine());
             yield return new WaitUntil(() => !_taskBodyIsRunning);
             AfterBodyFinished();
         }
@@ -231,7 +229,7 @@ namespace Recstazy.BehaviourTree
         [RuntimeInstanced]
         internal void SetCoroutineRunner(CoroutineRunner runner)
         {
-            _coroutineRunner = runner;
+            CoroutineRunner = runner;
         }
     }
 }

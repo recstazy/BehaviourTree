@@ -51,11 +51,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             for (int i = 0; i < outsCount; i++)
             {
                 var attribute = outAttributes[i];
-                int index = attribute.index;
+                int index = attribute.Index;
 
-                OutPins[index] = new ConnectionPin(index, false, attribute.name);
+                OutPins[index] = new ConnectionPin(index, false, attribute.Name);
                 OutPins[index].GetMousePosition = () => BTEventProcessor.LastRawMousePosition;
-                OutPins[index].Name = attribute.name;
+                OutPins[index].Name = attribute.Name;
             }
         }
 
