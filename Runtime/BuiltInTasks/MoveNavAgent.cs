@@ -11,7 +11,7 @@ namespace Recstazy.BehaviourTree
     {
         #region Fields
 
-        [ValueType(typeof(Vector3Value), typeof(TransformValue), typeof(GameObjectValue))]
+        [ValueType(typeof(Vector3Value), typeof(IGameObjectProvider))]
         [SerializeField]
         private BlackboardName _destination;
 
@@ -40,18 +40,11 @@ namespace Recstazy.BehaviourTree
                 {
                     destination = vectorValue;
                 }
-                else if (destinationValue is TransformValue transformValue)
+                else if (destinationValue is IGameObjectProvider goProvider)
                 {
-                    if (transformValue?.Value != null)
+                    if (goProvider.gameObject != null)
                     {
-                        destination = transformValue.Value.position;
-                    }
-                }
-                else if (destinationValue is GameObjectValue goValue)
-                {
-                    if (goValue?.Value != null)
-                    {
-                        destination = goValue.Value.transform.position;
+                        destination = goProvider.gameObject.transform.position;
                     }
                 }
 

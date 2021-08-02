@@ -7,5 +7,5 @@ namespace Recstazy.BehaviourTree
     [TaskOut(0)]
     [ExcludeFromTaskSelector]
     [NoInspector]
-    internal class EntryTask : BehaviourTask { }
+    internal sealed class EntryTask : BehaviourTask { }
 }
