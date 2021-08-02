@@ -35,43 +35,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             UpdateValueTypes();
         }
 
-        private static void UpdateValueTypes()
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            IEnumerable<Type> types = new List<Type>();
-
-            foreach (var a in assemblies)
-            {
-                types = types.Concat(a.GetTypes()
-                .Where(t => t.GetInterface(typeof(ITypedValue).FullName) != null)
-                .Where(t => !t.IsSubclassOf(typeof(UnityEngine.Object)))
-                .Where(t => !t.ContainsGenericParameters));
-            }
-
-            var newTypes = types.ToArray();
-            Names = new string[] { "None" }.Concat(newTypes.Select(t => RemoveValueCaptionFromEnd(t.Name))).ToArray();
-            FullNames = new string[] { "None" }.Concat(newTypes.Select(t => GetShortAssemblyName(t.Assembly.FullName) + " " + t.FullName)).ToArray();
-            Types = new Type[] { null }.Concat(newTypes).ToArray();
-        }
-
-        private static string GetShortAssemblyName(string assemblyName)
-        {
-            var versionIndex = assemblyName.IndexOf(", Version");
-            return assemblyName.Substring(0, versionIndex);
-        }
-
-        private static string RemoveValueCaptionFromEnd(string name)
-        {
-            var indexOfValue = name.LastIndexOf("Value");
-
-            if (indexOfValue > 0 && indexOfValue == name.Length - 5)
-            {
-                return name.Replace("Value", "");
-            }
-
-            return name;
-        }
-
         public ValueTypeProvider(string valueTypeName)
         {
             int index = Array.IndexOf(FullNames, valueTypeName);
@@ -102,6 +65,48 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 _currentEnumIndex = index;
                 Changed = true;
             }
+        }
+
+        private static void UpdateValueTypes()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            IEnumerable<Type> types = new List<Type>();
+
+            foreach (var a in assemblies)
+            {
+                types = types.Concat(a.GetTypes()
+                .Where(t => t.GetInterface(typeof(ITypedValue).FullName) != null)
+                .Where(t => !t.IsSubclassOf(typeof(UnityEngine.Object)))
+                .Where(t => !t.ContainsGenericParameters));
+            }
+
+            var newTypes = types.ToArray();
+            Names = new string[] { "None" }.Concat(newTypes.Select(t => RemoveValueCaptionFromEnd(t.Name))).ToArray();
+            FullNames = new string[] { "None" }.Concat(newTypes.Select(t => GetManagedTypeFullName(t))).ToArray();
+            Types = new Type[] { null }.Concat(newTypes).ToArray();
+        }
+
+        private static string RemoveValueCaptionFromEnd(string name)
+        {
+            var indexOfValue = name.LastIndexOf("Value");
+
+            if (indexOfValue > 0 && indexOfValue == name.Length - 5)
+            {
+                return name.Replace("Value", "");
+            }
+
+            return name;
+        }
+
+        internal static string GetManagedTypeFullName(Type type)
+        {
+            return $"{GetShortAssemblyName(type.Assembly.FullName)} {type.FullName}";
+        }
+
+        internal static string GetShortAssemblyName(string assemblyName)
+        {
+            var versionIndex = assemblyName.IndexOf(", Version");
+            return assemblyName.Substring(0, versionIndex);
         }
     }
 }

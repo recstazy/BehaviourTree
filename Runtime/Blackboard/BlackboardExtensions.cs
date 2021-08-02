@@ -11,7 +11,7 @@ namespace Recstazy.BehaviourTree
 
         internal static string[] GetNames(this Blackboard blackboard)
         {
-            if (blackboard.Values != null && blackboard.Values.Count > 0)
+            if (blackboard != null && blackboard.Values != null && blackboard.Values.Count > 0)
             {
                 return blackboard.Values.Where(v => !string.IsNullOrEmpty(v.Key)).Select(v => v.Key).ToArray();
             }
@@ -21,7 +21,7 @@ namespace Recstazy.BehaviourTree
 
         internal static string[] GetNamesTyped(this Blackboard blackboard, params Type[] compatableTypes)
         {
-            if (compatableTypes != null && compatableTypes.Length > 0)
+            if (blackboard != null && compatableTypes != null && compatableTypes.Length > 0)
             {
                 var result = new List<string>();
                 var names = blackboard.GetNames();
@@ -38,6 +38,29 @@ namespace Recstazy.BehaviourTree
             }
 
             return s_emptyNames;
+        }
+
+        internal static bool TryGetBlackboard(this UnityEngine.Object unityObject, out Blackboard blackboard)
+        {
+            if (unityObject != null)
+            {
+                if (unityObject is IBlackboardProvider bbProvider)
+                {
+                    blackboard = bbProvider.Blackboard;
+                    return blackboard != null;
+                }
+                else if (unityObject is Component component)
+                {
+                    if (component.TryGetComponent<IBlackboardProvider>(out var provider))
+                    {
+                        blackboard = provider.Blackboard;
+                        return blackboard != null;
+                    }
+                }
+            }
+            
+            blackboard = null;
+            return false;
         }
 
         private static bool TypeArrayContainsTypeOrBaseType(Type[] typeArray, Type type)

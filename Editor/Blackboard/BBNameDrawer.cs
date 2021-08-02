@@ -32,9 +32,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _rect = position;
             _property = property;
             _label = label;
-            _currentBB = GetBlackboard();
 
-            if (_currentBB is null)
+            if (!property.serializedObject.targetObject.TryGetBlackboard(out _currentBB))
             {
                 EditorGUI.LabelField(_rect, "[No blackboard]");
             }
@@ -71,25 +70,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 string message = hasTyping ? "No Compatable value" : "Blackboard Empty";
                 EditorGUI.LabelField(rect, $"[{message}]");
             }
-        }
-
-        private Blackboard GetBlackboard()
-        {
-            var sObject = _property.serializedObject;
-
-            if (sObject.targetObject is IBlackboardProvider bbProvider)
-            {
-                return bbProvider.Blackboard;
-            }
-            else if (sObject.targetObject is Component component)
-            {
-                if (component.TryGetComponent<IBlackboardProvider>(out var provider))
-                {
-                    return provider.Blackboard;
-                }
-            }
-
-            return null;
         }
     }
 }

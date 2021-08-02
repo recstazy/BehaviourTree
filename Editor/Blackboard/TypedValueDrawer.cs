@@ -18,6 +18,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private Rect _rect;
         private SerializedProperty _property;
         private ValueTypeProvider _typeProvider;
+        private bool _isReadonly = false;
+        private Type _forcedType;
 
         #endregion
 
@@ -47,18 +49,36 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
+        internal void ForceSetType(Type forceType, bool isReadonly) 
+        {
+            if (forceType != null && typeof(ITypedValue).IsAssignableFrom(forceType))
+            {
+                _forcedType = forceType;
+                _isReadonly = isReadonly;
+            }
+        }
+
         private void DrawType()
         {
+            EditorGUI.BeginDisabledGroup(_isReadonly);
+
             if (_typeProvider is null)
             {
-                _typeProvider = new ValueTypeProvider(_property.managedReferenceFullTypename);
+                string typename = _property.managedReferenceFullTypename;
+
+                if (_forcedType != null)
+                {
+                    typename = ValueTypeProvider.GetManagedTypeFullName(_forcedType);
+                }
+
+                _typeProvider = new ValueTypeProvider(typename);
             }
 
             var currentRect = _rect;
             currentRect.height = RowHeight;
             _typeProvider.OnGUI(currentRect);
 
-            if (_typeProvider.Changed)
+            if (_typeProvider.Changed || (_forcedType != null && ValueTypeProvider.GetManagedTypeFullName(_forcedType) != _property.managedReferenceFullTypename))
             {
                 ITypedValue newValue = null;
 
@@ -70,6 +90,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 _typeProvider = null;
                 _property.managedReferenceValue = newValue;
             }
+
+            EditorGUI.EndDisabledGroup();
         }
 
         private void DrawValue()
