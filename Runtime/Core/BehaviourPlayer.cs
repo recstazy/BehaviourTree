@@ -27,7 +27,6 @@ namespace Recstazy.BehaviourTree
         private BranchPlayer _treePlayer;
         private Coroutine _playRoutine;
         private CoroutineRunner _coroutineRunner;
-        private Blackboard _lastBlackboard;
 
         #endregion
 
@@ -83,9 +82,10 @@ namespace Recstazy.BehaviourTree
         public void Initialize(BehaviourTree tree)
         {
             Clear();
-            this._tree = tree;
-            Tree = this._tree?.CreateRuntimeImplementation(_coroutineRunner);
-            if (Tree is null) return;
+            _tree = tree;
+            if (_tree == null) return;
+
+            Tree = _tree?.CreateRuntimeImplementation(_coroutineRunner);
 
             foreach (var value in _setOnStart)
             {

@@ -13,16 +13,16 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private Blackboard blackboard;
+        private Blackboard _blackboard;
 
         [SerializeField]
-        private Vector2 graphPosition;
+        private Vector2 _graphPosition;
 
         [SerializeField]
-        private float zoom = 1f;
+        private float _zoom = 1f;
 
         [SerializeField]
-        private TreeNodeData nodeData;
+        private TreeNodeData _nodeData;
 
         #endregion
 
@@ -30,20 +30,20 @@ namespace Recstazy.BehaviourTree
 
         /// <summary> Is this tree a runtime instance </summary>
         public bool IsRuntime { get; private set; } = false;
-        public Blackboard Blackboard => blackboard;
+        public Blackboard Blackboard => _blackboard;
 
-        internal TreeNodeData NodeData { get => nodeData; set => nodeData = value; }
-        internal Vector2 GraphPosition { get => graphPosition; set => graphPosition = value; }
-        internal float Zoom { get => zoom; set => zoom = value; }
-        internal NodeData EntryNode => nodeData?.Data is null || nodeData.Data.Length == 0 ? null : nodeData.Data[0];
+        internal TreeNodeData NodeData { get => _nodeData; set => _nodeData = value; }
+        internal Vector2 GraphPosition { get => _graphPosition; set => _graphPosition = value; }
+        internal float Zoom { get => _zoom; set => _zoom = value; }
+        internal NodeData EntryNode => _nodeData?.Data is null || _nodeData.Data.Length == 0 ? null : _nodeData.Data[0];
 
         #endregion
 
         internal void CreateEntry()
         {
-            if (nodeData != null && nodeData.Data != null && nodeData.Data.Length == 0)
+            if (_nodeData != null && _nodeData.Data != null && _nodeData.Data.Length == 0)
             {
-                nodeData.Data = new NodeData[] { new NodeData(0, new EntryTask()) };
+                _nodeData.Data = new NodeData[] { new NodeData(0, new EntryTask()) };
             }
         }
 
@@ -65,9 +65,9 @@ namespace Recstazy.BehaviourTree
         [RuntimeInstanced]
         private void InitializeRuntime(CoroutineRunner coroutineRunner)
         {
-            blackboard = Instantiate(blackboard);
-            blackboard.InitializeAtRuntime(coroutineRunner.gameObject);
-            var runtimeNodeData = nodeData.Data;
+            _blackboard = Instantiate(_blackboard);
+            _blackboard.InitializeAtRuntime(coroutineRunner.gameObject);
+            var runtimeNodeData = _nodeData.Data;
 
             for (int i = 0; i < runtimeNodeData.Length; i++)
             {
@@ -82,9 +82,9 @@ namespace Recstazy.BehaviourTree
         [RuntimeInstanced]
         private void CreateRuntimeConnections()
         {
-            foreach (var d in nodeData.Data)
+            foreach (var d in _nodeData.Data)
             {
-                d.CreateRuntimeConnections(nodeData.Data);
+                d.CreateRuntimeConnections(_nodeData.Data);
             }
         }
     }
