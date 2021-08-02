@@ -45,7 +45,7 @@ namespace Recstazy.BehaviourTree
 
         private void OnValidate()
         {
-            UpdateValuesDictionary();
+            UpdateValuesDictionary(false);
         }
 
 #endif
@@ -125,10 +125,10 @@ namespace Recstazy.BehaviourTree
             GameObject = gameObject;
             Transform = gameObject.transform;
             NavAgent = gameObject.GetComponentInChildren<NavMeshAgent>();
-            UpdateValuesDictionary();
+            UpdateValuesDictionary(true);
         }
 
-        internal void UpdateValuesDictionary()
+        internal void UpdateValuesDictionary(bool onInitialization)
         {
             Values = new Dictionary<string, ITypedValue>()
             {
@@ -137,11 +137,13 @@ namespace Recstazy.BehaviourTree
                 { _reservedNames[2], new NavAgentValue(NavAgent) }
             };
 
+            if (_values == null) return;
+
             foreach (var v in _values)
             {
                 if (Values.ContainsKey(v.Name))
                 {
-                    if (Application.isPlaying)
+                    if (onInitialization)
                     {
                         Debug.LogError($"Blackboard {name} has multiple values with name \"{v.Name}\"");
                     }
