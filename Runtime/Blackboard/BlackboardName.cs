@@ -12,22 +12,22 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private string name;
+        private string _name;
 
         #endregion
 
         #region Properties
 
-        public string Name => name;
+        public string Name => _name;
 
         #endregion
 
         public override string ToString()
         {
-            return name;
+            return _name;
         }
 
-        public static implicit operator string(BlackboardName value) => Equals(value, null) || string.IsNullOrEmpty(value.name) ? string.Empty : value.name;
-        public static implicit operator BlackboardName(string value) => new BlackboardName() { name = value };
+        public static implicit operator string(BlackboardName value) => Equals(value, null) || string.IsNullOrEmpty(value._name) ? string.Empty : value._name;
+        public static implicit operator BlackboardName(string value) => new BlackboardName() { _name = value };
     }
 }

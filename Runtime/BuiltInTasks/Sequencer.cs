@@ -13,7 +13,7 @@ namespace Recstazy.BehaviourTree
     {
         #region Fields
 
-        private BranchPlayer branchPlayer;
+        private BranchPlayer _branchPlayer;
 
         #endregion
 
@@ -27,10 +27,10 @@ namespace Recstazy.BehaviourTree
 
             for (int i = 0; i < Connections.Count; i++)
             {
-                branchPlayer = PlayConnectedBranch(i);
-                yield return branchPlayer.WaitUntilFinished();
+                _branchPlayer = PlayConnectedBranch(i);
+                yield return _branchPlayer.WaitUntilFinished();
 
-                if (!branchPlayer.BranchSucceed)
+                if (!_branchPlayer.BranchSucceed)
                 {
                     allSucceed = false;
                     break;

@@ -9,25 +9,25 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private BehaviourPlayer player;
+        private BehaviourPlayer _player;
 
         [SerializeField]
-        private BlackboardValueMapping newValue;
+        private BlackboardValueMapping _newValue;
 
         [SerializeField]
-        private bool onStart;
+        private bool _onStart;
 
         #endregion
 
         #region Properties
 
-        public Blackboard Blackboard => player?.Blackboard;
+        public Blackboard Blackboard => _player?.Blackboard;
 
         #endregion
 
         private void Start()
         {
-            if (onStart)
+            if (_onStart)
             {
                 Execute();
             }
@@ -35,7 +35,10 @@ namespace Recstazy.BehaviourTree
 
         public void Execute()
         {
-            player?.Blackboard?.SetValue(newValue.BlackboardName, newValue.Value);
+            if (_player != null && Blackboard != null)
+            {
+                _player.Blackboard.SetValue(_newValue.BlackboardName, _newValue.Value);
+            }
         }
     }
 }

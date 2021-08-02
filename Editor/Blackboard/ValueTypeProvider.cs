@@ -12,8 +12,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private const float nameValueRatio = 0.4f;
-        private int currentEnumIndex = 0;
+        private const float NameValueRatio = 0.3f;
+        private int _currentEnumIndex = 0;
 
         #endregion
 
@@ -79,7 +79,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             CurrentType = Types[index];
             CurrentName = Names[index];
-            currentEnumIndex = index;
+            _currentEnumIndex = index;
         }
 
         public void OnGUI(Rect rect, string label = "")
@@ -87,19 +87,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Changed = false;
 
             var currentRect = rect;
-            currentRect.width *= nameValueRatio;
+            currentRect.width *= NameValueRatio;
             EditorGUI.LabelField(currentRect, string.IsNullOrEmpty(label) ? "Type" : label);
 
             currentRect.x += currentRect.width;
             currentRect.width = rect.width - currentRect.width;
-            int index = currentEnumIndex;
+            int index = _currentEnumIndex;
             index = EditorGUI.Popup(currentRect, index, Names);
 
-            if (index != currentEnumIndex)
+            if (index != _currentEnumIndex)
             {
                 CurrentName = Names[index];
                 CurrentType = Types[index];
-                currentEnumIndex = index;
+                _currentEnumIndex = index;
                 Changed = true;
             }
         }

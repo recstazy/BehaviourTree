@@ -11,10 +11,10 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private BlackboardName from;
+        private BlackboardName _from;
 
         [SerializeField]
-        private BlackboardName to;
+        private BlackboardName _to;
 
         #endregion
 
@@ -24,14 +24,14 @@ namespace Recstazy.BehaviourTree
 
         public override string GetDescription()
         {
-            return $"Copy {from} to {to}";
+            return $"Copy {_from} to {_to}";
         }
 
         protected override IEnumerator TaskRoutine()
         {
-            if (Blackboard.TryGetValue(from, out var value))
+            if (Blackboard.TryGetValue(_from, out var value))
             {
-                Blackboard.SetValue(to, value);
+                Blackboard.SetValue(_to, value);
             }
 
             yield return null;

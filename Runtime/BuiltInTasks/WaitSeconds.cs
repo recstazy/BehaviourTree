@@ -13,19 +13,19 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private float time = 2f;
+        private float _time = 2f;
 
         #endregion
 
         #region Properties
 
-        public float Time { get => time; set => time = value; }
+        public float Time { get => _time; set => _time = value; }
 
         #endregion
 
         public override string GetDescription()
         {
-            return $"Wait {time} seconds";
+            return $"Wait {_time} seconds";
         }
 
         protected override IEnumerator TaskRoutine()

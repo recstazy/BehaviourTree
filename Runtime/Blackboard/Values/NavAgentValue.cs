@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 namespace Recstazy.BehaviourTree
 {
-    public class NavAgentValue : ObjectValue<NavMeshAgent>
+    public class NavAgentValue : ComponentValue<NavMeshAgent>
     {
         public NavAgentValue() { }
         public NavAgentValue(NavMeshAgent value) : base(value) { }

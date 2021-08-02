@@ -8,7 +8,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private SerializedProperty bbProperty;
+        private SerializedProperty _bbProperty;
 
         #endregion
 
@@ -18,14 +18,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public override void OnInspectorGUI()
         {
-            bbProperty = serializedObject.FindProperty("blackboard");
+            _bbProperty = serializedObject.FindProperty("_blackboard");
             DrawBBProperty();
         }
 
         private void DrawBBProperty()
         {
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(bbProperty);
+            EditorGUILayout.PropertyField(_bbProperty);
 
             if (EditorGUI.EndChangeCheck())
             {

@@ -10,10 +10,10 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private bool succeedAll = true;
+        private bool _succeedAll = true;
 
         [SerializeField]
-        private bool succeedSelf = true;
+        private bool _succeedSelf = true;
 
         #endregion
 
@@ -23,17 +23,17 @@ namespace Recstazy.BehaviourTree
 
         public override string GetDescription()
         {
-            return $"{(succeedAll ? "Succeed" : "Fail")} all connected tasks";
+            return $"{(_succeedAll ? "Succeed" : "Fail")} all connected tasks";
         }
 
         protected override IEnumerator TaskRoutine()
         {
             foreach (var c in Connections)
             {
-                c?.ForceFinishTask(succeedAll);
+                c?.ForceFinishTask(_succeedAll);
             }
 
-            Succeed = succeedSelf;
+            Succeed = _succeedSelf;
             yield return null;
         }
 

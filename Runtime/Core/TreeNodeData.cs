@@ -11,25 +11,25 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeReference]
-        private BehaviourTask taskImplementation;
+        private BehaviourTask _taskImplementation;
 
         [SerializeField]
-        private Vector2 position;
+        private Vector2 _position;
 
         [SerializeField]
-        private int index;
+        private int _index;
 
         [SerializeField]
-        private TaskConnection[] connections;
+        private TaskConnection[] _connections;
 
         #endregion
 
         #region Properties
 
-        public BehaviourTask TaskImplementation { get => taskImplementation; internal set => taskImplementation = value; }
-        public int Index => index;
-        internal TaskConnection[] Connections { get => connections; set => connections = value; }
-        internal Vector2 Position { get => position; set => position = value; }
+        public BehaviourTask TaskImplementation { get => _taskImplementation; internal set => _taskImplementation = value; }
+        public int Index => _index;
+        internal TaskConnection[] Connections { get => _connections; set => _connections = value; }
+        internal Vector2 Position { get => _position; set => _position = value; }
 
         #endregion
 
@@ -40,14 +40,14 @@ namespace Recstazy.BehaviourTree
 
         public NodeData(int index, BehaviourTask taskImlpementation, params TaskConnection[] connections)
         {
-            this.index = index;
+            _index = index;
             TaskImplementation = taskImlpementation;
             SetConnections(connections);
         }
 
         public NodeData CreateCopy(bool copyTask)
         {
-            var data = new NodeData(index, TaskImplementation, Connections);
+            var data = new NodeData(_index, TaskImplementation, Connections);
 
             if (copyTask)
             {
@@ -60,7 +60,7 @@ namespace Recstazy.BehaviourTree
 
         public void OverrideIndex(int newIndex)
         {
-            index = newIndex;
+            _index = newIndex;
         }
 
         public void SetConnections(params TaskConnection[] connections)

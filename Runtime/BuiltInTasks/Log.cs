@@ -14,7 +14,7 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private string logString;
+        private string _logString;
 
         #endregion
 
@@ -24,12 +24,12 @@ namespace Recstazy.BehaviourTree
 
         public override string GetDescription()
         {
-            return $"Log: {logString}";
+            return $"Log: {_logString}";
         }
 
         protected override IEnumerator TaskRoutine()
         {
-            Debug.Log(logString);
+            Debug.Log(_logString);
             Succeed = true;
             yield return null;
         }

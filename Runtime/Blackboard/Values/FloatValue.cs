@@ -13,35 +13,35 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private float value;
+        private float _value;
 
         #endregion
 
         #region Properties
 
         public object MainValue => Value;
-        public float Value => value;
+        public float Value => _value;
 
         #endregion
 
         public FloatValue(float value)
         {
-            this.value = value;
+            _value = value;
         }
 
         public CompareResult Compare(ITypedValue other)
         {
             if (other is FloatValue otherFloat)
             {
-                if (value == otherFloat.value)
+                if (_value == otherFloat._value)
                 {
                     return CompareResult.Equal;
                 }
-                else if (value < otherFloat.value)
+                else if (_value < otherFloat._value)
                 {
                     return CompareResult.Less;
                 }
-                else if (value > otherFloat.value)
+                else if (_value > otherFloat._value)
                 {
                     return CompareResult.More;
                 }

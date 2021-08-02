@@ -8,7 +8,7 @@ namespace Recstazy.BehaviourTree
     /// Blackboard Rigidbody representation
     /// </summary>
     [System.Serializable]
-    public class RigidbodyValue : ObjectValue<Rigidbody>
+    public class RigidbodyValue : ComponentValue<Rigidbody>
     {
         public RigidbodyValue() { }
         public RigidbodyValue(Rigidbody value) : base(value) { }

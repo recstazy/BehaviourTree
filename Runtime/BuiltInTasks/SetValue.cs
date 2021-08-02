@@ -12,19 +12,19 @@ namespace Recstazy.BehaviourTree
     public class SetValue : BehaviourTask
     {
         [SerializeField]
-        private BlackboardName name;
+        private BlackboardName _name;
 
         [SerializeReference]
-        private ITypedValue newValue;
+        private ITypedValue _newValue;
 
         public override string GetDescription()
         {
-            return $"Set {name}";
+            return $"Set {_name}";
         }
 
         protected override IEnumerator TaskRoutine()
         {
-            Blackboard.SetValue(name, newValue);
+            Blackboard.SetValue(_name, _newValue);
             return base.TaskRoutine();
         }
     }

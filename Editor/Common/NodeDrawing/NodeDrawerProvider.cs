@@ -11,7 +11,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private static Dictionary<Type, Type> taskTypeToDrawer = new Dictionary<Type, Type>();
+        private static Dictionary<Type, Type> s_taskTypeToDrawer = new Dictionary<Type, Type>();
 
         #endregion
 
@@ -21,7 +21,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static void UpdateTaskDrawers()
         {
-            taskTypeToDrawer.Clear();
+            s_taskTypeToDrawer.Clear();
 
             var nodeDrawerTypes = Assembly.GetAssembly(typeof(BehaviourTreeNode)).GetTypes()
                 .Where(t => t.IsSubclassOf(typeof(BehaviourTreeNode)))
@@ -34,9 +34,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 foreach (var a in attributes)
                 {
-                    if (a.TaskType != null && !taskTypeToDrawer.ContainsKey(a.TaskType))
+                    if (a.TaskType != null && !s_taskTypeToDrawer.ContainsKey(a.TaskType))
                     {
-                        taskTypeToDrawer.Add(a.TaskType, drawerType);
+                        s_taskTypeToDrawer.Add(a.TaskType, drawerType);
                     }
                 }
             }
@@ -46,7 +46,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (data?.TaskImplementation != null)
             {
-                if (taskTypeToDrawer.TryGetValue(data.TaskImplementation.GetType(), out var drawerType))
+                if (s_taskTypeToDrawer.TryGetValue(data.TaskImplementation.GetType(), out var drawerType))
                 {
                     return Activator.CreateInstance(drawerType, data) as BehaviourTreeNode;
                 }
