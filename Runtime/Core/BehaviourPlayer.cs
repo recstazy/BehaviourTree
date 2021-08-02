@@ -18,7 +18,7 @@ namespace Recstazy.BehaviourTree
         private BehaviourTree _tree;
 
         [SerializeField]
-        private bool _playOnAwake = true;
+        private bool _playOnAwake;
 
         [Header("Set blackboard scene references here")]
         [SerializeField]
