@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Recstazy.BehaviourTree
 {
@@ -17,9 +18,15 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private TypedValue[] values;
+        private TypedValue[] _values;
 
-        private static readonly string[] emptyNames = new string[0];
+        private static readonly string[] _emptyNames = new string[0];
+        private static readonly string[] _reservedNames = new string[]
+        {
+            "GameObject",
+            "Transform",
+            "NavAgent"
+        };
 
         #endregion
 
@@ -28,34 +35,33 @@ namespace Recstazy.BehaviourTree
         /// <summary>Currently available variables, only exists in runtime.</summary>
         public Dictionary<string, ITypedValue> Values { get; private set; }
 
+        public Transform Transform { get; private set; }
+        public GameObject GameObject { get; private set; }
+        public NavMeshAgent NavAgent { get; private set; }
+
         #endregion
+
+#if UNITY_EDITOR
+
+        private void OnValidate()
+        {
+            UpdateValuesDictionary();
+        }
+
+#endif
 
         /// <summary>Get the variable corresponding to the name, including editor</summary>
         /// <returns>Returns false if there's no value with this name</returns>
         public bool TryGetValue(string name, out ITypedValue value)
         {
-            if (Application.isPlaying)
-            {
-                return TryGetValueRuntime(name, out value);
-            }
-            else
-            {
-                return TryGetValueEditor(name, out value);
-            }
+            return TryGetValueRuntime(name, out value);
         }
 
         /// <summary>Get the variable corresponding to the name and try cast it to T, including editor</summary>
         /// <returns>Returns false if there's no value with this name or cast was unsuccessful</returns>
         public bool TryGetValue<T>(string name, out T value)
         {
-            if (Application.isPlaying)
-            {
-                return TryGetValueRuntime(name, out value);
-            }
-            else
-            {
-                return TryGetValueEditor(name, out value);
-            }
+            return TryGetValueRuntime(name, out value);
         }
 
         /// <summary>Set value by name, works only in runtime</summary>
@@ -113,51 +119,61 @@ namespace Recstazy.BehaviourTree
             return false;
         }
 
-        private bool TryGetValueEditor(string name, out ITypedValue value)
-        {
-            if (values.Length > 0)
-            {
-                var bbValue = values.FirstOrDefault(v => v.Name == name);
-
-                if (bbValue != null)
-                {
-                    value = bbValue.Value;
-                    return true;
-                }
-            }
-
-            value = null;
-            return false;
-        }
-
-        private bool TryGetValueEditor<T>(string name, out T value)
-        {
-            if (values.Length > 0)
-            {
-                if (TryGetValueEditor(name, out var bbValue))
-                {
-                    if (bbValue is T tValue)
-                    {
-                        value = tValue;
-                        return true;
-                    }
-                }
-            }
-
-            value = default;
-            return false;
-        }
-
         [RuntimeInstanced]
-        internal void InitializeAtRuntime()
+        internal void InitializeAtRuntime(GameObject gameObject)
         {
-            Values = new Dictionary<string, ITypedValue>();
+            GameObject = gameObject;
+            Transform = gameObject.transform;
+            NavAgent = gameObject.GetComponentInChildren<NavMeshAgent>();
+            UpdateValuesDictionary();
+        }
 
-            foreach (var v in values)
+        internal void UpdateValuesDictionary()
+        {
+            Values = new Dictionary<string, ITypedValue>()
+            {
+                { _reservedNames[0], new GameObjectValue(GameObject) },
+                { _reservedNames[1], new TransformValue(Transform) },
+                { _reservedNames[2], new NavAgentValue(NavAgent) }
+            };
+
+            foreach (var v in _values)
             {
                 if (Values.ContainsKey(v.Name))
                 {
-                    Debug.LogError($"Blackboard {name} has multiple values with name {v.Name}, skipping duplications...");
+                    if (Application.isPlaying)
+                    {
+                        Debug.LogError($"Blackboard {name} has multiple values with name \"{v.Name}\"");
+                    }
+#if UNITY_EDITOR
+                    else
+                    {
+                        string valueName = v.Name;
+                        var nameSplitted = v.Name.Split(' ');
+
+                        if (nameSplitted.Length > 1)
+                        {
+                            if (int.TryParse(nameSplitted[nameSplitted.Length - 1], out var index))
+                            {
+                                valueName = v.Name.Replace($" {nameSplitted[nameSplitted.Length - 1]}", "");
+                            }
+                        }
+
+                        var nameIndices = _values.Where(value => value.Name.Contains(valueName)).Select(value => value.Name.Replace($"{valueName} ", "")).ToArray();
+                        int maxIndex = 0;
+
+                        foreach (var i in nameIndices)
+                        {
+                            if (int.TryParse(i, out var index))
+                            {
+                                maxIndex = Mathf.Max(index, maxIndex);
+                            }
+                        }
+
+                        v.ChangeName($"{valueName} {maxIndex + 1}");
+                        UnityEditor.EditorUtility.SetDirty(this);
+                    }
+#endif
                 }
                 else
                 {
@@ -168,41 +184,23 @@ namespace Recstazy.BehaviourTree
 
         internal string[] GetNames()
         {
-            if (values != null && values.Length > 0)
+            if (Values != null && Values.Count > 0)
             {
-                return values.Where(v => !string.IsNullOrEmpty(v?.Name)).Select(v => v.Name).ToArray();
+                return Values.Where(v => !string.IsNullOrEmpty(v.Key)).Select(v => v.Key).ToArray();
             }
 
-            return emptyNames;
+            return _emptyNames;
         }
 
         internal string[] GetNamesTyped(params Type[] compatableTypes)
         {
-            if (values != null && values.Length > 0 && compatableTypes != null && compatableTypes.Length > 0)
+            if (compatableTypes != null && compatableTypes.Length > 0)
             {
-                return values.Where(v => !string.IsNullOrEmpty(v?.Name) && v?.Value != null && compatableTypes.Contains(v.Value.GetType())).Select(v => v.Name).ToArray();
+                var names = GetNames();
+                return names.Where(n => compatableTypes.Contains(Values[n].GetType())).ToArray();
             }
 
-            return emptyNames;
-        }
-
-        internal void AddNameInEditor(string name)
-        {
-            var value = new TypedValue(name, null);
-            AddValueInEditor(value);
-        }
-
-        internal void AddValueInEditor(TypedValue value)
-        {
-            if (value is null) return;
-            
-            foreach (var v in values)
-            {
-                if (v?.Name == value.Name) return;
-            }
-
-            System.Array.Resize(ref values, values.Length + 1);
-            values[values.Length - 1] = value;
+            return _emptyNames;
         }
     }
 

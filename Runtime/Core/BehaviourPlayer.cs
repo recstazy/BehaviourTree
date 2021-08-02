@@ -15,18 +15,19 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private BehaviourTree tree;
+        private BehaviourTree _tree;
 
         [SerializeField]
-        private bool playOnAwake;
+        private bool _playOnAwake;
 
         [Header("Set blackboard scene references here")]
         [SerializeField]
-        private List<BlackboardValueMapping> setOnStart;
+        private List<BlackboardValueMapping> _setOnStart;
 
-        private BranchPlayer treePlayer;
-        private Coroutine playRoutine;
-        private CoroutineRunner coroutineRunner;
+        private BranchPlayer _treePlayer;
+        private Coroutine _playRoutine;
+        private CoroutineRunner _coroutineRunner;
+        private Blackboard _lastBlackboard;
 
         #endregion
 
@@ -36,9 +37,9 @@ namespace Recstazy.BehaviourTree
         public BehaviourTree Tree { get; private set; }
 
         /// <summary> Actual tree asset </summary>
-        public BehaviourTree SharedTree => tree;
+        public BehaviourTree SharedTree => _tree;
 
-        public bool IsPlaying => playRoutine != null;
+        public bool IsPlaying => _playRoutine != null;
         public BehaviourTask CurrentTask { get; private set; }
         public Blackboard Blackboard => Application.isPlaying ? Tree?.Blackboard : SharedTree?.Blackboard;
 
@@ -46,16 +47,16 @@ namespace Recstazy.BehaviourTree
 
         private void Reset()
         {
-            playOnAwake = true;
+            _playOnAwake = true;
         }
 
         private void Awake()
         {
-            coroutineRunner = gameObject.AddComponent<CoroutineRunner>();
+            _coroutineRunner = gameObject.AddComponent<CoroutineRunner>();
 
-            if (playOnAwake)
+            if (_playOnAwake)
             {
-                Initialize(tree);
+                Initialize(_tree);
                 Play();
             }
 
@@ -82,11 +83,11 @@ namespace Recstazy.BehaviourTree
         public void Initialize(BehaviourTree tree)
         {
             Clear();
-            this.tree = tree;
-            Tree = this.tree?.CreateRuntimeImplementation(coroutineRunner);
+            this._tree = tree;
+            Tree = this._tree?.CreateRuntimeImplementation(_coroutineRunner);
             if (Tree is null) return;
 
-            foreach (var value in setOnStart)
+            foreach (var value in _setOnStart)
             {
                 Tree.Blackboard.SetValue(value.BlackboardName, value.Value);
             }
@@ -111,39 +112,27 @@ namespace Recstazy.BehaviourTree
             {
                 if (!IsPlaying && Tree != null)
                 {
-                    treePlayer = new BranchPlayer(Tree.EntryNode?.TaskImplementation);
-                    playRoutine = StartCoroutine(PlayRoutine());
+                    _treePlayer = new BranchPlayer(Tree.EntryNode?.TaskImplementation);
+                    _playRoutine = StartCoroutine(PlayRoutine());
                 }
             }
             else
             {
                 if (IsPlaying)
                 {
-                    StopCoroutine(playRoutine);
-                    playRoutine = null;
-                    treePlayer = null;
+                    StopCoroutine(_playRoutine);
+                    _playRoutine = null;
+                    _treePlayer = null;
                 }
             }
-        }
-
-        internal void FetchCommonValues()
-        {
-            var mapping = new BlackboardValueMapping(CommonNames.GameObject, new GameObjectValue(gameObject));
-            AddOrSetToSetOnStart(mapping);
-            mapping = new BlackboardValueMapping(CommonNames.Transform, new TransformValue(transform));
-            AddOrSetToSetOnStart(mapping);
-            mapping = new BlackboardValueMapping(CommonNames.Rigidbody, new RigidbodyValue(GetComponentInChildren<Rigidbody>(true)));
-            AddOrSetToSetOnStart(mapping, true);
-            mapping = new BlackboardValueMapping(CommonNames.NavAgent, new NavAgentValue(GetComponentInChildren<UnityEngine.AI.NavMeshAgent>(true)));
-            AddOrSetToSetOnStart(mapping);
         }
 
         private IEnumerator PlayRoutine()
         {
             while(true)
             {
-                treePlayer.Start();
-                yield return new WaitUntil(() => !treePlayer.IsRunning);
+                _treePlayer.Start();
+                yield return new WaitUntil(() => !_treePlayer.IsRunning);
                 yield return null;
             }
         }
@@ -159,53 +148,6 @@ namespace Recstazy.BehaviourTree
             {
                 Destroy(Tree);
                 Tree = null;
-            }
-        }
-
-        private int SetOnStartIndexByName(string name)
-        {
-            for (int i = 0; i < setOnStart.Count; i++)
-            {
-                if (setOnStart[i] != null && setOnStart[i].BlackboardName == name)
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-
-        private void AddOrSetToSetOnStart(BlackboardValueMapping mapping, bool removeNull = false)
-        {
-            int index = SetOnStartIndexByName(mapping.BlackboardName);
-
-            if (mapping.Value.Compare(null) == CompareResult.Equal)
-            {
-                if (removeNull)
-                {
-                    if (index >= 0)
-                    {
-                        setOnStart.RemoveAt(index);
-                    }
-                }
-
-                return;
-            }
-
-            if (index >= 0)
-            {
-                setOnStart[index] = mapping;
-            }
-            else
-            {
-                bool blackboardContainsName = Array.IndexOf(SharedTree.Blackboard.GetNames(), mapping.BlackboardName) >= 0;
-
-                if (!blackboardContainsName)
-                {
-                    SharedTree.Blackboard.AddNameInEditor(mapping.BlackboardName);
-                }
-                
-                setOnStart.Add(mapping);
             }
         }
     }

@@ -15,10 +15,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private const float RowHeight = 20f;
         private const float ChildLeftPadding = 0f;
 
-        private Rect rect;
-        private SerializedProperty property;
-        private ValueTypeProvider typeProvider;
-        private GUIContent label;
+        private Rect _rect;
+        private SerializedProperty _property;
+        private ValueTypeProvider _typeProvider;
 
         #endregion
 
@@ -34,9 +33,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            rect = position;
-            this.property = property;
-            this.label = label;
+            _rect = position;
+            _property = property;
 
             if (property.propertyType == SerializedPropertyType.ManagedReference)
             {
@@ -51,39 +49,39 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void DrawType()
         {
-            if (typeProvider is null)
+            if (_typeProvider is null)
             {
-                typeProvider = new ValueTypeProvider(property.managedReferenceFullTypename);
+                _typeProvider = new ValueTypeProvider(_property.managedReferenceFullTypename);
             }
 
-            var currentRect = rect;
+            var currentRect = _rect;
             currentRect.height = RowHeight;
-            typeProvider.OnGUI(currentRect, label.text);
+            _typeProvider.OnGUI(currentRect);
 
-            if (typeProvider.Changed)
+            if (_typeProvider.Changed)
             {
                 ITypedValue newValue = null;
 
-                if (typeProvider.CurrentType != null)
+                if (_typeProvider.CurrentType != null)
                 {
-                    newValue = Activator.CreateInstance(typeProvider.CurrentType) as ITypedValue;
+                    newValue = Activator.CreateInstance(_typeProvider.CurrentType) as ITypedValue;
                 }
 
-                typeProvider = null;
-                property.managedReferenceValue = newValue;
+                _typeProvider = null;
+                _property.managedReferenceValue = newValue;
             }
         }
 
         private void DrawValue()
         {
-            var currentRect = rect;
+            var currentRect = _rect;
             currentRect.y += RowHeight;
             currentRect.height = RowHeight;
             currentRect.x += ChildLeftPadding;
             currentRect.width -= ChildLeftPadding;
 
-            var propCopy = property.Copy();
-            var nextPropInThisParent = property.Copy();
+            var propCopy = _property.Copy();
+            var nextPropInThisParent = _property.Copy();
             nextPropInThisParent.Next(false);
 
             if (propCopy.Next(true))

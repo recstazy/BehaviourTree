@@ -66,7 +66,7 @@ namespace Recstazy.BehaviourTree
         private void InitializeRuntime(CoroutineRunner coroutineRunner)
         {
             blackboard = Instantiate(blackboard);
-            blackboard.InitializeAtRuntime();
+            blackboard.InitializeAtRuntime(coroutineRunner.gameObject);
             var runtimeNodeData = nodeData.Data;
 
             for (int i = 0; i < runtimeNodeData.Length; i++)
