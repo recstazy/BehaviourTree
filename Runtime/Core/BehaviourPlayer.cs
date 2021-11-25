@@ -20,10 +20,6 @@ namespace Recstazy.BehaviourTree
         [SerializeField]
         private bool _playOnAwake;
 
-        [Header("Set blackboard scene references here")]
-        [SerializeField]
-        private List<BlackboardValueMapping> _setOnStart;
-
         private BranchPlayer _treePlayer;
         private Coroutine _playRoutine;
         private CoroutineRunner _coroutineRunner;
@@ -86,11 +82,6 @@ namespace Recstazy.BehaviourTree
             if (_tree == null) return;
 
             Tree = _tree?.CreateRuntimeImplementation(_coroutineRunner);
-
-            foreach (var value in _setOnStart)
-            {
-                Tree.Blackboard.SetValue(value.BlackboardName, value.Value);
-            }
         }
 
         /// <summary> Play tree from start </summary>

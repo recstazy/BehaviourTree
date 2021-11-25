@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    public interface IGameObjectProvider
-    {
-        GameObject gameObject { get; }
-    }
+    [System.Serializable]
+    public class BlackboardSetter : BlackboardName { }
 }

@@ -29,9 +29,9 @@ namespace Recstazy.BehaviourTree
 
         protected override IEnumerator TaskRoutine()
         {
-            if (Blackboard.TryGetValue(_from, out var value))
+            if (Blackboard.TryGetValue(_from, out object value))
             {
-                Blackboard.SetValue(_to, value);
+                Blackboard.TrySetValue(_to, value);
             }
 
             yield return null;

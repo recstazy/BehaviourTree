@@ -11,7 +11,7 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private BlackboardName _name;
+        private BlackboardSetter _name;
 
         #endregion
 
@@ -26,7 +26,7 @@ namespace Recstazy.BehaviourTree
 
         protected override IEnumerator TaskRoutine()
         {
-            Blackboard.SetValue(_name, null);
+            Blackboard.ClearValue(_name);
             yield return null;
         }
     }

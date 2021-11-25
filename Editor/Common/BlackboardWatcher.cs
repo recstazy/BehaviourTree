@@ -98,54 +98,35 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void DrawBlackboardImmediate(Blackboard blackboard)
         {
             EditorGUILayout.LabelField("Blackboard Properties:");
-            if (blackboard?.Values is null) return;
+            if (blackboard == null || !blackboard.ArePropertiesBound) return;
 
+            var bindable = blackboard.GetBindableProperties().Where(prop => prop.GetCustomAttribute<HideInWatcherAttribute>() == null).ToArray();
             EditorGUILayout.Space();
 
-            foreach (var key in blackboard.Values.Keys)
+            foreach (var propertyInfo in bindable)
             {
-                var value = blackboard.Values[key];
-                if (value is null) continue;
+                EditorGUILayout.LabelField(ObjectNames.NicifyVariableName(propertyInfo.Name), _nameDrawStyle, GUILayout.ExpandWidth(true));
+                var value = propertyInfo.GetValue(blackboard);
 
-                var valueType = value.GetType();
-                IEnumerable<FieldInfo> fields = new List<FieldInfo>();
+                string valueString;
 
-                while(valueType != null && valueType != typeof(object))
+                if (value == null)
                 {
-                    fields = fields.Concat(valueType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
-                    valueType = valueType.BaseType;
+                    valueString = NoneCaption;
+                }
+                else if (value is Object objectValue)
+                {
+                    valueString = objectValue != null ? objectValue.name : NoneCaption;
+                }
+                else
+                {
+                    valueString = value != null ? value.ToString() : NoneCaption;
                 }
 
-                var exposedFields = fields.ToArray();
-                if (exposedFields.Length == 0) continue;
-
-                EditorGUILayout.LabelField(ObjectNames.NicifyVariableName(key), _nameDrawStyle, GUILayout.ExpandWidth(true));
-
-                for (int i = 0; i < exposedFields.Length; i++)
-                {
-                    var fieldInfo = exposedFields[i];
-                    var valueExposed = fieldInfo.GetValue(value);
-
-                    string valueString;
-
-                    if (valueExposed is null)
-                    {
-                        valueString = NoneCaption;
-                    }
-                    else if (valueExposed is Object objectValue)
-                    {
-                        valueString = objectValue != null ? objectValue.name : NoneCaption;
-                    }
-                    else
-                    {
-                        valueString = valueExposed != null ? valueExposed.ToString() : NoneCaption;
-                    }
-
-                    EditorGUILayout.BeginHorizontal();
-                    GUILayout.Box("", GUILayout.Width(ValueLeftPadding));
-                    EditorGUILayout.LabelField($"{ObjectNames.NicifyVariableName(fieldInfo.Name)} = {valueString}", _valueDrawStyle, GUILayout.ExpandWidth(true));
-                    EditorGUILayout.EndHorizontal();
-                }
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Box("", GUILayout.Width(ValueLeftPadding));
+                EditorGUILayout.LabelField($"{ObjectNames.NicifyVariableName(propertyInfo.Name)} = {valueString}", _valueDrawStyle, GUILayout.ExpandWidth(true));
+                EditorGUILayout.EndHorizontal();
 
                 EditorGUILayout.Space(10f);
             }
