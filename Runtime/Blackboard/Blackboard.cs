@@ -70,7 +70,7 @@ namespace Recstazy.BehaviourTree
             }
         }
 
-        public bool IsValueSet(string valueName)
+        public bool IsValueSetAndNotNull(string valueName)
         {
             if (TryGetValue(valueName, out var value))
             {
