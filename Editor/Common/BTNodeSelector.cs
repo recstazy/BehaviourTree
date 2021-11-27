@@ -150,6 +150,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 SetMouseUp(mouseUpNode, node is null ? -1 : node.Index);
                 SetMouseClick(clickedNodeListIndex, clickedNodeListIndex >= 0 ? node.Index : -1);
             }
+            else
+            {
+                foreach (var n in Selection)
+                {
+                    _nodes[n].EndDrag();
+                }
+            }
             
             if (_isDraggingMouse)
             {
@@ -177,6 +184,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     UpdateNodesSelection(MouseDownNodeListIndex);
                 }
 
+                _isDraggingNodes = true;
                 DragSelected(delta);
             }
             else

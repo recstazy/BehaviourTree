@@ -29,7 +29,7 @@ namespace Recstazy.BehaviourTree
         public BehaviourTask TaskImplementation { get => _taskImplementation; internal set => _taskImplementation = value; }
         public int Index => _index;
         internal TaskConnection[] Connections { get => _connections; set => _connections = value; }
-        internal Vector2 Position { get => _position; set => _position = value; }
+        internal Vector2 CenterPosition { get => _position; set => _position = value; }
 
         #endregion
 
@@ -54,7 +54,7 @@ namespace Recstazy.BehaviourTree
                 data.TaskImplementation = TaskImplementation?.CreateShallowCopy();
             }
             
-            data.Position = Position;
+            data.CenterPosition = CenterPosition;
             return data;
         }
 

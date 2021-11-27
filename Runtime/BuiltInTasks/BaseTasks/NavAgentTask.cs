@@ -14,10 +14,6 @@ namespace Recstazy.BehaviourTree
     {
         #region Fields
 
-        [SerializeField]
-        [ValueType(typeof(NavAgentValue))]
-        protected BlackboardName _navAgent = CommonNames.NavAgent;
-
         #endregion
 
         #region Properties
@@ -26,12 +22,9 @@ namespace Recstazy.BehaviourTree
 
         protected override IEnumerator TaskRoutine()
         {
-            if (Blackboard.TryGetValue<NavAgentValue>(_navAgent, out var navAgentValue))
+            if (Blackboard.NavAgent != null)
             {
-                if (navAgentValue != null && navAgentValue.Value != null)
-                {
-                    yield return NavAgentTaskRoutine(navAgentValue.Value);
-                }
+                yield return NavAgentTaskRoutine(Blackboard.NavAgent);
             }
 
             yield return null;

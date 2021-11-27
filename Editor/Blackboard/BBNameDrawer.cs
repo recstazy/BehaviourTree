@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    [CustomPropertyDrawer(typeof(BlackboardName))]
+    [CustomPropertyDrawer(typeof(BlackboardName), true)]
     internal class BBNameDrawer : PropertyDrawer
     {
         #region Fields
@@ -32,9 +32,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _rect = position;
             _property = property;
             _label = label;
-            _currentBB = GetBlackboard();
 
-            if (_currentBB is null)
+            if (!property.serializedObject.targetObject.TryGetBlackboard(out _currentBB))
             {
                 EditorGUI.LabelField(_rect, "[No blackboard]");
             }
@@ -55,7 +54,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             var valueTypings = fieldInfo.GetCustomAttributes(typeof(ValueTypeAttribute), true) as ValueTypeAttribute[];
             bool hasTyping = valueTypings != null && valueTypings.Length > 0;
-            string[] names = hasTyping ? _currentBB.GetNamesTyped(valueTypings[0].CompatableTypes) : _currentBB.GetNames();
+            BlackboardProperty propType = _property.type.Contains("Setter") ? BlackboardProperty.Setter : BlackboardProperty.Getter;
+            string[] names = hasTyping ? _currentBB.GetNamesTyped(propType, valueTypings[0].CompatableTypes) : _currentBB.GetNames(propType);
 
             if (names != null && names.Length > 0)
             {
@@ -71,25 +71,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 string message = hasTyping ? "No Compatable value" : "Blackboard Empty";
                 EditorGUI.LabelField(rect, $"[{message}]");
             }
-        }
-
-        private Blackboard GetBlackboard()
-        {
-            var sObject = _property.serializedObject;
-
-            if (sObject.targetObject is IBlackboardProvider bbProvider)
-            {
-                return bbProvider.Blackboard;
-            }
-            else if (sObject.targetObject is Component component)
-            {
-                if (component.TryGetComponent<IBlackboardProvider>(out var provider))
-                {
-                    return provider.Blackboard;
-                }
-            }
-
-            return null;
         }
     }
 }

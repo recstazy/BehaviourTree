@@ -66,7 +66,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private int GetIndexOfTask(BehaviourTask taskImpl)
         {
-            if (taskImpl is null) return 0;
+            if (taskImpl == null) return 0;
             return System.Array.IndexOf(TaskFactory.NamesEditor, taskImpl.GetType().Name);
         }
     }
