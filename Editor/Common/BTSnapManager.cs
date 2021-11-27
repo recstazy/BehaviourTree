@@ -19,9 +19,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static Vector2 RoundToSnap(Vector2 vector)
         {
-            var newX = Mathf.RoundToInt(vector.x / GridSize) * GridSize;
-            var newY = Mathf.RoundToInt(vector.y / GridSize) * GridSize;
-            return new Vector2(newX, newY);
+            return new Vector2(RoundToSnap(vector.x), RoundToSnap(vector.y));
+        }
+
+        public static float RoundToSnap(float value)
+        {
+            return Mathf.Round(value / GridSize) * GridSize;
         }
     }
 }
