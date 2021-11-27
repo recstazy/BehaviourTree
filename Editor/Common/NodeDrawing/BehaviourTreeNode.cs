@@ -69,6 +69,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             _mainRect.size = Size;
             var rect = _mainRect;
+
+            if (BTSnapManager.SnapEnabled)
+            {
+                var newPosition = BTSnapManager.RoundToSnap(rect.center) - rect.size * 0.5f;
+                rect.position = newPosition;
+            }
+
             rect.position -= EditorZoomer.ContentOffset;
             return rect;
         }
@@ -211,7 +218,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
 
                 var height = Mathf.Max(s_minSize.y, HeaderHeight + descriptionSize.y + HeightPadding * 2f);
-                return new Vector2(width, height);
+                var size = new Vector2(width, height);
+                return size;
             }
 
             return s_minSize;
