@@ -22,10 +22,13 @@ namespace Recstazy.BehaviourTree
 
         [System.NonSerialized]
         private Blackboard _blackboard;
+
         private Coroutine _taskBodyRoutine;
         private bool _taskBodyIsRunning;
         private HashSet<Coroutine> _currentTaskCoroutines = new HashSet<Coroutine>();
         private HashSet<BranchPlayer> _currentTaskBranches = new HashSet<BranchPlayer>();
+
+        protected static readonly Color s_DefaultColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
 
         #endregion
 
@@ -39,6 +42,7 @@ namespace Recstazy.BehaviourTree
 
         public bool IsRunning { get; private set; }
         public Blackboard Blackboard { get => GetBlackboard(); set => SetBlackboard(value); }
+        protected virtual Color Color => s_DefaultColor;
 
         internal int LastReturnedOut { get; private set; }
         internal CoroutineRunner CoroutineRunner { get; private set; }
@@ -218,6 +222,11 @@ namespace Recstazy.BehaviourTree
             }
 
             return copy as BehaviourTask;
+        }
+
+        internal Color GetColor()
+        {
+            return Color;
         }
 
         [RuntimeInstanced]

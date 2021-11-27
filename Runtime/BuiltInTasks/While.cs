@@ -11,9 +11,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
+        private static readonly Color s_backColor = new Color(0.1f, 0.05f, 0.15f, 0.5f);
+
         #endregion
 
         #region Properties
+
+        protected override Color Color => s_backColor;
 
         #endregion
 
