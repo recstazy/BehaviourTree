@@ -5,35 +5,40 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    public enum BlackboardProperty { Getter = 0, Setter = 1 }
+    public enum BlackboardProperty { GetterOrSetter = 0, Getter = 1, Setter = 2 }
 
     internal static class BlackboardExtensions
     {
         private static readonly string[] s_emptyNames = new string[0];
 
-        internal static bool Includes(this BlackboardProperty mask, BlackboardProperty type)
+        internal static bool IncludesGetter(this BlackboardProperty type)
         {
-            return (mask & type) == type;
+            return type == BlackboardProperty.Getter || type == BlackboardProperty.GetterOrSetter;
+        }
+
+        internal static bool IncludesSetter(this BlackboardProperty type)
+        {
+            return type == BlackboardProperty.Setter || type == BlackboardProperty.GetterOrSetter;
         }
 
         internal static string[] GetNames(this Blackboard blackboard, BlackboardProperty typeMask)
         {
             if (blackboard == null || blackboard.GetterValues == null || blackboard.SetterValues == null) return s_emptyNames;
-            IEnumerable<string> namesResult = new string[0];
+            string[] namesResult = new string[0];
 
-            if (typeMask.Includes(BlackboardProperty.Getter))
+            if (typeMask.IncludesGetter())
             {
                 var names = blackboard.GetterValues.Keys.Where(key => !string.IsNullOrEmpty(key));
-                namesResult = namesResult.Concat(names);
+                namesResult = namesResult.Concat(names).ToArray();
             }
 
-            if (typeMask.Includes(BlackboardProperty.Setter))
+            if (typeMask.IncludesSetter())
             {
-                var names = blackboard.SetterValues.Keys.Where(key => !string.IsNullOrEmpty(key));
-                namesResult = namesResult.Concat(names);
+                var names = blackboard.SetterValues.Keys.Where(key => !string.IsNullOrEmpty(key) && !namesResult.Contains(key));
+                namesResult = namesResult.Concat(names).ToArray();
             }
 
-            return namesResult.ToArray();
+            return namesResult;
         }
 
         internal static string[] GetNamesTyped(this Blackboard blackboard, BlackboardProperty typeMask, params Type[] compatableTypes)
@@ -47,14 +52,14 @@ namespace Recstazy.BehaviourTree
                 {
                     Type type = null;
 
-                    if (typeMask.Includes(BlackboardProperty.Getter))
+                    if (typeMask.IncludesGetter())
                     {
                         if (blackboard.GetterValues.TryGetValue(n, out var getAccessor))
                         {
                             type = getAccessor.PropertyType;
                         }
                     }
-                    else if (typeMask.Includes(BlackboardProperty.Setter))
+                    else if (typeMask.IncludesSetter())
                     {
                         if (blackboard.SetterValues.TryGetValue(n, out var setAccessor))
                         {
