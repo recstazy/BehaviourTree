@@ -4,10 +4,10 @@ using System;
 namespace Recstazy.BehaviourTree
 {
     /// <summary>
-    /// Use this to show blackboard name selector in editor
+    /// Base type of variable name defined in blackboard. 
+    /// Use BlackboardGetter and BlackboardSetter to define property name which has "get" or "set" accessor
     /// </summary>
-    [Serializable]
-    public class BlackboardName
+    public abstract class BlackboardName
     {
         #region Fields
 

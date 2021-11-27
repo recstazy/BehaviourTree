@@ -39,10 +39,10 @@ namespace Recstazy.BehaviourTree
         public GameObject GameObject { get; private set; }
         public NavMeshAgent NavAgent { get; private set; }
 
-        [HideInWatcher]
+        [HideInTree]
         public bool ArePropertiesBound => _getters != null && _setters != null;
 
-        [HideInWatcher]
+        [HideInTree]
         public IReadOnlyDictionary<string, PropertyAccessor<Func<object>>> GetterValues
         {
             get
@@ -56,7 +56,7 @@ namespace Recstazy.BehaviourTree
             }
         }
 
-        [HideInWatcher]
+        [HideInTree]
         public IReadOnlyDictionary<string, PropertyAccessor<Action<object>>> SetterValues
         {
             get
@@ -214,7 +214,12 @@ namespace Recstazy.BehaviourTree
         internal PropertyInfo[] GetBindableProperties()
         {
             var bindableProperties = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.SetProperty);
-            bindableProperties = bindableProperties.Where(p => typeof(Blackboard).IsAssignableFrom(p.DeclaringType) && !p.GetIndexParameters().Any()).ToArray();
+
+            bindableProperties = bindableProperties
+                .Where(p => typeof(Blackboard).IsAssignableFrom(p.DeclaringType) && !p.GetIndexParameters().Any())
+                .Where(p => p.GetCustomAttribute<HideInTreeAttribute>() == null)
+                .ToArray();
+
             return bindableProperties;
         }
     }

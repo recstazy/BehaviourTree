@@ -4,7 +4,7 @@ using System;
 namespace Recstazy.BehaviourTree
 {
     /// <summary>
-    /// Use on BlackboardName to limit compatable types of blackboard value
+    /// Use on BlackboardName to constraint compatable types of blackboard property
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public class ValueTypeAttribute : PropertyAttribute

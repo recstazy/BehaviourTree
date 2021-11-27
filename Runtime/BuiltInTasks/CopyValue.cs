@@ -11,10 +11,10 @@ namespace Recstazy.BehaviourTree
         #region Fields
 
         [SerializeField]
-        private BlackboardName _from;
+        private BlackboardGetter _from;
 
         [SerializeField]
-        private BlackboardName _to;
+        private BlackboardSetter _to;
 
         #endregion
 

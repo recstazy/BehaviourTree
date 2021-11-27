@@ -100,7 +100,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             EditorGUILayout.LabelField("Blackboard Properties:");
             if (blackboard == null || !blackboard.ArePropertiesBound) return;
 
-            var bindable = blackboard.GetBindableProperties().Where(prop => prop.GetCustomAttribute<HideInWatcherAttribute>() == null).ToArray();
+            var bindable = blackboard.GetBindableProperties().ToArray();
             EditorGUILayout.Space();
 
             foreach (var propertyInfo in bindable)

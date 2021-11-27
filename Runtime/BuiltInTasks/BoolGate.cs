@@ -15,7 +15,7 @@ namespace Recstazy.BehaviourTree
 
         [SerializeField]
         [ValueType(typeof(bool))]
-        private BlackboardName _valueName;
+        private BlackboardGetter _valueName;
 
         #endregion
 
