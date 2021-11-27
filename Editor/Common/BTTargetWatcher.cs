@@ -53,7 +53,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private static void UpdatePlayers()
         {
             s_allPlayers = new BehaviourPlayer[1].Concat(Object.FindObjectsOfType<BehaviourPlayer>()).ToArray();
-            s_playersNames = s_allPlayers.Select(a => a is null ? "Empty" : a.gameObject.name).ToArray();
+            s_playersNames = s_allPlayers.Select(a => a == null ? "Empty" : a.gameObject.name).ToArray();
 
             if (CurrentPlayer != null)
             {
@@ -131,7 +131,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     ChangeTarget(newIndex);
                 }
 
-                if (s_currentIndex != 0 && Current?.Tree is null)
+                if (s_currentIndex != 0 && Current?.Tree == null)
                 {
                     currentRect.x += currentRect.width;
                     currentRect.width = NoTreeWidth;
