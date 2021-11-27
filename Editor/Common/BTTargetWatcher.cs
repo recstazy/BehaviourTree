@@ -16,7 +16,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private const float DropDownWidth = 200f;
         private const float NoTreeWidth = 100f;
 
-        private static readonly Color s_backColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
         private static bool s_isPlaying;
         private static BehaviourPlayer[] s_allPlayers;
         private static string[] s_playersNames;
@@ -116,7 +115,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     CreateGUI();
                 }
 
-                EditorGUI.DrawRect(_rect, s_backColor);
                 Rect currentRect = _rect;
                 currentRect.position += Vector2.right * LeftSpacing;
                 currentRect.width = LabelWidth;

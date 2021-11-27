@@ -22,6 +22,9 @@ namespace Recstazy.BehaviourTree
         private float _zoom = 1f;
 
         [SerializeField]
+        private bool _snapEnabled = true;
+
+        [SerializeField]
         private TreeNodeData _nodeData;
 
         #endregion
@@ -35,7 +38,8 @@ namespace Recstazy.BehaviourTree
         internal TreeNodeData NodeData { get => _nodeData; set => _nodeData = value; }
         internal Vector2 GraphPosition { get => _graphPosition; set => _graphPosition = value; }
         internal float Zoom { get => _zoom; set => _zoom = value; }
-        internal NodeData EntryNode => _nodeData?.Data is null || _nodeData.Data.Length == 0 ? null : _nodeData.Data[0];
+        internal NodeData EntryNode => _nodeData?.Data == null || _nodeData.Data.Length == 0 ? null : _nodeData.Data[0];
+        internal bool SnapEnabled { get => _snapEnabled; set => _snapEnabled = value; }
 
         #endregion
 
