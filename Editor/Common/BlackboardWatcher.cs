@@ -134,7 +134,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateStyleIfNeeded()
         {
-            if (_valueDrawStyle is null || _nameDrawStyle is null)
+            if (_valueDrawStyle == null || _nameDrawStyle == null)
             {
                 _valueDrawStyle = new GUIStyle("box");
                 _valueDrawStyle.alignment = TextAnchor.MiddleLeft;
@@ -147,7 +147,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateWatcherIfNeeded()
         {
-            if (_watcher is null)
+            if (_watcher == null)
             {
                 _watcher = new BTTargetWatcher();
             }
