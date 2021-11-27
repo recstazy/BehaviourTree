@@ -26,9 +26,7 @@ namespace Recstazy.BehaviourTree
 
         #region Fields
 
-        [SerializeField]
         private bool _logErrors;
-
         private Dictionary<string, PropertyAccessor<Func<object>>> _getters;
         private Dictionary<string, PropertyAccessor<Action<object>>> _setters;
 

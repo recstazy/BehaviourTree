@@ -28,8 +28,8 @@ namespace Recstazy.BehaviourTree
         {
             if (Blackboard.TryGetValue(_name, out var value))
             {
-                if (value is Object uObject) return uObject.name;
-                else return value.ToString();
+                if (value is Object uObject) return uObject != null ? uObject.name : "null";
+                else return value != null ? value.ToString() : "null";
             }
 
             return $"No value with name '{_name}'";

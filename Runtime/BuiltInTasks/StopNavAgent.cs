@@ -7,6 +7,7 @@ namespace Recstazy.BehaviourTree
 {
     [TaskOut(0)]
     [TaskMenu("Navigation/Stop NavAgent")]
+    [NoInspector]
     public class StopNavAgent : NavAgentTask
     {
         #region Fields
