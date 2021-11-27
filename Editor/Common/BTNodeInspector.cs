@@ -142,7 +142,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (tree != null)
             {
-                if (serializedObject is null || property is null)
+                if (serializedObject == null || property == null)
                 {
                     serializedObject = new SerializedObject(tree);
                     int dataIndex = -1;

@@ -17,7 +17,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private BTModeManager _modeManager;
         private BTTargetWatcher _watcher;
         private BTNodeProcessor _nodeProcessor;
+        private BTSnapManager _snapManager;
         private bool _isInitialized;
+        private static readonly Color s_topBarColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
+        private const float TopBarHeight = 20f;
 
         #endregion
 
@@ -82,14 +85,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void OnGUI()
         {
+            DrawTopBar();
+
             if (_isInitialized)
             {
                 _watcher.OnGUI(position);
+                if (ProcessWatcherEvents()) return;
 
-                if (ProcessWatcherEvents())
-                {
-                    return;
-                }
+                if (!BTModeManager.IsPlaymode) _snapManager.OnGUI(position);
 
                 _eventProcessor.BeginZoom();
                 _connector.OnGUI();
@@ -141,7 +144,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void InitializeWithAsset(BehaviourTree tree)
         {
             if (TreeInstance != null) Dispose();
-            if (tree is null) return;
+            if (tree == null) return;
             if (!tree.IsRuntime) _lastAssetID = tree.GetInstanceID();
 
             TreeAsset = tree;
@@ -154,6 +157,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _modeManager = new BTModeManager();
             _watcher = new BTTargetWatcher();
             _nodeProcessor = new BTNodeProcessor();
+            _snapManager = new BTSnapManager(TreeAsset.SnapEnabled);
             FetchGrapghFromAsset();
             _isInitialized = true;
         }
@@ -227,6 +231,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             TreeAsset.NodeData = new TreeNodeData(_nodeProcessor.Nodes.Select(n => n.Data).ToArray());
             TreeAsset.GraphPosition = BTEventProcessor.CurrentGraphPosition;
             TreeAsset.Zoom = EditorZoomer.Zoom;
+            TreeAsset.SnapEnabled = BTSnapManager.SnapEnabled;
 
             if (!TreeInstance.IsRuntime)
             {
@@ -340,6 +345,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 FetchGrapghFromAsset();
             }
+        }
+
+        private void DrawTopBar()
+        {
+            var rect = new Rect(Vector2.zero, new Vector2(position.width, TopBarHeight));
+            EditorGUI.DrawRect(rect, s_topBarColor);
         }
     }
 }

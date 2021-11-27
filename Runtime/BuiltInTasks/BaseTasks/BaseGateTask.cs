@@ -46,7 +46,7 @@ namespace Recstazy.BehaviourTree
 
         internal bool CheckGateConditionInEditor()
         {
-            if (Blackboard is null) return false;
+            if (Blackboard == null) return false;
             return GetFinalCondition();
         }
 

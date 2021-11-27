@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    [CustomPropertyDrawer(typeof(BlackboardName))]
+    [CustomPropertyDrawer(typeof(BlackboardName), true)]
     internal class BBNameDrawer : PropertyDrawer
     {
         #region Fields
@@ -54,7 +54,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             var valueTypings = fieldInfo.GetCustomAttributes(typeof(ValueTypeAttribute), true) as ValueTypeAttribute[];
             bool hasTyping = valueTypings != null && valueTypings.Length > 0;
-            string[] names = hasTyping ? _currentBB.GetNamesTyped(valueTypings[0].CompatableTypes) : _currentBB.GetNames();
+            BlackboardProperty propType = _property.type.Contains("Setter") ? BlackboardProperty.Setter : BlackboardProperty.Getter;
+            string[] names = hasTyping ? _currentBB.GetNamesTyped(propType, valueTypings[0].CompatableTypes) : _currentBB.GetNames(propType);
 
             if (names != null && names.Length > 0)
             {

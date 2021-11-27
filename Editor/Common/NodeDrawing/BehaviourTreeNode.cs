@@ -51,7 +51,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public BehaviourTreeNode(NodeData data)
         {
             _taskProvider = new BTNodeTaskProvider(data);
-            _mainRect = new Rect(data.Position, s_minSize);
+            _mainRect = new Rect(data.CenterPosition - s_minSize * 0.5f, s_minSize);
             Data = data;
             Index = data.Index;
 
@@ -67,8 +67,18 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public Rect GetTransformedRect()
         {
+            var lastCenter = _mainRect.center;
             _mainRect.size = Size;
+            var deltaCenter = _mainRect.center - lastCenter;
+            _mainRect.position -= deltaCenter;
             var rect = _mainRect;
+
+            if (BTSnapManager.SnapEnabled)
+            {
+                var newPosition = BTSnapManager.RoundToSnap(rect.center) - rect.size * 0.5f;
+                rect.position = newPosition;
+            }
+
             rect.position -= EditorZoomer.ContentOffset;
             return rect;
         }
@@ -90,8 +100,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void Drag(Vector2 delta)
         {
-            _mainRect.position += delta;
+            _mainRect.center += delta;
             UpdateData();
+        }
+
+        public void EndDrag()
+        {
+            if (BTSnapManager.SnapEnabled)
+            {
+                _mainRect.center = BTSnapManager.RoundToSnap(_mainRect.center);
+            }
         }
 
         protected void DrawSelection(Rect rect)
@@ -144,7 +162,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         protected string GetNameDescription()
         {
-            return Data.TaskImplementation is null ? "Empty Task" : ObjectNames.NicifyVariableName(Data.TaskImplementation.GetType().Name);
+            return Data.TaskImplementation == null ? "Empty Task" : ObjectNames.NicifyVariableName(Data.TaskImplementation.GetType().Name);
         }
 
         protected virtual string GetDescription()
@@ -168,7 +186,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UpdateData()
         {
-            Data.Position = _mainRect.position;
+            var savedPosition = _mainRect.center;
+
+            if (BTSnapManager.SnapEnabled)
+            {
+                savedPosition = BTSnapManager.RoundToSnap(savedPosition);
+            }
+
+            Data.CenterPosition = savedPosition;
         }
 
         private void CreateStyleIfNeeded()
@@ -185,7 +210,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             string descriptionString = GetDescription();
 
-            if (_description is null)
+            if (_description == null)
             {
                 _description = new GUIContent(descriptionString);
             }
@@ -211,7 +236,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
 
                 var height = Mathf.Max(s_minSize.y, HeaderHeight + descriptionSize.y + HeightPadding * 2f);
-                return new Vector2(width, height);
+                var size = new Vector2(width, height);
+                return size;
             }
 
             return s_minSize;
