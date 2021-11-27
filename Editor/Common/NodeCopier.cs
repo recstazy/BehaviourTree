@@ -29,7 +29,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             for (int i = 0; i < _buffer.Length; i++)
             {
-                center += _buffer[i].Position;
+                center += _buffer[i].CenterPosition;
             }
 
             center /= _buffer.Length;
@@ -81,7 +81,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
 
                 d.SetConnections(newConnections);
-                d.Position += deltaCenter + offset;
+                d.CenterPosition += deltaCenter + offset;
             }
         }
 
