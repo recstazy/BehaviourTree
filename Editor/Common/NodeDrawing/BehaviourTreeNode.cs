@@ -18,7 +18,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private const int WrapCountTreshold = 16;
         private const int MinOutPinWidth = 20;
         private static readonly Vector2 s_minSize = new Vector2(150f, HeaderHeight + MinDescriptionHeight);
-        private static readonly Color s_backColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
+        private static readonly Color s_defaultBackColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
         private static readonly Color s_selectionColor = new Color(0.6f, 0.6f, 0.5f, 1f);
         private static readonly Color s_runningMarkColor = new Color(0.5f, 1f, 0.7f, 1f);
 
@@ -42,7 +42,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public bool RuntimeIsRunningChanged => CheckIsRuntimeRunningChanged();
 
         protected virtual Vector2 Size { get => DefaultGetSize(); }
-        protected virtual Color BackColor { get => s_backColor; }
+        protected virtual Color BackColor { get => Data.TaskImplementation != null ? Data.TaskImplementation.GetColor() : s_defaultBackColor; }
         protected virtual Color SelectionColor => s_selectionColor;
         protected virtual bool ShouldDrawTaskProvider => true;
 

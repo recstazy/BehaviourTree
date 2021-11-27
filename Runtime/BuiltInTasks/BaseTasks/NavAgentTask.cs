@@ -14,9 +14,13 @@ namespace Recstazy.BehaviourTree
     {
         #region Fields
 
+        private static readonly Color s_backColor = new Color(0f, 0.255f, 0.3f, 0.5f);
+
         #endregion
 
         #region Properties
+
+        protected override Color Color => s_backColor;
 
         #endregion
 
