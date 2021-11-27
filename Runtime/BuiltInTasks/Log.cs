@@ -9,7 +9,7 @@ namespace Recstazy.BehaviourTree
     /// </summary>
     [TaskOut(0)]
     [TaskMenu("Debug/Log")]
-    public class Log : BehaviourTask
+    public class Log : BaseLogTask
     {
         #region Fields
 
@@ -24,14 +24,12 @@ namespace Recstazy.BehaviourTree
 
         public override string GetDescription()
         {
-            return $"Log: {_logString}";
+            return $"{_logType}: {_logString}";
         }
 
-        protected override IEnumerator TaskRoutine()
+        protected override string GetLogString()
         {
-            Debug.Log(_logString);
-            Succeed = true;
-            yield return null;
+            return _logString;
         }
     }
 }
