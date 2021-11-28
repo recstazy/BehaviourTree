@@ -13,6 +13,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private const KeyCode AltModifier = KeyCode.LeftAlt;
         private const KeyCode DeleteNodesKey = KeyCode.Delete;
+        private const KeyCode DeleteNodesKeyAlternative = KeyCode.X;
         private const KeyCode ControlModifier = KeyCode.LeftControl;
         private const KeyCode CopyKey = KeyCode.C;
         private const KeyCode PasteKey = KeyCode.V;
@@ -25,7 +26,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private Func<bool> CopyHotkey => () => ControlModifierPressed && s_pressStates[CopyKey];
         private Func<bool> PasteHotkey => () => ControlModifierPressed && s_pressStates[PasteKey];
         private Func<bool> DuplicateHotkey => () => ControlModifierPressed && s_pressStates[DuplicateKey];
-        private Func<bool> DeleteHotkey => () => s_pressStates[DeleteNodesKey];
+        private Func<bool> DeleteHotkey => () => s_pressStates[DeleteNodesKey] || s_pressStates[DeleteNodesKeyAlternative];
 
         #endregion
 
@@ -51,6 +52,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 { ControlModifier, false },
                 { AltModifier, false },
                 { DeleteNodesKey, false },
+                { DeleteNodesKeyAlternative, false },
                 { CopyKey, false },
                 { PasteKey, false },
                 { DuplicateKey, false },
