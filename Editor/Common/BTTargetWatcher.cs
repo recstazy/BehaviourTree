@@ -17,7 +17,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private const float NoTreeWidth = 100f;
 
         private static bool s_isPlaying;
-        private static BehaviourPlayer[] s_allPlayers;
+        private static TreePlayer[] s_treePlayers;
         private static string[] s_playersNames;
         private static int s_currentIndex;
 
@@ -25,14 +25,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private Rect _rect;
         private GUIStyle _labelStyle;
         private GUIStyle _dropDownStyle;
-        private BehaviourPlayer _current;
+        private TreePlayer _current;
 
         #endregion
 
         #region Properties
 		
-        public static BehaviourPlayer CurrentPlayer { get; private set; }
-        public BehaviourPlayer Current { get => _current; set { _current = value; CurrentPlayer = value; } }
+        public static TreePlayer CurrentPlayer { get; private set; }
+        public TreePlayer Current { get => _current; set { _current = value; CurrentPlayer = value; } }
         public Rect Rect => _rect;
 
         #endregion
@@ -52,13 +52,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private static void UpdatePlayers()
         {
-            s_allPlayers = new BehaviourPlayer[1].Concat(Object.FindObjectsOfType<BehaviourPlayer>()).ToArray();
-            s_playersNames = s_allPlayers.Select(a => a == null ? "Empty" : a.gameObject.name).ToArray();
+            s_treePlayers = new TreePlayer[1].Concat(TreePlayer.PlayersCache).ToArray();
+            s_playersNames = s_treePlayers.Select(a => a == null ? "Empty" : a.FullName).ToArray();
 
             if (CurrentPlayer != null)
             {
-                int newIndex = System.Array.IndexOf(s_allPlayers, CurrentPlayer);
-                s_currentIndex = Mathf.Clamp(newIndex, 0, s_allPlayers.Length);
+                int newIndex = System.Array.IndexOf(s_treePlayers, CurrentPlayer);
+                s_currentIndex = Mathf.Clamp(newIndex, 0, s_treePlayers.Length);
             }
         }
 
@@ -81,7 +81,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private static void ClearStaticData()
         {
             s_playersNames = null;
-            s_allPlayers = null;
+            s_treePlayers = null;
             s_currentIndex = 0;
         }
 
@@ -90,12 +90,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public BTTargetWatcher()
         {
             _rect.height = RectHeight;
-            
+
             if (s_isPlaying)
             {
                 UpdatePlayers();
-                s_currentIndex = Mathf.Clamp(s_currentIndex, 0, s_allPlayers.Length - 1);
-                Current = s_allPlayers[s_currentIndex];
+                s_currentIndex = Mathf.Clamp(s_currentIndex, 0, s_treePlayers.Length - 1);
+                Current = s_treePlayers[s_currentIndex];
             }
         }
 
@@ -148,7 +148,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 if (s_currentIndex >= 0)
                 {
-                    Current = s_allPlayers[s_currentIndex];
+                    Current = s_treePlayers[s_currentIndex];
                 }
 
                 _lastIndex = s_currentIndex;

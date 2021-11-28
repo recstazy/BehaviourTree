@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Recstazy.BehaviourTree
 {
@@ -10,7 +11,7 @@ namespace Recstazy.BehaviourTree
     /// </summary>
     public sealed class BehaviourPlayer : MonoBehaviour, IBlackboardProvider
     {
-        internal static event Action OnInstancedOrDestroyed;
+        internal static event System.Action OnInstancedOrDestroyed;
 
         #region Fields
 
@@ -35,7 +36,6 @@ namespace Recstazy.BehaviourTree
         public BehaviourTree SharedTree => _tree;
 
         public bool IsPlaying => _playRoutine != null;
-        public BehaviourTask CurrentTask { get; private set; }
         public Blackboard Blackboard => Application.isPlaying ? Tree?.Blackboard : SharedTree?.Blackboard;
 
         #endregion
@@ -70,6 +70,13 @@ namespace Recstazy.BehaviourTree
 
             if (Application.isEditor)
             {
+                var playersOnThisGameObject = TreePlayer.PlayersCache.Where(p => p.GameObject == gameObject).ToArray();
+
+                foreach (var player in playersOnThisGameObject)
+                {
+                    player.Destroyed();
+                }
+
                 OnInstancedOrDestroyed?.Invoke();
             }
         }
@@ -81,7 +88,7 @@ namespace Recstazy.BehaviourTree
             _tree = tree;
             if (_tree == null) return;
 
-            _treePlayer = new TreePlayer(_tree, _tree.Blackboard, _coroutineRunner);
+            _treePlayer = new TreePlayer(_tree, _tree.Blackboard, _coroutineRunner, "Main");
         }
 
         /// <summary> Play tree from start </summary>
@@ -118,7 +125,7 @@ namespace Recstazy.BehaviourTree
 
         private IEnumerator PlayRoutine()
         {
-            while(true)
+            while (true)
             {
                 yield return _treePlayer.PlayTreeRoutine();
             }

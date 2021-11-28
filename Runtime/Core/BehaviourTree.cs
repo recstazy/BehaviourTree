@@ -56,7 +56,7 @@ namespace Recstazy.BehaviourTree
         {
             var instance = Instantiate(this);
             instance.InitializeRuntime(coroutineRunner, blackboard);
-            instance.CreateRuntimeConnections();
+            instance.InitializeTasksWithConnections();
             instance.IsRuntime = true;
             return instance;
         }
@@ -90,11 +90,11 @@ namespace Recstazy.BehaviourTree
         }
 
         [RuntimeInstanced]
-        private void CreateRuntimeConnections()
+        private void InitializeTasksWithConnections()
         {
             foreach (var d in _nodeData.Data)
             {
-                d.CreateRuntimeConnections(_nodeData.Data);
+                d.InitialzeConnections(_nodeData.Data);
             }
         }
     }
