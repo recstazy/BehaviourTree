@@ -27,7 +27,8 @@ namespace Recstazy.BehaviourTree
 
         public GameObject GameObject => _coroutineRunner.gameObject;
         public Blackboard Blackboard => Application.isPlaying ? Tree?.Blackboard : SharedTree?.Blackboard;
-        public string FullName => $"{GameObject.name}{(string.IsNullOrEmpty(_name) ? string.Empty : $" ({_name})")}";
+        public string FullName => GetFullName();
+        public bool Succeed => _treeBranchPlayer.BranchSucceed;
 
         internal static List<TreePlayer> PlayersCache { get; private set; } = new List<TreePlayer>();
 
@@ -71,6 +72,13 @@ namespace Recstazy.BehaviourTree
         {
             if (player.SharedTree == null) return;
             PlayersCache.Remove(player);
+        }
+
+        private string GetFullName()
+        {
+            string treeName = SharedTree != null ? SharedTree.name : "[No Tree]";
+            string customName = string.IsNullOrEmpty(_name) ? string.Empty : $" ({_name})";
+            return $"{GameObject.name} - {treeName} {customName}";
         }
     }
 }

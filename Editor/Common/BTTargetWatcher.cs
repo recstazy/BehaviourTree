@@ -13,18 +13,20 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private const float LeftSpacing = 15f;
         private const float RectHeight = 20f;
         private const float LabelWidth = 30f;
-        private const float DropDownWidth = 200f;
         private const float NoTreeWidth = 100f;
+        private const float DropdownPickerSpacing = 10f;
 
         private static bool s_isPlaying;
         private static TreePlayer[] s_treePlayers;
         private static string[] s_playersNames;
         private static int s_currentIndex;
+        private static float s_minWidth;
 
         private int _lastIndex;
         private Rect _rect;
         private GUIStyle _labelStyle;
         private GUIStyle _dropDownStyle;
+        private GUIContent _dropdownCurrentContent;
         private TreePlayer _current;
 
         #endregion
@@ -120,10 +122,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 currentRect.width = LabelWidth;
                 EditorGUI.LabelField(currentRect, "Target", _labelStyle);
 
-                currentRect.position += Vector2.right * (currentRect.width + 10f);
-                currentRect.width = DropDownWidth;
-
                 int newIndex = s_currentIndex;
+
+                currentRect.position += Vector2.right * (currentRect.width + 10f);
+                _dropdownCurrentContent.text = s_playersNames[s_currentIndex];
+                var contentSize = _dropDownStyle.CalcSize(_dropdownCurrentContent);
+                currentRect.width = Mathf.Clamp(contentSize.x + DropdownPickerSpacing, s_minWidth, windowRect.width - currentRect.position.x);
+
                 newIndex = EditorGUI.Popup(currentRect, newIndex, s_playersNames, _dropDownStyle);
 
                 if (newIndex != _lastIndex)
@@ -165,6 +170,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             _dropDownStyle = (GUIStyle)"ToolbarCreateAddNewDropDown";
             _dropDownStyle.alignment = TextAnchor.MiddleCenter;
+
+            _dropdownCurrentContent = new GUIContent("Empty");
+            s_minWidth = _dropDownStyle.CalcSize(_dropdownCurrentContent).x;
         }
 
         private void ClearRuntimeData()
