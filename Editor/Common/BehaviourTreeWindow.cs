@@ -305,6 +305,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 _nodeProcessor.CreateConnection(_connector.ConnectionPending);
             }
+            else if (_connector.IsEmptyConnectionPending)
+            {
+                if (BTHotkeys.ControlModifierPressed)
+                {
+                    var emptyArgs = _connector.EmptyConnectionPending;
+                    CreateNewNodeInEditor();
+                    var newNode = _nodeProcessor.Nodes.Last();
+                    _connector.MakeFullConnectionFromEmpty(newNode.Index, emptyArgs);
+                }
+            }
 
             if (changed)
             {
