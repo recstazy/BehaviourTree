@@ -21,6 +21,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private NodeDrawerIO _mouseDownIO;
 
         private PinConnectionDrawer performedConnectionDrawer;
+        private bool _isPerformingEmptyConnection;
 
         #endregion
 
@@ -31,6 +32,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public bool IsRemovalPending { get; private set; }
         public bool IsConnectionPending { get; private set; }
         public bool IsPerformingConnection { get; private set; } = false;
+        public bool IsEmptyConnectionPending { get; private set; } = false;
+        public NodeConnectionEventArgs EmptyConnectionPending { get; private set; }
 
         #endregion
 
@@ -63,7 +66,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             if (BTModeManager.IsPlaymode)
             {
-                ClearDragNDrop();
+                ClearDragnDrop();
+            }
+
+            if (_isPerformingEmptyConnection)
+            {
+                _isPerformingEmptyConnection = false;
+                return;
             }
 
             foreach (var io in _ios)
@@ -99,6 +108,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             IsConnectionPending = false;
+            IsEmptyConnectionPending = false;
             IsRemovalPending = false;
 
             if (!BTModeManager.IsPlaymode)
@@ -111,7 +121,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         {
                             RemoveConnection(_mouseDownIO.Node.Index, _mouseDownPin.Index);
                             Event.current.Use();
-                            ClearDragNDrop();
+                            ClearDragnDrop();
                         }
                     }
                 }
@@ -119,23 +129,34 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 {
                     if (Event.current.button == 0)
                     {
-                        if (IsPerformingConnection && _mouseUpPin != null)
+                        if (IsPerformingConnection)
                         {
-                            if (_mouseUpPin != _draggedPin && _mouseUpIO != _draggedIO)
+                            if (_mouseUpPin != null)
                             {
-                                if (_mouseUpPin.IsInput != _draggedPin.IsInput)
+                                if (_mouseUpPin != _draggedPin && _mouseUpIO != _draggedIO)
                                 {
-                                    CreateRemovalBeforeConnection();
-                                    CreateConnection();
+                                    if (_mouseUpPin.IsInput != _draggedPin.IsInput)
+                                    {
+                                        CreateRemovalBeforeConnection();
+                                        CreateConnection();
+                                    }
+                                }
+
+                                IsPerformingConnection = false;
+                                Event.current.Use();
+                            }
+                            else
+                            {
+                                if (TryCreateEmptyConnection())
+                                {
+                                    Event.current.Use();
+                                    IsPerformingConnection = false;
                                 }
                             }
-
-                            IsPerformingConnection = false;
-                            Event.current.Use();
                         }
                     }
 
-                    ClearDragNDrop();
+                    ClearDragnDrop();
                 }
             }
             
@@ -143,6 +164,30 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 performedConnectionDrawer.Target.OnGUI(BTEventProcessor.LastRawMousePosition, 0f);
                 performedConnectionDrawer.OnGUI();
+            }
+        }
+
+        public void MakeFullConnectionFromEmpty(int newNodeIndex, NodeConnectionEventArgs emptyArgs)
+        {
+            if (emptyArgs.InNode < 0)
+            {
+                if (emptyArgs.OutNode >= 0 && emptyArgs.OutNode < _ios.Count)
+                {
+                    var outIO = _ios[emptyArgs.OutNode];
+
+                    if (emptyArgs.OutPin >= 0 && emptyArgs.OutPin < outIO.OutPins.Length)
+                    {
+                        var outPin = outIO.OutPins[emptyArgs.OutPin];
+                        RemoveConnectionIfExists(outIO, outPin);
+
+                        var args = new NodeConnectionEventArgs(emptyArgs.OutNode, emptyArgs.OutPin, newNodeIndex);
+                        ConnectionPending = args;
+                        IsConnectionPending = true;
+                        IsEmptyConnectionPending = false;
+                        EmptyConnectionPending = default;
+                        _isPerformingEmptyConnection = true;
+                    }
+                }
             }
         }
 
@@ -177,6 +222,23 @@ namespace Recstazy.BehaviourTree.EditorScripts
             IsConnectionPending = true;
         }
 
+        private bool TryCreateEmptyConnection()
+        {
+            if (!_draggedPin.IsInput)
+            {
+                int outNode = _mouseDownIO.Node.Index;
+                int pin = _draggedPin.Index;
+                int inNode = -1;
+
+                var args = new NodeConnectionEventArgs(outNode, pin, inNode);
+                EmptyConnectionPending = args;
+                IsEmptyConnectionPending = true;
+                return true;
+            }
+
+            return false;
+        }
+
         private void RemoveConnection(int node, int outPin)
         {
             var args = new NodeConnectionEventArgs(node, outPin, 0);
@@ -188,6 +250,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             ConnectionPin outPin = _draggedPin.IsInput ? _mouseUpPin : _draggedPin;
             var outIO = _draggedPin.IsInput ? _mouseUpIO : _draggedIO;
+            RemoveConnectionIfExists(outIO, outPin);
+        }
+
+        private void RemoveConnectionIfExists(NodeDrawerIO outIO, ConnectionPin outPin)
+        {
             bool hasConnectionOnPin = false;
 
             for (int i = 0; i < outIO.Node.Connections.Length; i++)
@@ -207,7 +274,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        private void ClearDragNDrop()
+        private void ClearDragnDrop()
         {
             _draggedPin = null;
             _mouseUpPin = null;
