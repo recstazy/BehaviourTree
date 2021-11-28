@@ -79,7 +79,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public void CreateNewNodeInEditor()
         {
             var nodeData = new NodeData(GetAvailableNodeIndex(), null, null);
-            nodeData.CenterPosition = BTEventProcessor.LastMousePosition;
+            var centerPosition = BTEventProcessor.LastMousePosition;
+
+            if (BTSnapManager.SnapEnabled)
+            {
+                centerPosition = BTSnapManager.RoundToSnap(centerPosition);
+            }
+
+            nodeData.CenterPosition = centerPosition;
             CreateNodeAndAppendToList(nodeData);
         }
 

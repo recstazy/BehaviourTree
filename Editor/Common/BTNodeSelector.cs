@@ -279,7 +279,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
             }
 
-            if (newSelectedNodes is null)
+            if (newSelectedNodes == null)
             {
                 Selection.Clear();
             }
@@ -319,21 +319,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        private void SetMouseDown(int listINdex, int nodeIndex)
+        private void SetMouseDown(int listIndex, int nodeIndex)
         {
-            MouseDownNodeListIndex = listINdex;
+            MouseDownNodeListIndex = listIndex;
             MouseDownNodeIndex = nodeIndex;
         }
 
-        private void SetMouseUp(int listINdex, int nodeIndex)
+        private void SetMouseUp(int listIndex, int nodeIndex)
         {
-            MouseUpNodeListIndex = listINdex;
+            MouseUpNodeListIndex = listIndex;
             MouseUpNodeIndex = nodeIndex;
         }
 
-        private void SetMouseClick(int listINdex, int nodeIndex)
+        private void SetMouseClick(int listIndex, int nodeIndex)
         {
-            ClickedNodeListIndex = listINdex;
+            ClickedNodeListIndex = listIndex;
             ClickNodeIndex = nodeIndex;
         }
     }
