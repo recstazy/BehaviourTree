@@ -276,10 +276,5 @@ namespace Recstazy.BehaviourTree.EditorScripts
             OnRegisterUndoAndSetDirty?.Invoke(undoName);
             OnUpdateNodes?.Invoke();
         }
-
-        private void StartZoomArea(Rect windowRect)
-        {
-
-        }
     }
 }
