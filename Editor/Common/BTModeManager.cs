@@ -42,7 +42,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void OnGUI(Rect windowRect)
         {
-            _labelRect.position = new Vector2(windowRect.width - s_labelSize.x, 0f);
+            _labelRect.position = new Vector2(windowRect.width - s_labelSize.x, windowRect.height - s_labelSize.y);
             EditorGUI.HelpBox(_labelRect, IsPlaymode ? PlaymodeLabel : EditorLabel, MessageType.None);
         }
     }

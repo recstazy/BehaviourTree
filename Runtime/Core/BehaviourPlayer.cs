@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Recstazy.BehaviourTree
 {
@@ -10,7 +11,7 @@ namespace Recstazy.BehaviourTree
     /// </summary>
     public sealed class BehaviourPlayer : MonoBehaviour, IBlackboardProvider
     {
-        internal static event Action OnInstancedOrDestroyed;
+        internal static event System.Action OnInstancedOrDestroyed;
 
         #region Fields
 
@@ -20,25 +21,27 @@ namespace Recstazy.BehaviourTree
         [SerializeField]
         private bool _playOnAwake;
 
-        private BranchPlayer _treePlayer;
+        private TreePlayer _treePlayer;
         private Coroutine _playRoutine;
         private CoroutineRunner _coroutineRunner;
 
         #endregion
 
         #region Properties
-		
+
         /// <summary> Runtime tree instanced on Awake </summary>
-        public BehaviourTree Tree { get; private set; }
+        public BehaviourTree Tree => _treePlayer.Tree;
 
         /// <summary> Actual tree asset </summary>
         public BehaviourTree SharedTree => _tree;
 
         public bool IsPlaying => _playRoutine != null;
-        public BehaviourTask CurrentTask { get; private set; }
         public Blackboard Blackboard => Application.isPlaying ? Tree?.Blackboard : SharedTree?.Blackboard;
 
         #endregion
+
+        // Dummy to show enabled checkmark
+        private void Start() { }
 
         private void Reset()
         {
@@ -67,12 +70,16 @@ namespace Recstazy.BehaviourTree
 
             if (Application.isEditor)
             {
+                var playersOnThisGameObject = TreePlayer.PlayersCache.Where(p => p.GameObject == gameObject).ToArray();
+
+                foreach (var player in playersOnThisGameObject)
+                {
+                    player.Destroyed();
+                }
+
                 OnInstancedOrDestroyed?.Invoke();
             }
         }
-
-        // Dummy to show enabled checkmark
-        private void OnEnable() { }
 
         /// <summary> Set new behaviour tree asset in runtime </summary>
         public void Initialize(BehaviourTree tree)
@@ -81,7 +88,7 @@ namespace Recstazy.BehaviourTree
             _tree = tree;
             if (_tree == null) return;
 
-            Tree = _tree?.CreateRuntimeImplementation(_coroutineRunner);
+            _treePlayer = new TreePlayer(_tree, _tree.Blackboard, _coroutineRunner, "Main");
         }
 
         /// <summary> Play tree from start </summary>
@@ -103,7 +110,6 @@ namespace Recstazy.BehaviourTree
             {
                 if (!IsPlaying && Tree != null)
                 {
-                    _treePlayer = new BranchPlayer(Tree.EntryNode?.TaskImplementation);
                     _playRoutine = StartCoroutine(PlayRoutine());
                 }
             }
@@ -113,18 +119,15 @@ namespace Recstazy.BehaviourTree
                 {
                     StopCoroutine(_playRoutine);
                     _playRoutine = null;
-                    _treePlayer = null;
                 }
             }
         }
 
         private IEnumerator PlayRoutine()
         {
-            while(true)
+            while (true)
             {
-                _treePlayer.Start();
-                yield return new WaitUntil(() => !_treePlayer.IsRunning);
-                yield return null;
+                yield return _treePlayer.PlayTreeRoutine();
             }
         }
 
@@ -133,12 +136,6 @@ namespace Recstazy.BehaviourTree
             if (IsPlaying)
             {
                 SetIsPlaying(false);
-            }
-
-            if (Tree != null)
-            {
-                Destroy(Tree);
-                Tree = null;
             }
         }
     }
