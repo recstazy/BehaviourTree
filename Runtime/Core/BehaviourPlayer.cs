@@ -20,16 +20,16 @@ namespace Recstazy.BehaviourTree
         [SerializeField]
         private bool _playOnAwake;
 
-        private BranchPlayer _treePlayer;
+        private TreePlayer _treePlayer;
         private Coroutine _playRoutine;
         private CoroutineRunner _coroutineRunner;
 
         #endregion
 
         #region Properties
-		
+
         /// <summary> Runtime tree instanced on Awake </summary>
-        public BehaviourTree Tree { get; private set; }
+        public BehaviourTree Tree => _treePlayer.Tree;
 
         /// <summary> Actual tree asset </summary>
         public BehaviourTree SharedTree => _tree;
@@ -39,6 +39,9 @@ namespace Recstazy.BehaviourTree
         public Blackboard Blackboard => Application.isPlaying ? Tree?.Blackboard : SharedTree?.Blackboard;
 
         #endregion
+
+        // Dummy to show enabled checkmark
+        private void Start() { }
 
         private void Reset()
         {
@@ -71,9 +74,6 @@ namespace Recstazy.BehaviourTree
             }
         }
 
-        // Dummy to show enabled checkmark
-        private void OnEnable() { }
-
         /// <summary> Set new behaviour tree asset in runtime </summary>
         public void Initialize(BehaviourTree tree)
         {
@@ -81,7 +81,7 @@ namespace Recstazy.BehaviourTree
             _tree = tree;
             if (_tree == null) return;
 
-            Tree = _tree?.CreateRuntimeImplementation(_coroutineRunner);
+            _treePlayer = new TreePlayer(_tree, _tree.Blackboard, _coroutineRunner);
         }
 
         /// <summary> Play tree from start </summary>
@@ -103,7 +103,6 @@ namespace Recstazy.BehaviourTree
             {
                 if (!IsPlaying && Tree != null)
                 {
-                    _treePlayer = new BranchPlayer(Tree.EntryNode?.TaskImplementation);
                     _playRoutine = StartCoroutine(PlayRoutine());
                 }
             }
@@ -113,7 +112,6 @@ namespace Recstazy.BehaviourTree
                 {
                     StopCoroutine(_playRoutine);
                     _playRoutine = null;
-                    _treePlayer = null;
                 }
             }
         }
@@ -122,9 +120,7 @@ namespace Recstazy.BehaviourTree
         {
             while(true)
             {
-                _treePlayer.Start();
-                yield return new WaitUntil(() => !_treePlayer.IsRunning);
-                yield return null;
+                yield return _treePlayer.PlayTreeRoutine();
             }
         }
 
@@ -133,12 +129,6 @@ namespace Recstazy.BehaviourTree
             if (IsPlaying)
             {
                 SetIsPlaying(false);
-            }
-
-            if (Tree != null)
-            {
-                Destroy(Tree);
-                Tree = null;
             }
         }
     }
