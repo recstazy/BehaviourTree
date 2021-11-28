@@ -73,6 +73,9 @@ namespace Recstazy.BehaviourTree
             Succeed = shouldSucceed;
         }
 
+        /// <summary> Called when task was initialized while Behaviour Tree is initializing in runtime </summary>
+        protected virtual void Initialized() { }
+
         /// <summary> What out index to choose after task completion </summary>
         protected virtual int GetCurrentOutIndex()
         {
@@ -185,6 +188,11 @@ namespace Recstazy.BehaviourTree
             StopAllBranches();
             _taskBodyRoutine = null;
             IsRunning = false;
+        }
+
+        internal void Initialize()
+        {
+            Initialized();
         }
 
         /// <summary> Get actual task connected to out index. Returns null if index out of bounds </summary>

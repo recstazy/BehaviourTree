@@ -76,7 +76,7 @@ namespace Recstazy.BehaviourTree
         }
 
         [RuntimeInstanced]
-        internal void CreateRuntimeConnections(NodeData[] treeData)
+        internal void InitialzeConnections(NodeData[] treeData)
         {
             if (TaskImplementation != null)
             {
@@ -100,6 +100,7 @@ namespace Recstazy.BehaviourTree
                 }
 
                 TaskImplementation.SetRuntimeConnections(connections);
+                TaskImplementation.Initialize();
             }
         }
     }

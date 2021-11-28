@@ -52,24 +52,30 @@ namespace Recstazy.BehaviourTree
         }
 
         [RuntimeInstanced]
-        internal BehaviourTree CreateRuntimeImplementation(CoroutineRunner coroutineRunner)
+        internal BehaviourTree CreateRuntimeImplementation(CoroutineRunner coroutineRunner, Blackboard blackboard)
         {
-            if (Blackboard is null)
-            {
-                Debug.LogError($"No blackboard set for \"{name}\" tree");
-            }
-
             var instance = Instantiate(this);
-            instance.InitializeRuntime(coroutineRunner);
-            instance.CreateRuntimeConnections();
+            instance.InitializeRuntime(coroutineRunner, blackboard);
+            instance.InitializeTasksWithConnections();
             instance.IsRuntime = true;
             return instance;
         }
 
         [RuntimeInstanced]
-        private void InitializeRuntime(CoroutineRunner coroutineRunner)
+        internal BehaviourTree CreateRuntimeImplementation(CoroutineRunner coroutineRunner)
         {
-            _blackboard = Instantiate(_blackboard);
+            if (_blackboard == null)
+            {
+                Debug.LogError($"No blackboard set for \"{name}\" tree");
+            }
+
+            return CreateRuntimeImplementation(coroutineRunner, _blackboard);
+        }
+
+        [RuntimeInstanced]
+        private void InitializeRuntime(CoroutineRunner coroutineRunner, Blackboard blackboard)
+        {
+            _blackboard = Instantiate(blackboard);
             _blackboard.InitializeAtRuntime(coroutineRunner.gameObject);
             var runtimeNodeData = _nodeData.Data;
 
@@ -77,18 +83,18 @@ namespace Recstazy.BehaviourTree
             {
                 if (runtimeNodeData[i].TaskImplementation != null)
                 {
-                    runtimeNodeData[i].TaskImplementation.Blackboard = Blackboard;
+                    runtimeNodeData[i].TaskImplementation.Blackboard = _blackboard;
                     runtimeNodeData[i].TaskImplementation.SetCoroutineRunner(coroutineRunner);
                 }
             }
         }
 
         [RuntimeInstanced]
-        private void CreateRuntimeConnections()
+        private void InitializeTasksWithConnections()
         {
             foreach (var d in _nodeData.Data)
             {
-                d.CreateRuntimeConnections(_nodeData.Data);
+                d.InitialzeConnections(_nodeData.Data);
             }
         }
     }
