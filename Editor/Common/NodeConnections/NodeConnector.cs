@@ -19,6 +19,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private NodeDrawerIO _draggedIO;
         private NodeDrawerIO _mouseUpIO;
         private NodeDrawerIO _mouseDownIO;
+        private NodeDrawerIO _rectMouseUpIO;
 
         private PinConnectionDrawer performedConnectionDrawer;
         private bool _isPerformingEmptyConnection;
@@ -90,10 +91,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     Event.current.Use();
                 }
-                else if (IsPerformingConnection && io.MouseUpPin != null)
+                else if (IsPerformingConnection)
                 {
-                    _mouseUpPin = io.MouseUpPin;
-                    _mouseUpIO = io;
+                    if (io.MouseUpPin != null)
+                    {
+                        _mouseUpPin = io.MouseUpPin;
+                        _mouseUpIO = io;
+                    }
+                    else if (io.WasMouseUpOnNodeRect)
+                    {
+                        _rectMouseUpIO = io;
+                    }
                 }
                 else if (io.MouseDownPin != null)
                 {
@@ -131,6 +139,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     {
                         if (IsPerformingConnection)
                         {
+                            if (_rectMouseUpIO != null)
+                            {
+                                if (!_draggedPin.IsInput)
+                                {
+                                    _mouseUpIO = _rectMouseUpIO;
+                                    _mouseUpPin = _rectMouseUpIO.InPin;
+                                }
+                            }
+
                             if (_mouseUpPin != null)
                             {
                                 if (_mouseUpPin != _draggedPin && _mouseUpIO != _draggedIO)
@@ -276,6 +293,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void ClearDragnDrop()
         {
+            _rectMouseUpIO = null;
             _draggedPin = null;
             _mouseUpPin = null;
             _draggedIO = null;
