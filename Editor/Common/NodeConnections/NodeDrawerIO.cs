@@ -23,6 +23,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public ConnectionPin DraggedPin = null;
         public ConnectionPin MouseDownPin = null;
         public ConnectionPin MouseUpPin = null;
+        public bool WasMouseUpOnNodeRect { get; private set; }
         public PinConnectionDrawer[] ConnectionDrawers { get; set; }
 
         public ConnectionPin InPin { get; private set; }
@@ -59,6 +60,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void OnGUI()
         {
+            WasMouseUpOnNodeRect = false;
             DraggedPin = null;
             MouseDownPin = null;
             MouseUpPin = null;
@@ -76,6 +78,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 InPin.OnGUI(GetInPosition(nodeRect), nodeRect.width);
                 ProcessPinEvents(InPin);
+
+                if (Event.current.type == EventType.MouseUp)
+                {
+                    if (nodeRect.Contains(BTEventProcessor.LastRawMousePosition))
+                    {
+                        WasMouseUpOnNodeRect = true;
+                    }
+                }
             }
 
             float pinWidth = nodeRect.width / OutPins.Length;
