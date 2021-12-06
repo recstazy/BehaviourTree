@@ -190,7 +190,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 if (emptyArgs.OutNode >= 0 && emptyArgs.OutNode < _ios.Count)
                 {
-                    var outIO = _ios[emptyArgs.OutNode];
+                    var outIO = GetIO(emptyArgs.OutNode);
 
                     if (emptyArgs.OutPin >= 0 && emptyArgs.OutPin < outIO.OutPins.Length)
                     {
