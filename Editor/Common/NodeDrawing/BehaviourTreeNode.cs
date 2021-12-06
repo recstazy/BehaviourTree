@@ -31,7 +31,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #endregion
 
         #region Properties
-
+        
         public NodeData Data { get; } = null;
         public bool Selected { get; set; }
         public Rect MainRect => _mainRect;
@@ -89,10 +89,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             UpdateDescription();
             var rect = GetTransformedRect();
 
-            if (Selected)
-            {
-                DrawSelection(rect);
-            }
+            if (Selected) DrawSelection(rect);
 
             EditorGUI.DrawRect(rect, BackColor);
             DrawContent(rect);

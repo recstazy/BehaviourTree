@@ -69,7 +69,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void ForceSetSelection(params BehaviourTreeNode[] nodes)
         {
-            if (nodes is null || nodes.Length == 0) return;
+            if (nodes == null || nodes.Length == 0) return;
 
             var listIndices = nodes.Select(n => _nodes.IndexOf(n)).ToArray();
             _isMultiSelecting = nodes.Length > 1;
