@@ -18,6 +18,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private Vector2 _mouseDownPos;
         private int _lastClickedNode;
         private bool _wasDoubleClick;
+        private static HashSet<int> s_lastSelection;
 
         #endregion
 
@@ -40,11 +41,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public BTNodeSelector(List<BehaviourTreeNode> nodes)
         {
             _nodes = nodes;
+            if (s_lastSelection != null) UpdateNodesSelection(s_lastSelection.ToArray());
         }
 
         public void Dispose()
         {
+            var lastSelection = s_lastSelection != null ? new HashSet<int>(s_lastSelection) : null;
             UpdateNodesSelection(null);
+            s_lastSelection = lastSelection;
             _nodes = null;
             Selection = null;
         }
@@ -130,9 +134,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void MouseDown()
         {
             var mouseDownNode = GetNodeUnderCursor(out var node);
-            SetMouseDown(mouseDownNode, node is null ? -1 : node.Index);
+            SetMouseDown(mouseDownNode, node == null ? -1 : node.Index);
             SetMouseUp(-1, -1);
             SetMouseClick(-1, -1);
+
+            if (MouseDownNodeIndex == -1) UpdateNodesSelection(null);
 
             _mouseDownPos = BTEventProcessor.LastRawMousePosition;
             _selectionRect.position = _mouseDownPos;
@@ -147,7 +153,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 _wasDoubleClick = !_isDraggingMouse && _lastClickedNode == clickedNodeListIndex;
                 _lastClickedNode = clickedNodeListIndex;
 
-                SetMouseUp(mouseUpNode, node is null ? -1 : node.Index);
+                SetMouseUp(mouseUpNode, node == null ? -1 : node.Index);
                 SetMouseClick(clickedNodeListIndex, clickedNodeListIndex >= 0 ? node.Index : -1);
             }
             else
@@ -189,7 +195,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
             else
             {
-                SelectionRectUpdate(delta);
+                SelectionRectUpdate();
                 _isMultiSelecting = true;
             }
         }
@@ -198,19 +204,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (ClickedNodeListIndex >= 0)
             {
-                if (!_isMultiSelecting)
-                {
-                    UpdateNodesSelection(ClickedNodeListIndex);
-                }
-
+                if (!_isMultiSelecting) UpdateNodesSelection(ClickedNodeListIndex);
                 return true;
-            }
-            else
-            {
-                if (!_isMultiSelecting)
-                {
-                    UpdateNodesSelection(null);
-                }
             }
 
             return false;
@@ -224,9 +219,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        private void SelectionRectUpdate(Vector2 delta)
+        private void SelectionRectUpdate()
         {
-            ChangeSelectionRect(delta);
+            ChangeSelectionRect();
             var nodesInRect = new List<int>();
 
             for(int i = 0; i < _nodes.Count; i++)
@@ -240,10 +235,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
             UpdateNodesSelection(nodesInRect.ToArray());
         }
 
-        private void ChangeSelectionRect(Vector2 delta)
+        private void ChangeSelectionRect()
         {
-            Vector2 curremtMousePos = BTEventProcessor.LastRawMousePosition;
-            Vector2 mouseDownToCurrent = curremtMousePos - _mouseDownPos;
+            Vector2 currentMousePos = BTEventProcessor.LastRawMousePosition;
+            Vector2 mouseDownToCurrent = currentMousePos - _mouseDownPos;
 
             if (mouseDownToCurrent.x > 0 && mouseDownToCurrent.y > 0)
             {
@@ -252,19 +247,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
             else if (mouseDownToCurrent.x > 0 && mouseDownToCurrent.y <= 0)
             {
-                _selectionRect.y = curremtMousePos.y;
+                _selectionRect.y = currentMousePos.y;
                 _selectionRect.height = -mouseDownToCurrent.y;
                 _selectionRect.width = mouseDownToCurrent.x;
             }
             else if (mouseDownToCurrent.x <= 0 && mouseDownToCurrent.y > 0)
             {
-                _selectionRect.x = curremtMousePos.x;
+                _selectionRect.x = currentMousePos.x;
                 _selectionRect.height = mouseDownToCurrent.y;
                 _selectionRect.width = -mouseDownToCurrent.x;
             }
             else if (mouseDownToCurrent.x <= 0 && mouseDownToCurrent.y <= 0)
             {
-                _selectionRect.position = curremtMousePos;
+                _selectionRect.position = currentMousePos;
                 _selectionRect.size = -mouseDownToCurrent;
             }
         }
@@ -293,6 +288,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 Selection = new HashSet<int>(newSelectedNodes);
             }
 
+            s_lastSelection = Selection;
             GUI.changed = true;
         }
 
