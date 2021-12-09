@@ -40,19 +40,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
             window.InitializeWithAsset(treeAsset);
         }
 
-        [OnOpenAsset(2)]
-        public static bool AssetOpened(int instanceID, int line)
-        {
-            var assetObject = EditorUtility.InstanceIDToObject(instanceID);
+        //[OnOpenAsset(2)]
+        //public static bool AssetOpened(int instanceID, int line)
+        //{
+        //    var assetObject = EditorUtility.InstanceIDToObject(instanceID);
 
-            if (assetObject is BehaviourTree treeAsset)
-            {
-                ShowWindow(treeAsset);
-                return true;
-            }
+        //    if (assetObject is BehaviourTree treeAsset)
+        //    {
+        //        ShowWindow(treeAsset);
+        //        return true;
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
         private void OnEnable()
         {
