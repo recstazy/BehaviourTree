@@ -17,11 +17,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 if (Event.current.commandName == UndoCommandName)
                 {
                     BTWindow.UndoRedoPreformed();
-                    
                     Event.current.Use();
-                    //Undo.IncrementCurrentGroup();
-                    //Undo.FlushUndoRecordObjects();
-                    
                 }
             }
         }

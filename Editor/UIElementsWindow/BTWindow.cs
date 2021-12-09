@@ -71,11 +71,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         internal static void SetDirty(string undoDescription = "")
         {
             bool canUndo = !string.IsNullOrEmpty(undoDescription);
-
-            if (canUndo)
-            {
-                Undo.RecordObject(SharedTree, undoDescription);
-            }
+            if (canUndo) Undo.RecordObject(SharedTree, undoDescription);
             
             SharedTree.NodeData = new TreeNodeData(TreeInstance.NodeData.Data.ToArray());
             EditorUtility.SetDirty(SharedTree);
@@ -112,8 +108,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void OnDisable()
         {
-            Undo.IncrementCurrentGroup();
             SetDirty();
+            Undo.IncrementCurrentGroup();
             SharedTree = null;
             TreeInstance = null;
             s_currentWindow = null;
