@@ -21,6 +21,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public NodeContainer()
         {
+            if (BTWindow.SharedTree == null) return;
             Initialize();
         }
 

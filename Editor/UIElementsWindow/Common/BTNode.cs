@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
@@ -20,8 +21,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public BTNode(NodeData data) : base()
         {
+            Data = data;
             transform.position = data.Position;
             AddToClassList("bt-node");
+        }
+
+        protected override void EndDrag(MouseUpEvent evt)
+        {
+            base.EndDrag(evt);
+            UpdateData();
+            BTWindow.SetDirty("Move Node");
+        }
+
+        private void UpdateData()
+        {
+            Data.Position = transform.position;
         }
     }
 }
