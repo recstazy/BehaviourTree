@@ -86,7 +86,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 centerPosition = BTSnapManager.RoundToSnap(centerPosition);
             }
 
-            nodeData.CenterPosition = centerPosition;
+            nodeData.Position = centerPosition;
             CreateNodeAndAppendToList(nodeData);
         }
 

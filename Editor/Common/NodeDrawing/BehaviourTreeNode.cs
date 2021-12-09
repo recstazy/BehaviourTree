@@ -51,7 +51,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public BehaviourTreeNode(NodeData data)
         {
             _taskProvider = new BTNodeTaskProvider(data);
-            _mainRect = new Rect(data.CenterPosition - s_minSize * 0.5f, s_minSize);
+            _mainRect = new Rect(data.Position - s_minSize * 0.5f, s_minSize);
             Data = data;
             Index = data.Index;
 
@@ -190,7 +190,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 savedPosition = BTSnapManager.RoundToSnap(savedPosition);
             }
 
-            Data.CenterPosition = savedPosition;
+            Data.Position = savedPosition;
         }
 
         private void CreateStyleIfNeeded()

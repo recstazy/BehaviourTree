@@ -9,6 +9,28 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     public class BTWindow : EditorWindow
     {
+        #region Fields
+
+        public static BehaviourTree SharedTree { get; private set; }
+        public static BehaviourTree TreeInstance { get; private set; }
+
+        #endregion
+
+        #region Properties
+
+        #endregion
+
+        [MenuItem("Window/Behaviour Tree/Force Close Window")]
+        private static void ForceCloseWindow()
+        {
+            try
+            {
+                BTWindow wnd = GetWindow<BTWindow>();
+                wnd.Close();
+            }
+            catch { }
+        }
+
         [OnOpenAsset(2)]
         private static bool AssetOpened(int instanceID, int line)
         {
@@ -16,39 +38,46 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             if (assetObject is BehaviourTree treeAsset)
             {
-                ShowBtWindow(treeAsset.name);
+                ShowBtWindow(treeAsset);
                 return true;
             }
 
             return false;
         }
 
-        private static void ShowBtWindow(string title)
+        private static void ShowBtWindow(BehaviourTree asset)
         {
             BTWindow wnd = GetWindow<BTWindow>();
-            wnd.titleContent = new GUIContent(title);
+            wnd.Show();
+            wnd.titleContent = new GUIContent(asset.name);
+            wnd.InitializeWithAsset(asset);
         }
 
-        public void CreateGUI()
+        private void InitializeWithAsset(BehaviourTree asset)
         {
-            // Each editor window contains a root VisualElement object
-            VisualElement root = rootVisualElement;
+            SharedTree = asset;
+            TreeInstance = Instantiate(SharedTree);
+            ImportLayout();
+        }
 
-            // VisualElements objects can contain other VisualElement following a tree hierarchy.
-            VisualElement label = new Label("Hello World! From C#");
-            root.Add(label);
+        private void OnDisable()
+        {
+            SharedTree = null;
+            TreeInstance = null;
+        }
+
+        private void ImportLayout()
+        {
+            VisualElement root = rootVisualElement;
 
             // Import UXML
             var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(Path.Combine(MainPaths.UxmlRoot, "BTWindowLayout.uxml"));
-            VisualElement labelFromUXML = visualTree.Instantiate();
-            root.Add(labelFromUXML);
+            VisualElement windowLayout = visualTree.Instantiate();
+            root.Add(windowLayout);
 
-            // A stylesheet can be added to a VisualElement.
-            // The style will be applied to the VisualElement and all of its children.
+            // Import USS
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(Path.Combine(MainPaths.UssRoot, "BTWindowStyles.uss"));
-            VisualElement labelWithStyle = new Label("Hello World! With Style");
-            labelWithStyle.styleSheets.Add(styleSheet);
-            root.Add(labelWithStyle);
+            root.styleSheets.Add(styleSheet);
         }
     }
 }

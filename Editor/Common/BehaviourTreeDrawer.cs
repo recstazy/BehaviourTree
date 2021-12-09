@@ -31,6 +31,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 serializedObject.ApplyModifiedProperties();
             }
+
+            EditorGUILayout.Space(20);
+            DrawDefaultInspector();
         }
     }
 }
