@@ -53,7 +53,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             for (int i = 0; i < TaskFactory.TypesEditor.Length; i++)
             {
-                evt.menu.AppendAction(TaskFactory.PathsEditor[i], TaskSelected, StatusCallback, i);
+                var path = TaskFactory.PathsEditor[i];
+                path = path.Contains('/') ? path : TaskFactory.NamesEditor[i];
+                evt.menu.AppendAction(path, TaskSelected, StatusCallback, i);
             }
         }
 
