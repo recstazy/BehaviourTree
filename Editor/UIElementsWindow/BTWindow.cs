@@ -14,6 +14,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private int _lastAssetID;
 
+        private bool _isInitialized;
         private BTGraph _graph;
         private static BTWindow s_currentWindow;
         public static BehaviourTree SharedTree { get; private set; }
@@ -59,14 +60,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             wnd.InitializeWithAsset(asset);
         }
 
-        private void InitializeWithAsset(BehaviourTree asset)
-        {
-            SharedTree = asset;
-            _lastAssetID = asset.GetInstanceID();
-            ImportLayout();
-            InitializeGraph();
-        }
-
         internal static void SetDirty(string undoDescription = "")
         {
             bool canUndo = !string.IsNullOrEmpty(undoDescription);
@@ -81,6 +74,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void OnEnable()
         {
+            TaskFactory.UpdateTaskTypes();
+
             if (_lastAssetID != 0)
             {
                 var assetObject = EditorUtility.InstanceIDToObject(_lastAssetID);
@@ -101,14 +96,32 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             SetDirty();
             Undo.IncrementCurrentGroup();
+            Dispose();
+        }
+
+        private void InitializeWithAsset(BehaviourTree asset)
+        {
+            if (_isInitialized) Dispose();
+            SharedTree = asset;
+            _lastAssetID = asset.GetInstanceID();
+            ImportLayout();
+            InitializeGraph();
+            _isInitialized = true;
+        }
+
+        private void Dispose()
+        {
+            _graph?.Dispose();
+            VisualElement root = rootVisualElement;
+            if (root.childCount > 0) root.Clear();
             SharedTree = null;
             s_currentWindow = null;
+            _isInitialized = false;
         }
 
         private void ImportLayout()
         {
             VisualElement root = rootVisualElement;
-            if (root.childCount > 0) root.Clear();
 
             // Import UXML
             var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(Path.Combine(MainPaths.UxmlRoot, "BTWindowLayout.uxml"));
@@ -132,7 +145,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (SharedTree.EntryNode?.TaskImplementation == null)
             {
-                SharedTree.CreateEntry();
+                SharedTree.CreateEntry(GUID.Generate().ToString());
                 EditorUtility.SetDirty(SharedTree);
             }
         }

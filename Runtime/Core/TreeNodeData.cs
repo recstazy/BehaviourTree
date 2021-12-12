@@ -10,11 +10,14 @@ namespace Recstazy.BehaviourTree
     {
         #region Fields
 
+        [SerializeField]
+        private Vector2 _position;
+
         [SerializeReference]
         private BehaviourTask _taskImplementation;
 
         [SerializeField]
-        private Vector2 _position;
+        private string _guid;
 
         [SerializeField]
         private int _index;
@@ -30,6 +33,7 @@ namespace Recstazy.BehaviourTree
         public int Index => _index;
         internal TaskConnection[] Connections { get => _connections; set => _connections = value; }
         internal Vector2 Position { get => _position; set => _position = value; }
+        internal string Guid { get => _guid; }
 
         #endregion
 
@@ -41,6 +45,13 @@ namespace Recstazy.BehaviourTree
         public NodeData(int index, BehaviourTask taskImlpementation, params TaskConnection[] connections)
         {
             _index = index;
+            TaskImplementation = taskImlpementation;
+            SetConnections(connections);
+        }
+
+        public NodeData(string guid, BehaviourTask taskImlpementation, params TaskConnection[] connections)
+        {
+            _guid = guid;
             TaskImplementation = taskImlpementation;
             SetConnections(connections);
         }
@@ -121,6 +132,16 @@ namespace Recstazy.BehaviourTree
         public TreeNodeData(NodeData[] data)
         {
             Data = data;
+        }
+
+        public void AddData(params NodeData[] data)
+        {
+            _data = _data.Concat(data).ToArray();
+        }
+
+        public void RemoveData(params NodeData[] data)
+        {
+            _data = _data.Where(d => !data.Contains(d)).ToArray();
         }
     }
 }

@@ -51,6 +51,14 @@ namespace Recstazy.BehaviourTree
             }
         }
 
+        internal void CreateEntry(string guid)
+        {
+            if (_nodeData != null && _nodeData.Data != null && _nodeData.Data.Length == 0)
+            {
+                _nodeData.Data = new NodeData[] { new NodeData(guid, new EntryTask()) };
+            }
+        }
+
         [RuntimeInstanced]
         internal BehaviourTree CreateRuntimeImplementation(CoroutineRunner coroutineRunner, Blackboard blackboard)
         {
