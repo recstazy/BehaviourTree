@@ -22,5 +22,5 @@ BTGraph {
 NodeTaskProvider {
     background-color: rgb(150, 150, 150);
     height: 20px;
-    width: 150px;
+    width: 100%;
 }

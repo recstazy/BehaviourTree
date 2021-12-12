@@ -10,15 +10,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     internal class NodeTaskProvider : VisualElement
     {
+        public event Action OnTaskChanged;
+
         #region Fields
 
-        private string _currentMenuName;
+        private int _currentTaskIndex;
+        private Button _button;
 
         #endregion
 
         #region Properties
 
         public Type CurrentType { get; private set; }
+        public int CurrentIndex => _currentTaskIndex;
 
         #endregion
 
@@ -29,29 +33,42 @@ namespace Recstazy.BehaviourTree.EditorScripts
             CurrentType = data?.TaskImplementation?.GetType();
             var manipulator = new ContextualMenuManipulator(CreateMenu);
 
-            var button = new Button();
-            _currentMenuName = TaskFactory.GetName(CurrentType);
-            button.text = _currentMenuName;
-            button.AddManipulator(manipulator);
-            Add(button);
+            _button = new Button();
+            _currentTaskIndex = TaskFactory.GetIndex(CurrentType);
+            _button.text = TaskFactory.NamesEditor[_currentTaskIndex];
+            _button.AddManipulator(manipulator);
+            Add(_button);
         }
 
         private void CreateMenu(ContextualMenuPopulateEvent evt)
         {
             for (int i = 0; i < TaskFactory.TypesEditor.Length; i++)
             {
-                evt.menu.AppendAction(TaskFactory.NamesEditor[i], TaskSelected, StatusCallback, TaskFactory.TypesEditor[i]);
+                evt.menu.AppendAction(TaskFactory.NamesEditor[i], TaskSelected, StatusCallback, i);
             }
         }
 
         private void TaskSelected(DropdownMenuAction action)
         {
-            Debug.Log($"Selected {action.userData as Type}");
+            var selectedIndex = (int)action.userData;
+
+            if (selectedIndex != _currentTaskIndex)
+            {
+                SetTaskTypeByIndex(selectedIndex);
+            }
+        }
+
+        private void SetTaskTypeByIndex(int taskIndex)
+        {
+            _currentTaskIndex = taskIndex;
+            CurrentType = TaskFactory.TypesEditor[taskIndex];
+            _button.text = TaskFactory.NamesEditor[_currentTaskIndex];
+            OnTaskChanged?.Invoke();
         }
 
         private DropdownMenuAction.Status StatusCallback(DropdownMenuAction action)
         {
-            return _currentMenuName == action.name ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal;
+            return _currentTaskIndex == (int)action.userData ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal;
         }
     }
 }

@@ -75,6 +75,12 @@ namespace Recstazy.BehaviourTree
             return NamesEditor[index];
         }
 
+        public static int GetIndex(Type type)
+        {
+            if (type == null) return 0;
+            return Array.IndexOf(TypesEditor, type);
+        }
+
         private static void FindTaskTypes()
         {
             var types = TypeCache.GetTypesDerivedFrom<BehaviourTask>()

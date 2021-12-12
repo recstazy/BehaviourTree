@@ -13,6 +13,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #region Fields
 
+        private NodeTaskProvider _taskProvider;
+
         #endregion
 
         #region Properties
@@ -27,23 +29,22 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public BTNode(NodeData data) : base()
         {
             Data = data;
-            IsEntry = Data?.TaskImplementation is EntryTask;
+            IsEntry = Data.TaskImplementation is EntryTask;
 
             var currentRect = GetPosition();
             currentRect.position = data.Position;
             SetPosition(currentRect);
-            title = GetName();
             CreateInput();
-            CreateOutputs();
             outputContainer.AddToClassList("portContainer");
 
             if (!IsEntry)
             {
-                var taskProvider = new NodeTaskProvider(Data);
-                mainContainer.Insert(1, taskProvider);
+                _taskProvider = new NodeTaskProvider(Data);
+                _taskProvider.OnTaskChanged += TaskChanged;
+                mainContainer.Insert(1, _taskProvider);
             }
 
-            RefreshExpandedState();
+            UpdateTaskDependencies();
         }
 
         protected string GetName()
@@ -51,11 +52,18 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return Data.TaskImplementation == null ? "Empty Task" : ObjectNames.NicifyVariableName(Data.TaskImplementation.GetType().Name);
         }
 
+        private void UpdateTaskDependencies()
+        {
+            if (outputContainer.childCount > 0) outputContainer.Clear();
+            title = GetName();
+            CreateOutputs();
+            RefreshExpandedState();
+        }
+
         private void CreateInput()
         {
             if (IsEntry) return;
-
-            var port = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Single, typeof(float));
+            var port = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Multi, typeof(float));
             port.portName = string.Empty;
             inputContainer.Add(port);
         }
@@ -67,10 +75,18 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             foreach (var o in outputs)
             {
-                var port = InstantiatePort(Orientation.Vertical, Direction.Output, Port.Capacity.Single, typeof(float));
+                bool isMultiout = Data.TaskImplementation != null && Data.TaskImplementation is MultioutTask;
+                var port = InstantiatePort(Orientation.Vertical, Direction.Output, isMultiout ? Port.Capacity.Multi : Port.Capacity.Single, typeof(float));
                 port.portName = o.Name;
                 outputContainer.Add(port);
             }
+        }
+
+        private void TaskChanged()
+        {
+            Data.TaskImplementation = TaskFactory.CreateTaskImplementationEditor(_taskProvider.CurrentIndex);
+            BTWindow.SetDirty("Change Task");
+            UpdateTaskDependencies();
         }
     }
 }
