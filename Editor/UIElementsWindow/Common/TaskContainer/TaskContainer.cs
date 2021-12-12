@@ -15,7 +15,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private NodeData _data;
         private SerializedObject _serializedObject;
         private SerializedProperty _property;
-        private List<PropertyField> _fields;
+        private PropertyField _field;
 
         #endregion
 
@@ -28,15 +28,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public void SetData(NodeData data)
         {
             _data = data;
-            UpdateFields();
+            UpdateField();
         }
 
-        private void UpdateFields()
+        private void UpdateField()
         {
-            UnbindProperties();
+            _field?.Unbind();
+            _serializedObject = null;
             Clear();
             bool hasEditor = !CheckForNoEditor(_data.TaskImplementation);
-            if (hasEditor) CreateProperties();
+            if (hasEditor) CreatePropertyField();
 
             SetEnabled(hasEditor);
         }
@@ -49,40 +50,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return false;
         }
 
-        private void CreateProperties()
+        private void CreatePropertyField()
         {
-            _fields = new List<PropertyField>();
             var property = CreateOrGetTaskProperty();
             if (property == null) return;
+
             property = property.Copy();
-
-            if (property.NextVisible(true))
-            {
-                int depth = property.depth;
-
-                do
-                {
-                    var field = new PropertyField(property);
-                    _fields.Add(field);
-                    Add(field);
-                }
-                while (property.NextVisible(false) && depth == property.depth);
-            }
-
+            _field = new PropertyField(property);
+            Add(_field);
             this.Bind(_serializedObject);
-        }
-
-        private void UnbindProperties()
-        {
-            if (_fields != null)
-            {
-                foreach (var f in _fields)
-                {
-                    f.Unbind();
-                }
-            }
-
-            _serializedObject = null;
         }
 
         private SerializedProperty CreateOrGetTaskProperty()

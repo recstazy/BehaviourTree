@@ -50,7 +50,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 _taskContainer = new TaskContainer();
                 _taskContainer.SetData(Data);
-                topContainer.Insert(1, _taskContainer);
+                extensionContainer.Add(_taskContainer);
+                //topContainer.Insert(1, _taskContainer);
             }
 
             UpdateTaskDependencies();

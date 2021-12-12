@@ -27,11 +27,13 @@ NodeTaskProvider:hover {
 TaskContainer {
     width: 200px;
     height: 100%;
+    padding: 5px;
 }
 
 TaskContainer:disabled {
     width: 0px;
     height: 0px;
+    padding: 0px;
 }
 
 PropertyField {

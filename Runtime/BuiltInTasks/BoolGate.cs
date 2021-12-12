@@ -15,7 +15,7 @@ namespace Recstazy.BehaviourTree
 
         [SerializeField]
         [ValueType(typeof(bool))]
-        private BlackboardGetter _valueName;
+        private BlackboardGetter _name;
 
         #endregion
 
@@ -25,12 +25,12 @@ namespace Recstazy.BehaviourTree
 
         protected override string GetGateDescription()
         {
-            return $"{_valueName} is true";
+            return $"{_name} is true";
         }
 
         protected override bool CheckGateCondition()
         {
-            if (Blackboard.TryGetValue(_valueName, out bool bbValue))
+            if (Blackboard.TryGetValue(_name, out bool bbValue))
             {
                 return bbValue;
             }
