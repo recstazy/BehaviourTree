@@ -158,7 +158,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     if (dataIndex >= 0)
                     {
-                        var datasArray = serializedObject.FindProperty("_nodeData.data");
+                        var datasArray = serializedObject.FindProperty("_nodeData._data");
                         property = datasArray.GetArrayElementAtIndex(dataIndex).FindPropertyRelative("_taskImplementation");
                     }
                 }

@@ -15,6 +15,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Fields
 
         private NodeTaskProvider _taskProvider;
+        private TaskContainer _taskContainer;
 
         #endregion
 
@@ -36,7 +37,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             currentRect.position = data.Position;
             SetPosition(currentRect);
             CreateInput();
-            outputContainer.AddToClassList("port-container");
 
             if (!IsEntry)
             {
@@ -47,6 +47,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 titleContainer.Insert(0, _taskProvider);
                 titleContainer.AddToClassList("title-container");
                 titleContainer.style.height = 25;
+
+                _taskContainer = new TaskContainer();
+                _taskContainer.SetData(Data);
+                topContainer.Insert(1, _taskContainer);
             }
 
             UpdateTaskDependencies();
@@ -62,13 +66,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (outputContainer.childCount > 0) outputContainer.Clear();
             title = GetName();
             CreateOutputs();
+            _taskContainer?.SetData(Data);
             RefreshExpandedState();
         }
 
         private void CreateInput()
         {
             if (IsEntry) return;
-            var port = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Multi, typeof(float));
+            var port = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
             port.portName = string.Empty;
             inputContainer.Add(port);
         }
@@ -81,7 +86,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             foreach (var o in outputs)
             {
                 bool isMultiout = Data.TaskImplementation != null && Data.TaskImplementation is MultioutTask;
-                var port = InstantiatePort(Orientation.Vertical, Direction.Output, isMultiout ? Port.Capacity.Multi : Port.Capacity.Single, typeof(float));
+                var port = InstantiatePort(Orientation.Horizontal, Direction.Output, isMultiout ? Port.Capacity.Multi : Port.Capacity.Single, typeof(float));
                 port.portName = o.Name;
                 outputContainer.Add(port);
             }

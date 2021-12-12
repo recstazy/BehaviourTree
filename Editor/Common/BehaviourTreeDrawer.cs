@@ -20,6 +20,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             _bbProperty = serializedObject.FindProperty("_blackboard");
             DrawBBProperty();
+
+            EditorGUILayout.Space(20);
+            DrawDefaultInspector();
         }
 
         private void DrawBBProperty()
@@ -31,9 +34,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 serializedObject.ApplyModifiedProperties();
             }
-
-            EditorGUILayout.Space(20);
-            DrawDefaultInspector();
         }
     }
 }

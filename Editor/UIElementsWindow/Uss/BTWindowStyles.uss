@@ -24,13 +24,19 @@ NodeTaskProvider:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.port-container {
-    height: 10px;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-content: center;
-    align-items: center;
-    justify-content: space-around;
+TaskContainer {
+    width: 200px;
+    height: 100%;
+}
+
+TaskContainer:disabled {
+    width: 0px;
+    height: 0px;
+}
+
+PropertyField {
+    height: 100%;
+    width: 100%;
 }
 
 .title-container {
@@ -42,5 +48,5 @@ NodeTaskProvider:hover {
     height: 100%;
     width: 100%;
     -unity-text-align: middle-left;
-    margin-left: 10px;
+    padding-left: 5px;
 }

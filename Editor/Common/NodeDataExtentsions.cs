@@ -29,7 +29,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             for (int i = 0; i < outs.Length; i++)
             {
-                outs[i] = new TaskOutAttribute(i, generatePlusSign && i == outs.Length - 1 ? "+" : i.ToString());
+                outs[i] = new TaskOutAttribute(i, generatePlusSign && i == outs.Length - 1 ? string.Empty : i.ToString());
             }
 
             return outs;
