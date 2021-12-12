@@ -9,3 +9,13 @@ BTGraph {
     width: 100%;
     height: 100%;
 }
+
+.portContainer {
+    height: 10px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    align-items: center;
+    justify-content: space-around;
+    background-color: rgb(150, 150, 150);
+}

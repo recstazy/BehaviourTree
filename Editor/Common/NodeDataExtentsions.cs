@@ -35,4 +35,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return outs;
         }
     }
+
+    internal static class BTNodeExtensions
+    {
+        public static TaskOutAttribute[] GetOuts(this BTNode node)
+        {
+            return node?.Data?.GetOuts();
+        }
+    }
 }
