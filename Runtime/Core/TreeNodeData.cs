@@ -109,9 +109,9 @@ namespace Recstazy.BehaviourTree
     internal class TreeNodeData
     {
         [SerializeField]
-        private NodeData[] data;
+        private NodeData[] _data;
 
-        public NodeData[] Data { get => data; internal set => data = value; }
+        public NodeData[] Data { get => _data; internal set => _data = value; }
 
         public TreeNodeData() 
         {

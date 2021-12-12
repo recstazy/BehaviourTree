@@ -13,11 +13,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Fields
 
         private int _lastAssetID;
-        private UndoHandler _undoHandler;
-        
+
+        private BTGraph _graph;
         private static BTWindow s_currentWindow;
         public static BehaviourTree SharedTree { get; private set; }
-        public static BehaviourTree TreeInstance { get; private set; }
 
         #endregion
 
@@ -64,27 +63,20 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             SharedTree = asset;
             _lastAssetID = asset.GetInstanceID();
-            TreeInstance = Instantiate(SharedTree);
             ImportLayout();
+            InitializeGraph();
         }
 
         internal static void SetDirty(string undoDescription = "")
         {
             bool canUndo = !string.IsNullOrEmpty(undoDescription);
             if (canUndo) Undo.RecordObject(SharedTree, undoDescription);
-            
-            SharedTree.NodeData = new TreeNodeData(TreeInstance.NodeData.Data.ToArray());
             EditorUtility.SetDirty(SharedTree);
         }
 
         internal static void UndoRedoPreformed()
         {
             s_currentWindow.InitializeWithAsset(SharedTree);
-        }
-
-        private void OnGUI()
-        {
-            _undoHandler.OnGUI();
         }
 
         private void OnEnable()
@@ -102,7 +94,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
             }
 
-            _undoHandler = new UndoHandler();
             Undo.IncrementCurrentGroup();
         }
 
@@ -111,25 +102,39 @@ namespace Recstazy.BehaviourTree.EditorScripts
             SetDirty();
             Undo.IncrementCurrentGroup();
             SharedTree = null;
-            TreeInstance = null;
             s_currentWindow = null;
-            _undoHandler = null;
         }
 
         private void ImportLayout()
         {
             VisualElement root = rootVisualElement;
-
             if (root.childCount > 0) root.Clear();
 
             // Import UXML
             var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(Path.Combine(MainPaths.UxmlRoot, "BTWindowLayout.uxml"));
             VisualElement windowLayout = visualTree.Instantiate();
             root.Add(windowLayout);
+            windowLayout.StretchToParentSize();
 
             // Import USS
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(Path.Combine(MainPaths.UssRoot, "BTWindowStyles.uss"));
             root.styleSheets.Add(styleSheet);
+        }
+
+        private void InitializeGraph()
+        {
+            InitializeEntry();
+            var _graph = rootVisualElement.Q<BTGraph>();
+            _graph.Initialize(SharedTree);
+        }
+
+        private void InitializeEntry()
+        {
+            if (SharedTree.EntryNode?.TaskImplementation == null)
+            {
+                SharedTree.CreateEntry();
+                EditorUtility.SetDirty(SharedTree);
+            }
         }
     }
 }

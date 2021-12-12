@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using UnityEngine.UIElements;
+using UnityEditor.Experimental.GraphView;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    internal class BTNode : Draggable
+    internal class BTNode : Node
     {
         #region Fields
 
@@ -23,19 +25,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             Data = data;
             transform.position = data.Position;
-            AddToClassList("bt-node");
+            title = GetName();
         }
 
-        protected override void EndDrag(MouseUpEvent evt)
+        protected string GetName()
         {
-            base.EndDrag(evt);
-            UpdateData();
-            BTWindow.SetDirty("Move Node");
-        }
-
-        private void UpdateData()
-        {
-            Data.Position = transform.position;
+            return Data.TaskImplementation == null ? "Empty Task" : ObjectNames.NicifyVariableName(Data.TaskImplementation.GetType().Name);
         }
     }
 }
