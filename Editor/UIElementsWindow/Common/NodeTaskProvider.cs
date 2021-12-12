@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
+using UnityEditor.UI;
+using UnityEditor.UIElements;
 using UnityEditor.Experimental.GraphView;
+using System.Linq;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
@@ -15,7 +18,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Fields
 
         private int _currentTaskIndex;
-        private Button _button;
+        private Label _label;
 
         #endregion
 
@@ -31,20 +34,26 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public NodeTaskProvider(NodeData data)
         {
             CurrentType = data?.TaskImplementation?.GetType();
-            var manipulator = new ContextualMenuManipulator(CreateMenu);
-
-            _button = new Button();
             _currentTaskIndex = TaskFactory.GetIndex(CurrentType);
-            _button.text = TaskFactory.NamesEditor[_currentTaskIndex];
-            _button.AddManipulator(manipulator);
-            Add(_button);
+
+            var manipulator = new ContextualMenuManipulator(CreateMenu);
+            manipulator.activators.Add(new ManipulatorActivationFilter() { button = MouseButton.LeftMouse, clickCount = 1 });
+
+            _label = new Label();
+            _label.text = TaskFactory.NamesEditor[_currentTaskIndex];
+            _label.style.fontSize = 13;
+            _label.AddToClassList("node-task-button");
+            _label.AddManipulator(manipulator);
+            Add(_label);
         }
 
         private void CreateMenu(ContextualMenuPopulateEvent evt)
         {
+            evt.StopImmediatePropagation();
+
             for (int i = 0; i < TaskFactory.TypesEditor.Length; i++)
             {
-                evt.menu.AppendAction(TaskFactory.NamesEditor[i], TaskSelected, StatusCallback, i);
+                evt.menu.AppendAction(TaskFactory.PathsEditor[i], TaskSelected, StatusCallback, i);
             }
         }
 
@@ -62,7 +71,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             _currentTaskIndex = taskIndex;
             CurrentType = TaskFactory.TypesEditor[taskIndex];
-            _button.text = TaskFactory.NamesEditor[_currentTaskIndex];
+            _label.text = TaskFactory.NamesEditor[_currentTaskIndex];
             OnTaskChanged?.Invoke();
         }
 

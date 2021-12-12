@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
+using System.Linq;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
@@ -35,13 +36,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
             currentRect.position = data.Position;
             SetPosition(currentRect);
             CreateInput();
-            outputContainer.AddToClassList("portContainer");
+            outputContainer.AddToClassList("port-container");
 
             if (!IsEntry)
             {
                 _taskProvider = new NodeTaskProvider(Data);
                 _taskProvider.OnTaskChanged += TaskChanged;
-                mainContainer.Insert(1, _taskProvider);
+                var titleElement = titleContainer.Children().First();
+                titleContainer.Remove(titleElement);
+                titleContainer.Insert(0, _taskProvider);
+                titleContainer.AddToClassList("title-container");
+                titleContainer.style.height = 25;
             }
 
             UpdateTaskDependencies();

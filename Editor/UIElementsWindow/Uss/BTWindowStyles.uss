@@ -10,7 +10,21 @@ BTGraph {
     height: 100%;
 }
 
-.portContainer {
+NodeTaskProvider {
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: rgb(40, 40, 40);
+}
+
+NodeTaskProvider:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.port-container {
     height: 10px;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -19,8 +33,14 @@ BTGraph {
     justify-content: space-around;
 }
 
-NodeTaskProvider {
-    background-color: rgb(150, 150, 150);
-    height: 20px;
+.title-container {
+    flex-direction: row;
     width: 100%;
+}
+
+.node-task-button {
+    height: 100%;
+    width: 100%;
+    -unity-text-align: middle-left;
+    margin-left: 10px;
 }
