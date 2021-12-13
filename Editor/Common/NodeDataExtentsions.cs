@@ -14,9 +14,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static TaskOutAttribute[] GetOuts(this NodeData data)
         {
-            if (data?.TaskImplementation is MultioutTask multioutTask)
+            if (data?.TaskImplementation is MultioutTask)
             {
-                return GenerateOuts(multioutTask.OutsCount, true);
+                return GenerateOuts(data.Connections.Length, true);
             }
 
             return data?.TaskImplementation?.GetType()?.GetCustomAttributes(typeof(TaskOutAttribute), false) as TaskOutAttribute[];
@@ -29,7 +29,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             for (int i = 0; i < outs.Length; i++)
             {
-                outs[i] = new TaskOutAttribute(i, generatePlusSign && i == outs.Length - 1 ? string.Empty : i.ToString());
+                outs[i] = new TaskOutAttribute(i, generatePlusSign && i == outs.Length - 1 ? "+" : i.ToString());
             }
 
             return outs;

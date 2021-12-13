@@ -51,10 +51,48 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 _taskContainer = new TaskContainer();
                 _taskContainer.SetData(Data);
                 extensionContainer.Add(_taskContainer);
-                //topContainer.Insert(1, _taskContainer);
             }
 
             UpdateTaskDependencies();
+        }
+
+        public void EdgesChanged()
+        {
+            var newOuts = Data.GetOuts();
+            if (newOuts == null || newOuts.Length == 0) return;
+            OutsOrderChanged();
+            var sortedPorts = outputContainer.Query<Port>().Build().ToList();
+            if (sortedPorts == null) sortedPorts = new List<Port>();
+
+            // Remove extra ports
+            for (int i = sortedPorts.Count - 1; i >= newOuts.Length; i--)
+            {
+                outputContainer.Remove(sortedPorts[i]);
+            }
+
+            // Add ports wich are lack
+            for (int i = sortedPorts.Count; i < newOuts.Length; i++)
+            {
+                CreateOutputPort(newOuts[i]);
+            }
+
+            sortedPorts = sortedPorts.Where(p => p.parent == outputContainer).ToList();
+            // Update ports info
+            for (int i = 0; i < sortedPorts.Count; i++)
+            {
+                sortedPorts[i].userData = newOuts[i].Index;
+                sortedPorts[i].portName = newOuts[i].Name;
+            }
+        }
+
+        public void OutsOrderChanged()
+        {
+            var sortedPorts = outputContainer.Query<Port>().Build().ToList().OrderBy(p => (int)p.userData).ToArray();
+
+            foreach (var p in sortedPorts)
+            {
+                p.BringToFront();
+            }
         }
 
         protected string GetName()
@@ -64,9 +102,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UpdateTaskDependencies()
         {
-            if (outputContainer.childCount > 0) outputContainer.Clear();
+            EdgesChanged();
             title = GetName();
-            CreateOutputs();
             _taskContainer?.SetData(Data);
             RefreshExpandedState();
         }
@@ -76,6 +113,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (IsEntry) return;
             var port = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
             port.portName = string.Empty;
+            port.userData = 0;
             inputContainer.Add(port);
         }
 
@@ -86,10 +124,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             foreach (var o in outputs)
             {
-                bool isMultiout = Data.TaskImplementation != null && Data.TaskImplementation is MultioutTask;
-                var port = InstantiatePort(Orientation.Horizontal, Direction.Output, isMultiout ? Port.Capacity.Multi : Port.Capacity.Single, typeof(float));
-                port.portName = o.Name;
-                outputContainer.Add(port);
+                CreateOutputPort(o);
             }
         }
 
@@ -98,6 +133,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Data.TaskImplementation = TaskFactory.CreateTaskImplementationEditor(_taskProvider.CurrentIndex);
             BTWindow.SetDirty("Change Task");
             UpdateTaskDependencies();
+        }
+
+        private void CreateOutputPort(TaskOutAttribute outAttribute)
+        {
+            var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(float));
+            port.portName = outAttribute.Name;
+            port.userData = outAttribute.Index;
+            outputContainer.Add(port);
         }
     }
 }

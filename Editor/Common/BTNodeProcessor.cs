@@ -369,7 +369,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 return Nodes.Max(n => n.Index) + 1;
             }
 
-            return Nodes.Count;
+            return 0;
         }
     }
 }

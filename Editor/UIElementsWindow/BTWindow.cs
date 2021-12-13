@@ -145,7 +145,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (SharedTree.EntryNode?.TaskImplementation == null)
             {
-                SharedTree.CreateEntry(GUID.Generate().ToString());
+                SharedTree.CreateEntry();
                 EditorUtility.SetDirty(SharedTree);
             }
         }

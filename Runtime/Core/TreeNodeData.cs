@@ -17,9 +17,6 @@ namespace Recstazy.BehaviourTree
         private BehaviourTask _taskImplementation;
 
         [SerializeField]
-        private string _guid;
-
-        [SerializeField]
         private int _index;
 
         [SerializeField]
@@ -33,7 +30,6 @@ namespace Recstazy.BehaviourTree
         public int Index => _index;
         internal TaskConnection[] Connections { get => _connections; set => _connections = value; }
         internal Vector2 Position { get => _position; set => _position = value; }
-        internal string Guid { get => _guid; }
 
         #endregion
 
@@ -45,13 +41,6 @@ namespace Recstazy.BehaviourTree
         public NodeData(int index, BehaviourTask taskImlpementation, params TaskConnection[] connections)
         {
             _index = index;
-            TaskImplementation = taskImlpementation;
-            SetConnections(connections);
-        }
-
-        public NodeData(string guid, BehaviourTask taskImlpementation, params TaskConnection[] connections)
-        {
-            _guid = guid;
             TaskImplementation = taskImlpementation;
             SetConnections(connections);
         }
@@ -76,14 +65,63 @@ namespace Recstazy.BehaviourTree
 
         public void SetConnections(params TaskConnection[] connections)
         {
-            if (connections == null)
+            if (connections == null) Connections = new TaskConnection[0];
+            else Connections = connections;
+        }
+
+        public bool TryFindIndexOfConnection(int outPin, int inNodeIndex, out int connectionIndex)
+        {
+            for (int i = 0; i < _connections.Length; i++)
             {
-                Connections = new TaskConnection[0];
+                var c = _connections[i];
+
+                if (c.OutPin == outPin && c.InNode == inNodeIndex)
+                {
+                    connectionIndex = i;
+                    return true;
+                }
             }
-            else
+
+            connectionIndex = -1;
+            return false;
+        }
+
+        public bool RemoveConnectionAtIndex(int index)
+        {
+            if (_connections == null || _connections.Length == 0 || index < 0 || index >= _connections.Length) return false;
+
+            var newArray = new TaskConnection[_connections.Length - 1];
+
+            int offset = 0;
+            for (int i = 0; i < _connections.Length; i++)
             {
-                Connections = connections;
+                if (i == index)
+                {
+                    offset = 1;
+                    continue;
+                }
+
+                newArray[i - offset] = _connections[i];
             }
+
+            SetConnections(newArray);
+            return true;
+        }
+
+        public bool AddConnection(int outPin, int inNode)
+        {
+            bool hasConnections = _connections != null && _connections.Length > 0;
+            if (hasConnections && _connections.Any(c => c.OutPin == outPin && c.InNode == inNode)) return false;
+
+            var currentConnections = _connections == null ? new TaskConnection[0] : _connections;
+            var connection = new TaskConnection(outPin, inNode);
+            SetConnections(currentConnections.Concat(new TaskConnection[] { connection }).ToArray());
+            return true;
+        }
+
+        public void ReorderConnections(System.Func<TaskConnection, float> orderBy)
+        {
+            System.Array.Sort(_connections, (c, next) => orderBy(c) > orderBy(next) ? 1 : -1);
         }
 
         [RuntimeInstanced]

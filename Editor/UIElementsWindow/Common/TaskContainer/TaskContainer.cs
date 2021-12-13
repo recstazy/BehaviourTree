@@ -72,7 +72,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     for (int i = 0; i < Tree.NodeData.Data.Length; i++)
                     {
-                        if (Tree.NodeData.Data[i].Guid == _data.Guid)
+                        if (Tree.NodeData.Data[i].Index == _data.Index)
                         {
                             dataIndex = i;
                             break;
