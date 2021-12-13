@@ -77,11 +77,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             foreach (var n in _nodes)
             {
-                var outpuPorts = ports.ToList().Where(p => p.direction == Direction.Output).ToArray();
+                var outputPorts = ports.ToList().Where(p => p.direction == Direction.Output).ToArray();
+                if (outputPorts.Length == 0) continue;
 
                 foreach (var c in n.Data.Connections)
                 {
-                    var outPort = outpuPorts.First(p => p.node == n && (int)p.userData == c.OutPin);
+                    var outPort = outputPorts.First(p => p.node == n && (int)p.userData == c.OutPin);
                     var inPort = _nodes.First(n => n.Data.Index == c.InNode).inputContainer.Q<Port>();
                     var edge = outPort.ConnectTo(inPort);
                     contentViewContainer.Add(edge);
@@ -109,13 +110,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 if (edges.Length > 0)
                 {
+                    var nodesToUpdate = edges.Select(e => e.output.node as BTNode).ToArray();
+
                     foreach (var e in edges)
                     {
                         RemoveConnectionByEdge(e);
-                        (e.output.node as BTNode).EdgesChanged();
                     }
 
                     BTWindow.SetDirty("Delete Connectiions");
+
+                    foreach (var n in nodesToUpdate)
+                    {
+                        n.EdgesChanged();
+                    }
                 }
 
                 var data = ToNodes(change.elementsToRemove)
@@ -141,13 +148,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
             else if (change.edgesToCreate != null && change.edgesToCreate.Count > 0)
             {
+                var nodesToUpdate = change.edgesToCreate.Select(e => e.output.node as BTNode).ToArray();
+
                 foreach (var e in change.edgesToCreate)
                 {
                     CreateConnectionByEdge(e);
-                    (e.output.node as BTNode).EdgesChanged();
                 }
 
                 BTWindow.SetDirty("Connect Nodes");
+
+                foreach (var n in nodesToUpdate)
+                {
+                    n.EdgesChanged();
+                }
             }
 
             return change;

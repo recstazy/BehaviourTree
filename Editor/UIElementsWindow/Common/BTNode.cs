@@ -59,7 +59,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public void EdgesChanged()
         {
             var newOuts = Data.GetOuts();
-            if (newOuts == null || newOuts.Length == 0) return;
+            if (newOuts == null) return;
+
+            if (Data.Connections.Length != newOuts.Length)
+            {
+                Data.SetConnections(Data.Connections.Take(Mathf.Min(Data.Connections.Length, newOuts.Length)).ToArray());
+            }
+
             OutsOrderChanged();
             var sortedPorts = outputContainer.Query<Port>().Build().ToList();
             if (sortedPorts == null) sortedPorts = new List<Port>();
@@ -67,6 +73,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
             // Remove extra ports
             for (int i = sortedPorts.Count - 1; i >= newOuts.Length; i--)
             {
+                var edges = sortedPorts[i].connections.ToArray();
+
+                for (int j = 0; j < edges.Length; j++)
+                {
+                    var edge = edges[j];
+                    edge.input.Disconnect(edge);
+                    edge.output.Disconnect(edge);
+                    edge.parent.Remove(edge);
+                }
+
                 outputContainer.Remove(sortedPorts[i]);
             }
 
