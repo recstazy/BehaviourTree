@@ -85,8 +85,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     var outPort = outputPorts.First(p => p.node == n && (int)p.userData == c.OutPin);
                     var inPort = _nodes.First(n => n.Data.Index == c.InNode).inputContainer.Q<Port>();
                     var edge = outPort.ConnectTo(inPort);
-                    contentViewContainer.Add(edge);
-                    edge.layer = 0;
+                    AddElement(edge);
                 }
             }
         }
@@ -110,7 +109,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 if (edges.Length > 0)
                 {
-                    var nodesToUpdate = edges.Select(e => e.output.node as BTNode).ToArray();
+                    var nodesToUpdate = edges.Select(e => e.output.node as BTNode).ToList();
 
                     foreach (var e in edges)
                     {
@@ -125,14 +124,18 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     }
                 }
 
-                var data = ToNodes(change.elementsToRemove)
-                    .Select(n => n.Data)
-                    .ToArray();
+                var nodes = ToNodes(change.elementsToRemove).ToArray();
+                var data = nodes.Select(n => n.Data).ToArray();
 
                 if (data.Length > 0)
                 {
                     Tree.NodeData.RemoveData(data);
                     BTWindow.SetDirty("Delete Nodes");
+
+                    foreach (var n in nodes)
+                    {
+                        _nodes.Remove(n);
+                    }
                 }
             }
             else if (change.movedElements != null)
@@ -148,7 +151,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
             else if (change.edgesToCreate != null && change.edgesToCreate.Count > 0)
             {
-                var nodesToUpdate = change.edgesToCreate.Select(e => e.output.node as BTNode).ToArray();
+                var nodesToUpdate = change.edgesToCreate.Select(e => e.output.node as BTNode).ToList();
 
                 foreach (var e in change.edgesToCreate)
                 {
