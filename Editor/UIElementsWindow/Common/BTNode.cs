@@ -21,7 +21,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #endregion
 
         #region Properties
-	
+
+        public int TaskTypeIndex => _taskProvider != null ? _taskProvider.CurrentIndex : -1;
         public NodeData Data { get; private set; }
         public bool IsEntry { get; private set; }
 

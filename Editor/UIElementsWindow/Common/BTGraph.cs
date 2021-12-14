@@ -24,6 +24,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public BehaviourTree Tree { get; private set; }
 
+        protected override bool canCopySelection => true;
+        protected override bool canPaste => true;
+
         #endregion
 
         public void Initialize(BehaviourTree tree)
@@ -39,11 +42,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
             this.AddManipulator(new ContentZoomer());
             this.AddManipulator(new RectangleSelector());
             SetupZoom(minScale, maxScale);
+
+            serializeGraphElements += SerializeForCopy;
+            unserializeAndPaste += UnserializeAndPaste;
             _isInitialized = true;
         }
 
         public void Dispose()
         {
+            serializeGraphElements -= SerializeForCopy;
+            unserializeAndPaste -= UnserializeAndPaste;
             graphViewChanged -= GraphChanged;
             _nodes = null;
         }
@@ -86,16 +94,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             foreach (var n in _nodes)
             {
-                var outputPorts = ports.ToList().Where(p => p.direction == Direction.Output).ToArray();
-                if (outputPorts.Length == 0) continue;
+                CreateEdgesForNode(n);
+            }
+        }
 
-                foreach (var c in n.Data.Connections)
-                {
-                    var outPort = outputPorts.First(p => p.node == n && (int)p.userData == c.OutPin);
-                    var inPort = _nodes.First(n => n.Data.Index == c.InNode).inputContainer.Q<Port>();
-                    var edge = outPort.ConnectTo(inPort);
-                    AddElement(edge);
-                }
+        private void CreateEdgesForNode(BTNode n)
+        {
+            var outputPorts = ports.ToList().Where(p => p.direction == Direction.Output).ToArray();
+            if (outputPorts.Length == 0) return;
+
+            foreach (var c in n.Data.Connections)
+            {
+                var outPort = outputPorts.First(p => p.node == n && (int)p.userData == c.OutPin);
+                var inPort = _nodes.First(n => n.Data.Index == c.InNode).inputContainer.Q<Port>();
+                var edge = outPort.ConnectTo(inPort);
+                AddElement(edge);
             }
         }
 
@@ -115,10 +128,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (change.elementsToRemove != null)
             {
                 // Remove entry node from change
-                change.elementsToRemove = change.elementsToRemove
-                    .Where(e => !(e is BTNode bTNode && bTNode.IsEntry))
-                    .ToList();
-
+                change.elementsToRemove = change.elementsToRemove.Where(e => !e.IsEntryNode()).ToList();
                 var edges = change.elementsToRemove.Where(e => e is Edge).Select(e => (Edge)e).ToArray();
 
                 if (edges.Length > 0)
@@ -213,6 +223,30 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (_nodes.Count > 0) return _nodes.Max(n => n.Data.Index) + 1;
             else return 0;
+        }
+
+        private string SerializeForCopy(IEnumerable<GraphElement> elements)
+        {
+            string serializedString = CopyPasteSerializer.Serialize(elements);
+            return serializedString;
+        }
+
+        private void UnserializeAndPaste(string operationName, string dataString)
+        {
+            var newNodeData = CopyPasteSerializer.Deserialize(dataString, GetAvailableNodeIndex());
+            Tree.NodeData.AddData(newNodeData);
+            var newNodes = new List<BTNode>();
+
+            foreach (var data in newNodeData)
+            {
+                var newNode = GenerateNode(data);
+                newNodes.Add(newNode);
+            }
+
+            foreach (var node in newNodes)
+            {
+                CreateEdgesForNode(node);
+            }
         }
     }
 }
