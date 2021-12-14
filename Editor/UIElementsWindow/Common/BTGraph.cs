@@ -136,6 +136,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     {
                         _nodes.Remove(n);
                     }
+
+                    BTNode.AnyNodeDeleted();
                 }
             }
             else if (change.movedElements != null)

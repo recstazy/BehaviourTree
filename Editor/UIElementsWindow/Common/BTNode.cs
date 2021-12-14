@@ -5,12 +5,13 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
 using System.Linq;
+using System;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
     internal class BTNode : Node
     {
-        private struct BTNodePort { }
+        private static event Action OnAnyDeleted;
 
         #region Fields
 
@@ -25,6 +26,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public bool IsEntry { get; private set; }
 
         #endregion
+
+        public static void AnyNodeDeleted()
+        {
+            OnAnyDeleted?.Invoke();
+        }
 
         public BTNode() { }
 
@@ -49,11 +55,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 titleContainer.style.height = 25;
 
                 _taskContainer = new TaskContainer();
-                _taskContainer.SetData(Data);
+                UpdateTaskContainer();
                 extensionContainer.Add(_taskContainer);
             }
 
             UpdateTaskDependencies();
+            RegisterCallback<DetachFromPanelEvent>(Detached);
+            OnAnyDeleted += UpdateTaskContainer;
         }
 
         public void EdgesChanged()
@@ -116,11 +124,30 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return Data.TaskImplementation == null ? "Empty Task" : ObjectNames.NicifyVariableName(Data.TaskImplementation.GetType().Name);
         }
 
+        private void Detached(DetachFromPanelEvent evt)
+        {
+            Dispose();
+        }
+
+        private void Dispose()
+        {
+            UnregisterCallback<DetachFromPanelEvent>(Detached);
+            OnAnyDeleted -= UpdateTaskContainer;
+            _taskContainer?.Dispose();
+            if (_taskProvider != null) _taskProvider.OnTaskChanged -= TaskChanged;
+            _taskProvider = null;
+        }
+
+        private void UpdateTaskContainer()
+        {
+            _taskContainer?.SetData(Data);
+        }
+
         private void UpdateTaskDependencies()
         {
             EdgesChanged();
             title = GetName();
-            _taskContainer?.SetData(Data);
+            UpdateTaskContainer();
             RefreshExpandedState();
         }
 

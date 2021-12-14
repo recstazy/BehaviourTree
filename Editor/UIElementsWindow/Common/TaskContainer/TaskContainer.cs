@@ -31,6 +31,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
             UpdateField();
         }
 
+        public void Dispose()
+        {
+            _field?.Unbind();
+            _serializedObject = null;
+            _property = null;
+            _data = null;
+        }
+
         private void UpdateField()
         {
             _field?.Unbind();
