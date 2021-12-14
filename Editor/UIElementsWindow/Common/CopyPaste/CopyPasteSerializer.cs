@@ -49,7 +49,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var task = TaskFactory.CreateTaskImplementationEditor(TaskTypeIndex);
                 JsonUtility.FromJsonOverwrite(TaskJson, task);
                 var data = new NodeData(Index, task, Connections);
-                data.Position = Position + PasteOffset;
+                data.Position = Position;
                 return data;
             }
         }
@@ -57,6 +57,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         [System.Serializable]
         private struct SerializedStructure
         {
+            public Vector2 AvgPosition;
             public NodeDescription[] Nodes;
 
             public SerializedStructure(BTNode[] nodes)
@@ -75,6 +76,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     Nodes[i] = node;
                 }
+
+                AvgPosition = Nodes.GetAvgPosition();
             }
 
             public void OffsetAllIndices(int offset)
@@ -110,7 +113,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return JsonUtility.ToJson(structure);
         }
 
-        public static NodeData[] Deserialize(string data, int startNodeIndex)
+        public static NodeData[] Deserialize(string data, int startNodeIndex, Vector2 mousePosition)
         {
             var structure = JsonUtility.FromJson<SerializedStructure>(data);
             if (structure.Nodes == null || structure.Nodes.Length == 0) return new NodeData[0];
@@ -118,7 +121,31 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var maxNodeIndex = structure.Nodes.Min(n => n.Index);
             int offset = startNodeIndex - maxNodeIndex;
             structure.OffsetAllIndices(offset);
+            structure.Nodes.SetAvgPosition(mousePosition);
             return structure.GenerateData();
+        }
+
+        private static Vector2 GetAvgPosition(this NodeDescription[] nodes)
+        {
+            Vector2 avgPos = Vector2.zero;
+
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                avgPos += nodes[i].Position;
+            }
+
+            return avgPos / nodes.Length;
+        }
+
+        private static void SetAvgPosition(this NodeDescription[] nodes, Vector2 avgPosition)
+        {
+            var currentAvgPosition = GetAvgPosition(nodes);
+
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                var avgOffset = nodes[i].Position - currentAvgPosition;
+                nodes[i].Position = avgPosition + avgOffset;
+            }
         }
     }
 }
