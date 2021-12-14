@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
@@ -34,7 +35,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             if (!hasChildren)
             {
-                EditorGUI.LabelField(position, label);
+                var taskName = property.managedReferenceFullTypename.Split('.').LastOrDefault();
+                taskName = string.IsNullOrEmpty(taskName) ? "None" : taskName;
+                EditorGUI.LabelField(position, $"{label.text} ({taskName})");
                 return;
             }
 
