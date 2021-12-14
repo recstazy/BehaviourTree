@@ -54,6 +54,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
             base.BuildContextualMenu(evt);
         }
 
+        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
+        {
+            // Remove all ports on same node and all ports with same direction (in/out)
+            var availablePorts = ports.ToList().Where(p => p.direction != startPort.direction && p.node != startPort.node).ToArray();
+            var connectedPorts = startPort.connections.Select(c => startPort.direction == Direction.Input ? c.output : c.input).ToArray();
+            // Remove all ports which we already are connected with to avoid multi-edge generation on both in and out ports multi capacity
+            return availablePorts.Where(p => !connectedPorts.Contains(p)).ToList();
+        }
+
         private void CreateNodes(BehaviourTree tree)
         {
             _nodes = new List<BTNode>();
@@ -105,6 +114,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             if (change.elementsToRemove != null)
             {
+                // Remove entry node from change
+                change.elementsToRemove = change.elementsToRemove
+                    .Where(e => !(e is BTNode bTNode && bTNode.IsEntry))
+                    .ToList();
+
                 var edges = change.elementsToRemove.Where(e => e is Edge).Select(e => (Edge)e).ToArray();
 
                 if (edges.Length > 0)
@@ -188,15 +202,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var inputNode = edge.input.node as BTNode;
             // Port user data is output index
             outputNode.Data.AddConnection((int)edge.output.userData, inputNode.Data.Index);
-        }
-
-        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
-        {
-            // Remove all ports on same node and all ports with same direction (in/out)
-            var availablePorts = ports.ToList().Where(p => p.direction != startPort.direction && p.node != startPort.node).ToArray();
-            var connectedPorts = startPort.connections.Select(c => startPort.direction == Direction.Input ? c.output : c.input).ToArray();
-            // Remove all ports which we already are connected with to avoid multi-edge generation on both in and out ports multi capacity
-            return availablePorts.Where(p => !connectedPorts.Contains(p)).ToList();
         }
 
         private IEnumerable<BTNode> ToNodes(IEnumerable<GraphElement> elements)
