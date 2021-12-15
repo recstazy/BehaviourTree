@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    public class MousePositionProviderManipulator : MouseManipulator
+    public class BTMousePosProvider : MouseManipulator
     {
         #region Fields
 
@@ -13,7 +13,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #region Properties
 
-        public Vector2 MousePos { get; private set; }
+        public Vector2 MousePosition { get; private set; }
 
         #endregion
 
@@ -29,7 +29,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void MouseMove(MouseMoveEvent evt)
         {
-            MousePos = evt.mousePosition;
+            MousePosition = (target as BTGraph).viewTransform.matrix.inverse.MultiplyPoint3x4(evt.mousePosition);
         }
     }
 }

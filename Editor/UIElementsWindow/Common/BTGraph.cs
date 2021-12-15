@@ -17,7 +17,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private List<BTNode> _nodes;
         private bool _isInitialized;
-        private MousePositionProviderManipulator _mousePositionProvider;
+        private BTMousePosProvider _mousePosProvider;
 
         #endregion
 
@@ -27,7 +27,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         protected override bool canCopySelection => true;
         protected override bool canPaste => true;
-        private Vector2 MousePos => _mousePositionProvider == null ? Vector2.zero : _mousePositionProvider.MousePos;
+        private Vector2 MousePosition => _mousePosProvider == null ? Vector2.zero : _mousePosProvider.MousePosition;
 
         #endregion
 
@@ -43,8 +43,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             this.AddManipulator(new ClickSelector());
             this.AddManipulator(new ContentZoomer());
             this.AddManipulator(new RectangleSelector());
-            _mousePositionProvider = new MousePositionProviderManipulator();
-            this.AddManipulator(_mousePositionProvider);
+            _mousePosProvider = new BTMousePosProvider();
+            this.AddManipulator(_mousePosProvider);
             SetupZoom(minScale, maxScale);
 
             serializeGraphElements += SerializeForCopy;
@@ -120,7 +120,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void ContextCreateDataAndNode(DropdownMenuAction args)
         {
             var data = new NodeData(GetAvailableNodeIndex(), null, null);
-            data.Position = _mousePositionProvider.MousePos;
+            data.Position = _mousePosProvider.MousePosition;
             Tree.NodeData.AddData(data);
             BTWindow.SetDirty("Add Node");
             GenerateNode(data);
@@ -238,7 +238,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UnserializeAndPaste(string operationName, string dataString)
         {
-            var newNodeData = CopyPasteSerializer.Deserialize(dataString, GetAvailableNodeIndex(), MousePos);
+            var newNodeData = CopyPasteSerializer.Deserialize(dataString, GetAvailableNodeIndex(), MousePosition);
             Tree.NodeData.AddData(newNodeData);
             var newNodes = new List<BTNode>();
 

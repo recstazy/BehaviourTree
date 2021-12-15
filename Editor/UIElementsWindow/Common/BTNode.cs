@@ -64,14 +64,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public void ApplyPositionFromData()
         {
             var currentRect = GetPosition();
-            currentRect.position = parent.WorldToLocal(Data.Position);
+            currentRect.position = Data.Position;
             SetPosition(currentRect);
         }
 
         public Vector2 GetWorldPosition()
         {
             var currentRect = GetPosition();
-            return parent.LocalToWorld(currentRect.position);
+            return currentRect.position;
         }
 
         public void EdgesChanged()
