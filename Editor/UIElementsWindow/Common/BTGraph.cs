@@ -91,6 +91,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var node = new BTNode(data);
             _nodes.Add(node);
             AddElement(node);
+            node.ApplyPositionFromData();
             return node;
         }
 
@@ -119,7 +120,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void ContextCreateDataAndNode(DropdownMenuAction args)
         {
             var data = new NodeData(GetAvailableNodeIndex(), null, null);
-            data.Position = args.eventInfo.mousePosition;
+            data.Position = _mousePositionProvider.MousePos;
             Tree.NodeData.AddData(data);
             BTWindow.SetDirty("Add Node");
             GenerateNode(data);
@@ -174,7 +175,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 foreach (var n in nodes)
                 {
-                    n.Data.Position = n.GetPosition().position;
+                    n.Data.Position = n.GetWorldPosition();
                 }
 
                 BTWindow.SetDirty("Move Nodes");

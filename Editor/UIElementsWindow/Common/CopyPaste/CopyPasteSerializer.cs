@@ -28,7 +28,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 TaskTypeIndex = node.TaskTypeIndex;
                 TaskJson = JsonUtility.ToJson(node.Data.TaskImplementation);
                 Connections = node.Data.Connections.ToArray();
-                Position = node.GetPosition().position;
+                Position = node.GetWorldPosition();
             }
 
             public void OffsetAllIndices(int offset)

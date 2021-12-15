@@ -39,10 +39,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             Data = data;
             IsEntry = Data.TaskImplementation is EntryTask;
-
-            var currentRect = GetPosition();
-            currentRect.position = data.Position;
-            SetPosition(currentRect);
             CreateInput();
 
             if (!IsEntry)
@@ -63,6 +59,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
             UpdateTaskDependencies();
             RegisterCallback<DetachFromPanelEvent>(Detached);
             OnAnyDeleted += UpdateTaskContainer;
+        }
+
+        public void ApplyPositionFromData()
+        {
+            var currentRect = GetPosition();
+            currentRect.position = parent.WorldToLocal(Data.Position);
+            SetPosition(currentRect);
+        }
+
+        public Vector2 GetWorldPosition()
+        {
+            var currentRect = GetPosition();
+            return parent.LocalToWorld(currentRect.position);
         }
 
         public void EdgesChanged()
@@ -159,17 +168,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             port.portName = string.Empty;
             port.userData = 0;
             inputContainer.Add(port);
-        }
-
-        private void CreateOutputs()
-        {
-            var outputs = Data.GetOuts();
-            if (outputs == null || outputs.Length == 0) return;
-
-            foreach (var o in outputs)
-            {
-                CreateOutputPort(o);
-            }
         }
 
         private void TaskChanged()
