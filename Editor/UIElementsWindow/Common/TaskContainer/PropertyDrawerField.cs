@@ -53,10 +53,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             else
             {
                 var subTarget = _fieldInfo.GetValue(_target);
-                var subProps = subTarget.GetType()
-                    .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-                subProps = subProps.Where(p => p.IsSerialized()).ToArray();
+                var targetType = subTarget.GetType();
+                var subProps = targetType.GetSerializedFieldsUpToBase();
                 _subFields = new PropertyDrawerField[subProps.Length];
 
                 for (int i = 0; i < subProps.Length; i++)

@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace Recstazy.BehaviourTree.EditorScripts
@@ -27,13 +28,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return false;
         }
 
-        public static bool IsSerialized(this FieldInfo info)
+        public static bool IsSerializedAndVisible(this FieldInfo info)
         {
+            if (info.GetCustomAttribute<HideInInspector>() != null) return false;
+
             if (info.IsPublic) return true;
             else if (info.GetCustomAttribute<SerializeField>() != null) return true;
             else if (info.GetCustomAttribute<SerializeReference>() != null) return true;
-
-            return false;
+            else return false;
         }
 
         public static VisualElement GetFieldByType(SerializedProperty property, Action<object, object> onValueChanged)
@@ -44,13 +46,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
             switch (type)
             {
                 case SerializedPropertyType.Integer:
-                    return BindChange(new IntegerField(property.displayName), onValueChanged);
+                    return BindChange(new IntegerField(property.displayName) { isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.Boolean:
                     return BindChange(new Toggle(property.displayName), onValueChanged);
                 case SerializedPropertyType.Float:
-                    return BindChange(new FloatField(property.displayName), onValueChanged);
+                    return BindChange(new FloatField(property.displayName) { isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.String:
-                    return BindChange(new TextField(property.displayName), onValueChanged);
+                    return BindChange(new TextField(property.displayName) { isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.Color:
                     return BindChange(new ColorField(property.displayName), onValueChanged);
                 case SerializedPropertyType.ObjectReference:
@@ -68,9 +70,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 case SerializedPropertyType.Rect:
                     return BindChange(new RectField(property.displayName), onValueChanged);
                 case SerializedPropertyType.ArraySize:
-                    return BindChange(new IntegerField(property.displayName), onValueChanged);
+                    return BindChange(new IntegerField(property.displayName) { isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.Character:
-                    return BindChange(new TextField(property.displayName, 1, false, false, '.'), onValueChanged);
+                    return BindChange(new TextField(property.displayName, 1, false, false, '.') { isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.AnimationCurve:
                     return BindChange(new CurveField(property.displayName), onValueChanged);
                 case SerializedPropertyType.Bounds:
@@ -90,6 +92,29 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 default:
                     return null;
             }
+        }
+
+        public static FieldInfo[] GetSerializedFieldsUpToBase(this Type type)
+        {
+            var baseType = type;
+            List<FieldInfo> fields = new List<FieldInfo>();
+
+            while (baseType != null)
+            {
+                var subProps = baseType
+                    .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+                subProps = subProps.Where(p => p.IsSerializedAndVisible()).ToArray();
+
+                foreach (var s in subProps)
+                {
+                    fields.Add(s);
+                }
+
+                baseType = baseType.BaseType;
+            }
+
+            return fields.ToArray();
         }
 
         private static VisualElement BindChange<T>(BaseField<T> field, Action<object, object> onChanged)
