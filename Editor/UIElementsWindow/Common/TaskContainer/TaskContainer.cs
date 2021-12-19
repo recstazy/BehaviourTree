@@ -15,7 +15,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private NodeData _data;
         private SerializedObject _serializedObject;
         private SerializedProperty _property;
-        private PropertyDrawerField _field;
+        private PropertyFieldElement _field;
         private const string TaskImplName = "_taskImplementation";
 
         #endregion
@@ -64,7 +64,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             property = property.Copy();
             var fieldInfo = _data.GetType().GetField(TaskImplName, BindingFlags.NonPublic | BindingFlags.Instance);
-            _field = new PropertyDrawerField();
+            _field = new PropertyFieldElement();
             _field.SetField(property, fieldInfo, _data, true);
             Add(_field);
         }

@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    public class PropertyDrawerField : VisualElement
+    public class PropertyFieldElement : VisualElement
     {
         #region Fields
 
@@ -19,7 +19,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private VisualElement _inputField;
         private object _target;
 
-        private PropertyDrawerField[] _subFields;
+        private PropertyFieldElement[] _subFields;
         private bool _unwrap;
 
         #endregion
@@ -46,11 +46,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             bool isComplex = FieldUtility.IsComplex(_property.propertyType);
+            var label = new Label(_property.displayName);
 
             if (!isComplex)
             {
                 _inputField = FieldUtility.GetFieldByType(_property, ValueChanged);
-                Add(_inputField);
+                _inputField.AddToClassList("simple-prop-value");
+                var simpleContainer = new VisualElement();
+                simpleContainer.AddToClassList("simple-prop-container");
+                Add(simpleContainer);
+                simpleContainer.Add(label);
+                simpleContainer.Add(_inputField);
             }
             else
             {
@@ -62,7 +68,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
                 else
                 {
-                    var label = new Label(_property.displayName);
                     Add(label);
                     container = new VisualElement();
                     container.AddToClassList("complex-prop-container");
@@ -72,13 +77,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var subTarget = _fieldInfo.GetValue(_target);
                 var targetType = subTarget.GetType();
                 var subProps = targetType.GetSerializedFieldsUpToBase();
-                _subFields = new PropertyDrawerField[subProps.Length];
+                _subFields = new PropertyFieldElement[subProps.Length];
 
                 for (int i = 0; i < subProps.Length; i++)
                 {
                     var subProp = subProps[i];
                     var property = _property.FindPropertyRelative(subProp.Name);
-                    var subField = new PropertyDrawerField();
+                    var subField = new PropertyFieldElement();
                     subField.SetField(property, subProp, subTarget);
                     _subFields[i] = subField;
                     container.Add(subField);
