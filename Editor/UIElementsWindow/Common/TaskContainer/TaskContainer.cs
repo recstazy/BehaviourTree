@@ -15,7 +15,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private NodeData _data;
         private SerializedObject _serializedObject;
         private SerializedProperty _property;
-        //private PropertyField _field;
         private PropertyDrawerField _field;
         private const string TaskImplName = "_taskImplementation";
 
@@ -35,7 +34,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void Dispose()
         {
-            //_field?.Unbind();
             _serializedObject = null;
             _property = null;
             _data = null;
@@ -43,7 +41,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UpdateField()
         {
-            //_field?.Unbind();
             _serializedObject = null;
             Clear();
             bool hasEditor = !CheckForNoEditor(_data.TaskImplementation);
@@ -68,12 +65,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             property = property.Copy();
             var fieldInfo = _data.GetType().GetField(TaskImplName, BindingFlags.NonPublic | BindingFlags.Instance);
             _field = new PropertyDrawerField();
-            _field.SetField(property, fieldInfo, _data);
+            _field.SetField(property, fieldInfo, _data, true);
             Add(_field);
-
-            //_field = new PropertyField(property);
-            //Add(_field);
-            //this.Bind(_serializedObject);
         }
 
         private SerializedProperty CreateOrGetTaskProperty()

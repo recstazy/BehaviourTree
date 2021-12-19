@@ -20,6 +20,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private object _target;
 
         private PropertyDrawerField[] _subFields;
+        private bool _unwrap;
 
         #endregion
 
@@ -27,8 +28,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 	
         #endregion
 
-        public void SetField(SerializedProperty property, FieldInfo fieldInfo, object target)
+        public void SetField(SerializedProperty property, FieldInfo fieldInfo, object target, bool hideLabelAndUnwrap = false)
         {
+            _unwrap = hideLabelAndUnwrap;
             _fieldInfo = fieldInfo;
             _property = property;
             _target = target;
@@ -52,6 +54,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
             else
             {
+                VisualElement container;
+
+                if (_unwrap)
+                {
+                    container = this;
+                }
+                else
+                {
+                    var label = new Label(_property.displayName);
+                    Add(label);
+                    container = new VisualElement();
+                    container.AddToClassList("complex-prop-container");
+                    Add(container);
+                }
+                
                 var subTarget = _fieldInfo.GetValue(_target);
                 var targetType = subTarget.GetType();
                 var subProps = targetType.GetSerializedFieldsUpToBase();
@@ -64,7 +81,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     var subField = new PropertyDrawerField();
                     subField.SetField(property, subProp, subTarget);
                     _subFields[i] = subField;
-                    Add(subField);
+                    container.Add(subField);
                 }
             }
         }
