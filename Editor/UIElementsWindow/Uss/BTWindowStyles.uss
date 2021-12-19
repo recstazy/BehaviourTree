@@ -36,11 +36,6 @@ TaskContainer:disabled {
     padding: 0px;
 }
 
-PropertyField {
-    height: 100%;
-    width: 100%;
-}
-
 .simple-prop-container {
     flex-direction: row;
     justify-content: space-between;
@@ -52,10 +47,9 @@ PropertyField {
 }
 
 .complex-prop-container {
-    margin-left: 5px;
-    padding-left: 5px;
+    padding-left: 10px;
     background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
+    border-radius: 3px;
 }
 
 .title-container {
