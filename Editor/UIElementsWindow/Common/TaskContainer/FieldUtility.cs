@@ -36,7 +36,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return false;
         }
 
-        public static VisualElement GetFieldByType(SerializedProperty property, Action<object> onValueChanged)
+        public static VisualElement GetFieldByType(SerializedProperty property, Action<object, object> onValueChanged)
         {
             var type = property.propertyType;
             if (IsComplex(property.propertyType)) return ComplexLabel;
@@ -92,9 +92,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        private static VisualElement BindChange<T>(BaseField<T> field, Action<object> onChanged)
+        private static VisualElement BindChange<T>(BaseField<T> field, Action<object, object> onChanged)
         {
-            field.RegisterValueChangedCallback((change) => onChanged?.Invoke(change));
+            field.RegisterValueChangedCallback((change) => onChanged?.Invoke(change.previousValue, change.newValue));
             return field;
         }
     }

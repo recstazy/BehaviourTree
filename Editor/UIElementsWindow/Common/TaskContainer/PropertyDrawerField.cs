@@ -71,11 +71,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        private void ValueChanged(object newValue)
+        private void ValueChanged(object oldValue, object newValue)
         {
-            Debug.Log($"New Value: {newValue}");
+            Debug.Log($"Value changed: {oldValue} -> {newValue}");
         }
-
-        
     }
 }
