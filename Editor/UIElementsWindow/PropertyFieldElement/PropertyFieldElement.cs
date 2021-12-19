@@ -47,10 +47,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             bool isComplex = FieldUtility.IsComplex(_property.propertyType);
             var label = new Label(_property.displayName);
+            var fieldValue = _fieldInfo.GetValue(_target);
 
             if (!isComplex)
             {
-                _inputField = FieldUtility.GetFieldByType(_property, ValueChanged);
+                _inputField = FieldUtility.GetFieldByType(_property, _fieldInfo, fieldValue, ValueChanged);
                 _inputField.AddToClassList("simple-prop-value");
                 var simpleContainer = new VisualElement();
                 simpleContainer.AddToClassList("simple-prop-container");
@@ -73,8 +74,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     container.AddToClassList("complex-prop-container");
                     Add(container);
                 }
-                
-                var subTarget = _fieldInfo.GetValue(_target);
+
+                var subTarget = fieldValue;
                 var targetType = subTarget.GetType();
                 var subProps = targetType.GetSerializedFieldsUpToBase();
                 _subFields = new PropertyFieldElement[subProps.Length];

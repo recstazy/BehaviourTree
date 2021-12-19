@@ -38,7 +38,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             else return false;
         }
 
-        public static VisualElement GetFieldByType(SerializedProperty property, Action<object, object> onValueChanged)
+        public static VisualElement GetFieldByType(SerializedProperty property, FieldInfo fieldInfo, object currentValue, Action<object, object> onValueChanged)
         {
             var type = property.propertyType;
             if (IsComplex(property.propertyType)) return ComplexLabel;
@@ -56,11 +56,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 case SerializedPropertyType.Color:
                     return BindChange(new ColorField(), onValueChanged);
                 case SerializedPropertyType.ObjectReference:
-                    return BindChange(new ObjectField(), onValueChanged);
+                    return BindChange(new ObjectField() { objectType = fieldInfo.FieldType }, onValueChanged);
                 case SerializedPropertyType.LayerMask:
                     return BindChange(new LayerMaskField(), onValueChanged);
                 case SerializedPropertyType.Enum:
-                    return BindChange(new EnumField(), onValueChanged);
+                    return BindChange(new EnumField(defaultValue: (Enum)currentValue), onValueChanged);
                 case SerializedPropertyType.Vector2:
                     return BindChange(new Vector2Field(), onValueChanged);
                 case SerializedPropertyType.Vector3:
