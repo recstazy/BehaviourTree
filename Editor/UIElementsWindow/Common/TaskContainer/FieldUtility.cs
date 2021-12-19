@@ -96,22 +96,27 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static FieldInfo[] GetSerializedFieldsUpToBase(this Type type)
         {
-            var baseType = type;
+            List<Type> hierarchy = new List<Type>();
+            var currentType = type;
+
+            while (currentType != null)
+            {
+                hierarchy.Add(currentType);
+                currentType = currentType.BaseType;
+            }
+
+            hierarchy.Reverse();
             List<FieldInfo> fields = new List<FieldInfo>();
 
-            while (baseType != null)
+            foreach (var t in hierarchy)
             {
-                var subProps = baseType
-                    .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
+                var subProps = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
                 subProps = subProps.Where(p => p.IsSerializedAndVisible()).ToArray();
 
                 foreach (var s in subProps)
                 {
                     fields.Add(s);
                 }
-
-                baseType = baseType.BaseType;
             }
 
             return fields.ToArray();
