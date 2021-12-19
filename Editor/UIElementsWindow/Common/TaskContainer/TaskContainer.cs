@@ -15,7 +15,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private NodeData _data;
         private SerializedObject _serializedObject;
         private SerializedProperty _property;
-        private PropertyField _field;
+        //private PropertyField _field;
+        private PropertyDrawerField _field;
+        private const string TaskImplName = "_taskImplementation";
 
         #endregion
 
@@ -33,7 +35,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void Dispose()
         {
-            _field?.Unbind();
+            //_field?.Unbind();
             _serializedObject = null;
             _property = null;
             _data = null;
@@ -41,7 +43,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UpdateField()
         {
-            _field?.Unbind();
+            //_field?.Unbind();
             _serializedObject = null;
             Clear();
             bool hasEditor = !CheckForNoEditor(_data.TaskImplementation);
@@ -64,9 +66,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (property == null) return;
 
             property = property.Copy();
-            _field = new PropertyField(property);
+            var fieldInfo = _data.GetType().GetField(TaskImplName, BindingFlags.NonPublic | BindingFlags.Instance);
+            _field = new PropertyDrawerField();
+            _field.SetField(property, fieldInfo, _data);
             Add(_field);
-            this.Bind(_serializedObject);
+
+            //_field = new PropertyField(property);
+            //Add(_field);
+            //this.Bind(_serializedObject);
         }
 
         private SerializedProperty CreateOrGetTaskProperty()
@@ -90,7 +97,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     if (dataIndex >= 0)
                     {
                         var datasArray = _serializedObject.FindProperty("_nodeData._data");
-                        _property = datasArray.GetArrayElementAtIndex(dataIndex).FindPropertyRelative("_taskImplementation");
+                        _property = datasArray.GetArrayElementAtIndex(dataIndex).FindPropertyRelative(TaskImplName);
                     }
                 }
 
