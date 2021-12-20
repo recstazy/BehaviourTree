@@ -12,9 +12,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     public static class FieldUtility
     {
-        public static readonly VisualElement NullLabel = new Label("None");
-        public static readonly VisualElement ComplexLabel = new Label("Complex Field");
-        public static readonly VisualElement QuaternionLabel = new Label("Quaternions not supported");
+        public static VisualElement ComplexLabel => new Label("Complex Field");
+        public static VisualElement NotSupportedLabel => new Label("Not Supported");
+        public static VisualElement NoneLabel => new Label("None");
         
         public static bool IsComplex(SerializedPropertyType type)
         {
@@ -38,6 +38,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
             else return false;
         }
 
+        public static bool IsGenericList(Type type)
+        {
+            return (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(List<>)));
+        }
+
+        // Ah shit...
         public static VisualElement GetFieldByType(SerializedPropertyType type, object curValue, Action<object, object> onValueChanged)
         {
             if (IsComplex(type)) return ComplexLabel;
@@ -78,8 +84,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     return BindChange(new BoundsField() { value = (Bounds)curValue }, onValueChanged);
                 case SerializedPropertyType.Gradient:
                     return BindChange(new GradientField() { value = (Gradient)curValue }, onValueChanged);
-                case SerializedPropertyType.Quaternion:
-                    return QuaternionLabel;
                 case SerializedPropertyType.Vector2Int:
                     return BindChange(new Vector2IntField() { value = (Vector2Int)curValue }, onValueChanged);
                 case SerializedPropertyType.Vector3Int:
@@ -89,7 +93,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 case SerializedPropertyType.BoundsInt:
                     return BindChange(new BoundsIntField() { value = (BoundsInt)curValue}, onValueChanged);
                 default:
-                    return null;
+                    return NotSupportedLabel;
             }
         }
 
