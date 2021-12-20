@@ -38,57 +38,56 @@ namespace Recstazy.BehaviourTree.EditorScripts
             else return false;
         }
 
-        public static VisualElement GetFieldByType(SerializedProperty property, FieldInfo fieldInfo, object currentValue, Action<object, object> onValueChanged)
+        public static VisualElement GetFieldByType(SerializedPropertyType type, object curValue, Action<object, object> onValueChanged)
         {
-            var type = property.propertyType;
-            if (IsComplex(property.propertyType)) return ComplexLabel;
+            if (IsComplex(type)) return ComplexLabel;
 
             switch (type)
             {
                 case SerializedPropertyType.Integer:
-                    return BindChange(new IntegerField() { isDelayed = true }, onValueChanged);
+                    return BindChange(new IntegerField() { value = (int)curValue, isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.Boolean:
-                    return BindChange(new Toggle(), onValueChanged);
+                    return BindChange(new Toggle() { value = (bool) curValue }, onValueChanged);
                 case SerializedPropertyType.Float:
-                    return BindChange(new FloatField() { isDelayed = true }, onValueChanged);
+                    return BindChange(new FloatField() { value = (float)curValue, isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.String:
-                    return BindChange(new TextField() { isDelayed = true }, onValueChanged);
+                    return BindChange(new TextField() { value = (string)curValue, isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.Color:
-                    return BindChange(new ColorField(), onValueChanged);
+                    return BindChange(new ColorField() { value = (Color)curValue }, onValueChanged);
                 case SerializedPropertyType.ObjectReference:
-                    return BindChange(new ObjectField() { objectType = fieldInfo.FieldType }, onValueChanged);
+                    return BindChange(new ObjectField() { value = (UnityEngine.Object)curValue, objectType = curValue.GetType() }, onValueChanged);
                 case SerializedPropertyType.LayerMask:
-                    return BindChange(new LayerMaskField(), onValueChanged);
+                    return BindChange(new LayerMaskField() { value = (LayerMask)curValue }, onValueChanged);
                 case SerializedPropertyType.Enum:
-                    return BindChange(new EnumField(defaultValue: (Enum)currentValue), onValueChanged);
+                    return BindChange(new EnumField(defaultValue: (Enum)curValue),  onValueChanged);
                 case SerializedPropertyType.Vector2:
-                    return BindChange(new Vector2Field(), onValueChanged);
+                    return BindChange(new Vector2Field() { value = (Vector2)curValue }, onValueChanged);
                 case SerializedPropertyType.Vector3:
-                    return BindChange(new Vector3Field(), onValueChanged);
+                    return BindChange(new Vector3Field() { value = (Vector3)curValue }, onValueChanged);
                 case SerializedPropertyType.Vector4:
-                    return BindChange(new Vector4Field(), onValueChanged);
+                    return BindChange(new Vector4Field() { value = (Vector4)curValue }, onValueChanged);
                 case SerializedPropertyType.Rect:
-                    return BindChange(new RectField(), onValueChanged);
+                    return BindChange(new RectField() { value = (Rect)curValue }, onValueChanged);
                 case SerializedPropertyType.ArraySize:
-                    return BindChange(new IntegerField() { isDelayed = true }, onValueChanged);
+                    return BindChange(new IntegerField() { value = (int)curValue, isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.Character:
-                    return BindChange(new TextField(1, false, false, '.') { isDelayed = true }, onValueChanged);
+                    return BindChange(new TextField(1, false, false, '.') {value = (string)curValue, isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.AnimationCurve:
-                    return BindChange(new CurveField(), onValueChanged);
+                    return BindChange(new CurveField() { value = (AnimationCurve)curValue }, onValueChanged);
                 case SerializedPropertyType.Bounds:
-                    return BindChange(new BoundsField(), onValueChanged);
+                    return BindChange(new BoundsField() { value = (Bounds)curValue }, onValueChanged);
                 case SerializedPropertyType.Gradient:
-                    return BindChange(new GradientField(), onValueChanged);
+                    return BindChange(new GradientField() { value = (Gradient)curValue }, onValueChanged);
                 case SerializedPropertyType.Quaternion:
                     return QuaternionLabel;
                 case SerializedPropertyType.Vector2Int:
-                    return BindChange(new Vector2IntField(), onValueChanged);
+                    return BindChange(new Vector2IntField() { value = (Vector2Int)curValue }, onValueChanged);
                 case SerializedPropertyType.Vector3Int:
-                    return BindChange(new Vector3IntField(), onValueChanged);
+                    return BindChange(new Vector3IntField() { value = (Vector3Int)curValue }, onValueChanged);
                 case SerializedPropertyType.RectInt:
-                    return BindChange(new RectIntField(), onValueChanged);
+                    return BindChange(new RectIntField() { value = (RectInt)curValue }, onValueChanged);
                 case SerializedPropertyType.BoundsInt:
-                    return BindChange(new BoundsIntField(), onValueChanged);
+                    return BindChange(new BoundsIntField() { value = (BoundsInt)curValue}, onValueChanged);
                 default:
                     return null;
             }

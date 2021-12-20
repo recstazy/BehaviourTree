@@ -34,6 +34,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void Dispose()
         {
+            if (_field != null) _field.OnValueChanged -= FieldChanged;
             _serializedObject = null;
             _property = null;
             _data = null;
@@ -66,7 +67,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var fieldInfo = _data.GetType().GetField(TaskImplName, BindingFlags.NonPublic | BindingFlags.Instance);
             _field = new PropertyFieldElement();
             _field.SetField(property, fieldInfo, _data, true);
+            _field.OnValueChanged += FieldChanged;
             Add(_field);
+        }
+
+        private void FieldChanged(object newValue)
+        {
+            BTWindow.SetDirty("Change task field");
         }
 
         private SerializedProperty CreateOrGetTaskProperty()

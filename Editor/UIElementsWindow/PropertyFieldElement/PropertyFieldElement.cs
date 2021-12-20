@@ -12,6 +12,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     public class PropertyFieldElement : VisualElement
     {
+        public event Action<object> OnValueChanged;
+
         #region Fields
 
         private FieldInfo _fieldInfo;
@@ -27,6 +29,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Properties
 	
         #endregion
+
+        public PropertyFieldElement()
+        {
+            RegisterCallback<DetachFromPanelEvent>(Detached);
+        }
 
         public void SetField(SerializedProperty property, FieldInfo fieldInfo, object target, bool hideLabelAndUnwrap = false)
         {
@@ -51,7 +58,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             if (!isComplex)
             {
-                _inputField = FieldUtility.GetFieldByType(_property, _fieldInfo, fieldValue, ValueChanged);
+                _inputField = FieldUtility.GetFieldByType(_property.propertyType, fieldValue, ValueChanged);
                 _inputField.AddToClassList("simple-prop-value");
                 var simpleContainer = new VisualElement();
                 simpleContainer.AddToClassList("simple-prop-container");
@@ -88,13 +95,42 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     subField.SetField(property, subProp, subTarget);
                     _subFields[i] = subField;
                     container.Add(subField);
+                    subField.OnValueChanged += SubfieldChanged;
                 }
             }
         }
 
         private void ValueChanged(object oldValue, object newValue)
         {
-            Debug.Log($"Value changed: {oldValue} -> {newValue}");
+            ApplyChangesToTarget(newValue);
+            OnValueChanged?.Invoke(newValue);
+        }
+
+        private void SubfieldChanged(object newValue)
+        {
+            OnValueChanged?.Invoke(_fieldInfo.GetValue(_target));
+        }
+
+        private void ApplyChangesToTarget(object newValue)
+        {
+            _fieldInfo.SetValue(_target, newValue);
+        }
+
+        private void Detached(DetachFromPanelEvent evt)
+        {
+            UnregisterCallback<DetachFromPanelEvent>(Detached);
+
+            if (_subFields != null)
+            {
+                foreach (var s in _subFields)
+                {
+                    s.OnValueChanged -= SubfieldChanged;
+                }
+            }
+
+            if (_property != null) _property.Dispose();
+            _target = null;
+            _fieldInfo = null;
         }
     }
 }
