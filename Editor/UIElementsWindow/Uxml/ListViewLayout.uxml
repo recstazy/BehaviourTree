@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UXML xmlns="Recstazy.BehaviourTree.EditorScripts" xmlns:unity="UnityEngine.UIElements">
-  <unity:VisualElement class="list-items-container"/>
-  <unity:VisualElement style="flex-direction: row; align-items: flex-end; justify-content: flex-end;">
+  <unity:VisualElement class="list-button-container">
+    <unity:Button name="minusButton" class="resize-button" text="-"/>
     <unity:Button name="plusButton" class="resize-button" text="+"/>
-    <unity:Button name="minusButton" class="resize-button" text="-" style="margin-right: 3px"/>
   </unity:VisualElement>
+  <unity:VisualElement class="list-items-container"/>
 </UXML>

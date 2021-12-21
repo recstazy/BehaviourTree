@@ -22,6 +22,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private SerializedProperty _property;
         private VisualElement _inputField;
         private PropertyFieldElement[] _subFields;
+        private ListPropertyElement _listView;
         private bool _unwrap;
         private Label _label;
 
@@ -66,6 +67,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 {
                     s.OnValueChanged -= SubfieldChanged;
                 }
+            }
+
+            if (_listView != null)
+            {
+                _listView.OnChanged -= ListChanged;
             }
 
             if (_property != null) _property.Dispose();
@@ -165,10 +171,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void CreateListView(object fieldValue, VisualElement container)
         {
             var iList = fieldValue as IList;
-            var listView = new ListPropertyElement();
-            listView.SetList(iList, _property);
+            _listView = new ListPropertyElement();
+            _listView.SetList(iList, _property);
+            _listView.OnChanged += ListChanged;
+            container.Add(_listView);
+        }
 
-            container.Add(listView);
+        private void ListChanged(IList list)
+        {
+            ApplyChangesToTarget(list);
+            SubfieldChanged(list);
         }
 
         private object GetValue()

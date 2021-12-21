@@ -24,6 +24,12 @@ ListPropertyElement {
     height: 100%;
 }
 
+.list-button-container {
+    height: 15px;
+    flex-direction: row-reverse;
+    margin-bottom: 5px;
+}
+
 .resize-button {
     width: 20px; 
     height: 15px;
@@ -31,5 +37,9 @@ ListPropertyElement {
 }
 
 .list-item {
-    
+    margin-bottom: 4px;
+    padding-left: 3px;
+    border-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    border-width: 2px;
 }
