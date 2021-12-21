@@ -122,9 +122,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateComplexView(object fieldValue, Label label)
         {
-            var fieldType = fieldValue?.GetType();
-            bool isArray = fieldType != null && (fieldType.IsArray || FieldUtility.IsGenericList(fieldType));
-
+            bool isArray = fieldValue != null && _property.isArray;
             VisualElement container;
 
             if (_unwrap)

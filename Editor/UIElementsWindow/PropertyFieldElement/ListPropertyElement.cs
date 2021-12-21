@@ -105,7 +105,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void PlusClicked()
         {
             List = IncrementListSize(List);
-            _listProperty.arraySize++;
             _listProperty.InsertArrayElementAtIndex(List.Count - 1);
             
             OnChanged?.Invoke(List);
@@ -117,7 +116,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (List.Count == 0) return;
 
             _listProperty.DeleteArrayElementAtIndex(List.Count - 1);
-            _listProperty.arraySize--;
             List = DecrementListSize(List);
 
             OnChanged?.Invoke(List);
@@ -150,8 +148,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             if (isArray)
             {
-                var newArray = Array.CreateInstance(list.GetType().GetElementType(), list.Count + 1);
+                var elementType = list.GetType().GetElementType();
+                var newArray = Array.CreateInstance(elementType, list.Count + 1);
                 list.CopyTo(newArray, 0);
+                var serializedLastElement = list.Count > 0 ? JsonUtility.ToJson(list[list.Count - 1]) : "{}";
+                var deserializedElement = JsonUtility.FromJson(serializedLastElement, elementType);
+                newArray.SetValue(deserializedElement, newArray.Length - 1);
                 return newArray;
             }
             else

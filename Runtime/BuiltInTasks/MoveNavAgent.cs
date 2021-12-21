@@ -24,11 +24,9 @@ namespace Recstazy.BehaviourTree
         {
             public float _float;
             public string _string;
-            public int _int;
-            public bool _bool;
-            public Vector3 _vector3;
-        }
 
+            public string[] _strings;
+        }
 
         [SerializeField]
         private TestStruct[] _testArray;
