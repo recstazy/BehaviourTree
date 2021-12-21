@@ -23,6 +23,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private VisualElement _inputField;
         private PropertyFieldElement[] _subFields;
         private bool _unwrap;
+        private Label _label;
 
         private Func<object> _valueGetter;
         private Action<object> _valueSetter;
@@ -30,6 +31,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #endregion
 
         #region Properties
+
+        public string Label { get => _label.text; set => _label.text = value; }
 
         #endregion
 
@@ -77,11 +80,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             bool isComplex = FieldUtility.IsComplex(_property.propertyType);
-            var label = new Label(_property.displayName);
+            _label = new Label(_property.displayName);
             var fieldValue = GetValue();
 
-            if (!isComplex) CreateSimpleView(fieldValue, label);
-            else CreateComplexView(fieldValue, label);
+            if (!isComplex) CreateSimpleView(fieldValue, _label);
+            else CreateComplexView(fieldValue, _label);
         }
 
         private void ValueChanged(object oldValue, object newValue)
