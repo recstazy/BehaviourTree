@@ -22,6 +22,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 case SerializedPropertyType.Generic:
                 case SerializedPropertyType.ManagedReference:
+                case SerializedPropertyType.Quaternion:
                     return true;
             }
 
@@ -129,6 +130,61 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             field.RegisterValueChangedCallback((change) => onChanged?.Invoke(change.previousValue, change.newValue));
             return field;
+        }
+
+        private static SerializedPropertyType GetSerializedPropertyType(Type type)
+        {
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return SerializedPropertyType.Integer;
+                case TypeCode.Single:
+                case TypeCode.Double:
+                case TypeCode.Decimal:
+                    return SerializedPropertyType.Float;
+                case TypeCode.Boolean:
+                    return SerializedPropertyType.Boolean;
+                case TypeCode.Char:
+                    return SerializedPropertyType.Character;
+                case TypeCode.String:
+                    return SerializedPropertyType.String;
+                case TypeCode.Object:
+                    return GetSerializedTypeByObject(type);
+                default:
+                    return SerializedPropertyType.Generic;
+            }
+        }
+
+        private static SerializedPropertyType GetSerializedTypeByObject(Type type)
+        {
+            if (type.Is<Color>()) return SerializedPropertyType.Color;
+            else if (type.Is<UnityEngine.Object>()) return SerializedPropertyType.ObjectReference;
+            else if (type.Is<LayerMask>()) return SerializedPropertyType.LayerMask;
+            else if (type.Is<Enum>()) return SerializedPropertyType.Enum;
+            else if (type.Is<Vector2>()) return SerializedPropertyType.Vector2;
+            else if (type.Is<Vector3>()) return SerializedPropertyType.Vector3;
+            else if (type.Is<Vector4>()) return SerializedPropertyType.Vector4;
+            else if (type.Is<Rect>()) return SerializedPropertyType.Rect;
+            else if (type.Is<AnimationCurve>()) return SerializedPropertyType.AnimationCurve;
+            else if (type.Is<Bounds>()) return SerializedPropertyType.Bounds;
+            else if (type.Is<Gradient>()) return SerializedPropertyType.Gradient;
+            else if (type.Is<Vector2Int>()) return SerializedPropertyType.Vector2Int;
+            else if (type.Is<Vector3Int>()) return SerializedPropertyType.Vector3Int;
+            else if (type.Is<RectInt>()) return SerializedPropertyType.RectInt;
+            else if (type.Is<BoundsInt>()) return SerializedPropertyType.BoundsInt;
+            else return SerializedPropertyType.Generic;
+        }
+
+        private static bool Is<T>(this Type type)
+        {
+            return type == typeof(T);
         }
     }
 }
