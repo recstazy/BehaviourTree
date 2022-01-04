@@ -111,7 +111,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             foreach (var c in n.Data.Connections)
             {
                 var outPort = outputPorts.First(p => p.node == n && (int)p.userData == c.OutPin);
-                var inPort = _nodes.First(n => n.Data.Index == c.InNode).inputContainer.Q<Port>();
+                var inPort = _nodes.First(node => node.Data.Index == c.InNode).inputContainer.Q<Port>();
                 var edge = outPort.ConnectTo(inPort);
                 AddElement(edge);
             }
