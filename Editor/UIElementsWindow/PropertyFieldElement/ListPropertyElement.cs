@@ -25,6 +25,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private List<PropertyFieldElement> _fieldElements;
 
+        private PropertyField _field;
+
         #endregion
 
         #region Properties
@@ -54,6 +56,40 @@ namespace Recstazy.BehaviourTree.EditorScripts
             List = list;
             _listProperty = listProperty;
             CreateItems();
+        }
+
+        public void SetProperty(SerializedProperty property)
+        {
+            _listProperty = property;
+
+            var name = new Label(property.displayName);
+            Add(name);
+
+            var button = new Button(EditClicked);
+            button.text = "Edit";
+            Add(button);
+        }
+
+        private void EditClicked()
+        {
+            _field = new PropertyField(_listProperty);
+            _field.Bind(_listProperty.serializedObject);
+
+            var window = new EditorWindow();
+            window.titleContent = new GUIContent(_listProperty.displayName);
+            
+            window.rootVisualElement.Add(_field);
+            var winPosition = window.position;
+            winPosition.position = Event.current.mousePosition;
+            window.position = winPosition;
+            window.ShowUtility();
+            window.Focus();
+            
+        }
+
+        private void EditClosed()
+        {
+
         }
 
         private void CreateItems()

@@ -171,6 +171,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var iList = fieldValue as IList;
             _listView = new ListPropertyElement();
             _listView.SetList(iList, _property);
+            //_listView.SetProperty(_property);
             _listView.OnChanged += ListChanged;
             container.Add(_listView);
         }
