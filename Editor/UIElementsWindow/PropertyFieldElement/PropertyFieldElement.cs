@@ -28,6 +28,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private Func<object> _valueGetter;
         private Action<object> _valueSetter;
+
         
         #endregion
 
@@ -43,12 +44,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
             RegisterCallback<DetachFromPanelEvent>(Detached);
         }
 
-        public void SetField(SerializedProperty property, FieldInfo fieldInfo, object target, bool hideLabelAndUnwrap = false)
+        public void SetProperty(SerializedProperty property, bool hideLabelAndUnwrap = false)
         {
-            SetField(property, () => fieldInfo.GetValue(target), (value) => fieldInfo.SetValue(target, value), hideLabelAndUnwrap);
+            Func<object> getter;
+            Action<object> setter;
+            FieldUtility.TryGetGetterAndSetter(property, out getter, out setter);
+            SetProperty(property, getter, setter, hideLabelAndUnwrap);
         }
 
-        public void SetField(SerializedProperty property, Func<object> valueGetter, Action<object> valueSetter, bool hideLabelAndUnwrap = false)
+        private void SetProperty(SerializedProperty property, Func<object> valueGetter, Action<object> valueSetter, bool hideLabelAndUnwrap = false)
         {
             _valueGetter = valueGetter;
             _valueSetter = valueSetter;
@@ -69,11 +73,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
             }
 
-            if (_listView != null)
-            {
-                _listView.OnChanged -= ListChanged;
-            }
-
             if (_property != null) _property.Dispose();
         }
 
@@ -87,10 +86,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             bool isComplex = FieldUtility.IsComplex(_property.propertyType);
             _label = new Label(_property.displayName);
-            var fieldValue = GetValue();
 
-            if (!isComplex) CreateSimpleView(fieldValue, _label);
-            else CreateComplexView(fieldValue, _label);
+            if (!isComplex) CreateSimpleView(_label);
+            else CreateComplexView(_label);
         }
 
         private void ValueChanged(object oldValue, object newValue)
@@ -107,11 +105,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void ApplyChangesToTarget(object newValue)
         {
             SetValue(newValue);
+            var current = _property;
+            var path = _property.propertyPath;
+            var serializedObject = _property.serializedObject;
+            serializedObject.ApplyModifiedProperties();
         }
 
-        private void CreateSimpleView(object fieldValue, Label label)
+        private void CreateSimpleView(Label label)
         {
-            _inputField = FieldUtility.GetFieldByType(_property.propertyType, fieldValue, ValueChanged);
+            _inputField = FieldUtility.GetFieldByType(_property, GetValue(), ValueChanged);
             _inputField.AddToClassList("simple-prop-value");
             var simpleContainer = new VisualElement();
             simpleContainer.AddToClassList("simple-prop-container");
@@ -120,9 +122,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             simpleContainer.Add(_inputField);
         }
 
-        private void CreateComplexView(object fieldValue, Label label)
+        private void CreateComplexView(Label label)
         {
-            bool isArray = fieldValue != null && _property.isArray;
+            bool isArray = _property.isArray;
             VisualElement container;
 
             if (_unwrap)
@@ -137,21 +139,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 Add(container);
             }
 
-            if (isArray) CreateListView(fieldValue, container);
-            else CreateSubfieldsView(fieldValue, container);
+            if (isArray) CreateListView(container);
+            else CreateSubfieldsView(container);
         }
 
-        private void CreateSubfieldsView(object fieldValue, VisualElement container)
+        private void CreateSubfieldsView(VisualElement container)
         {
-            if (fieldValue == null)
+            var value = GetValue();
+
+            if (value == null)
             {
                 container.Add(FieldUtility.NoneLabel);
                 return;
             }
 
-            var subTarget = fieldValue;
-            var targetType = subTarget.GetType();
-            var subInfos = targetType.GetSerializedFieldsUpToBase();
+            var subInfos = value.GetType().GetSerializedFieldsUpToBase();
             _subFields = new PropertyFieldElement[subInfos.Length];
 
             for (int i = 0; i < subInfos.Length; i++)
@@ -159,27 +161,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var subProp = subInfos[i];
                 var property = _property.FindPropertyRelative(subProp.Name);
                 var subField = new PropertyFieldElement();
-                subField.SetField(property, subProp, subTarget);
+                subField.SetProperty(property);
                 _subFields[i] = subField;
                 container.Add(subField);
                 subField.OnValueChanged += SubfieldChanged;
             }
         }
 
-        private void CreateListView(object fieldValue, VisualElement container)
+        private void CreateListView(VisualElement container)
         {
-            var iList = fieldValue as IList;
-            _listView = new ListPropertyElement();
-            _listView.SetList(iList, _property);
-            //_listView.SetProperty(_property);
-            _listView.OnChanged += ListChanged;
-            container.Add(_listView);
-        }
-
-        private void ListChanged(IList list)
-        {
-            ApplyChangesToTarget(list);
-            SubfieldChanged(list);
+            container.Add(new Label("Lists are coming soon"));
         }
 
         private object GetValue()

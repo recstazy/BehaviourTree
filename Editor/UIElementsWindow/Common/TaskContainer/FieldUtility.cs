@@ -44,16 +44,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(List<>)));
         }
 
-        public static VisualElement GetFieldByType(SerializedPropertyType type, object curValue, Action<object, object> onValueChanged)
+        public static VisualElement GetFieldByType(SerializedProperty property, object curValue, Action<object, object> onValueChanged)
         {
-            if (IsComplex(type)) return ComplexLabel;
-            else return CreateFieldByPropertyType(type, curValue, onValueChanged);
-        }
-
-        public static VisualElement GetFieldByType(FieldInfo fieldInfo, object curValue, Action<object, object> onValueChanged)
-        {
-            var serializedPropType = GetSerializedPropertyType(fieldInfo.FieldType);
-            return GetFieldByType(serializedPropType, curValue, onValueChanged);
+            if (IsComplex(property.propertyType)) return ComplexLabel;
+            else return CreateFieldByPropertyType(property, curValue, onValueChanged);
         }
 
         public static FieldInfo[] GetSerializedFieldsUpToBase(this Type type)
@@ -89,10 +83,111 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return GetSerializedPropertyType(type);
         }
 
+        public static bool TryGetGetterAndSetter(SerializedProperty property, out Func<object> getter, out Action<object> setter)
+        {
+            return GetGetterAndSetter(property, out getter, out setter);
+        }
+
         private static VisualElement BindChange<T>(BaseField<T> field, Action<object, object> onChanged)
         {
             field.RegisterValueChangedCallback((change) => onChanged?.Invoke(change.previousValue, change.newValue));
             return field;
+        }
+
+        // having fun here
+        private static bool GetGetterAndSetter(SerializedProperty property, out Func<object> getter, out Action<object> setter)
+        {
+            switch (property.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    getter = () => property.intValue;
+                    setter = (value) => property.intValue = (int)value;
+                    return true;
+                case SerializedPropertyType.Boolean:
+                    getter = () => property.boolValue;
+                    setter = (value) => property.boolValue = (bool)value;
+                    return true;
+                case SerializedPropertyType.Float:
+                    getter = () => property.floatValue;
+                    setter = (value) => property.floatValue = (float)value;
+                    return true;
+                case SerializedPropertyType.String:
+                    getter = () => property.stringValue;
+                    setter = (value) => property.stringValue = (string)value;
+                    return true;
+                case SerializedPropertyType.Color:
+                    getter = () => property.colorValue;
+                    setter = (value) => property.colorValue = (Color)value;
+                    return true;
+                case SerializedPropertyType.ObjectReference:
+                    getter = () => property.objectReferenceValue;
+                    setter = (value) => property.objectReferenceValue = (UnityEngine.Object)value;
+                    return true;
+                case SerializedPropertyType.LayerMask:
+                    getter = () => (LayerMask)property.intValue;
+                    setter = (value) => property.intValue = (LayerMask)value;
+                    return true;
+                case SerializedPropertyType.Enum:
+                    getter = () => property.enumValueIndex;
+                    setter = (value) => property.enumValueIndex = (int)value;
+                    return true;
+                case SerializedPropertyType.Vector2:
+                    getter = () => property.vector2Value;
+                    setter = (value) => property.vector2Value = (Vector2)value;
+                    return true;
+                case SerializedPropertyType.Vector3:
+                    getter = () => property.vector3Value;
+                    setter = (value) => property.vector3Value = (Vector3)value;
+                    return true;
+                case SerializedPropertyType.Vector4:
+                    getter = () => property.vector4Value;
+                    setter = (value) => property.vector4Value = (Vector4)value;
+                    return true;
+                case SerializedPropertyType.Rect:
+                    getter = () => property.rectValue;
+                    setter = (value) => property.rectValue = (Rect)value;
+                    return true;
+                case SerializedPropertyType.ArraySize:
+                    getter = () => property.arraySize;
+                    setter = (value) => property.arraySize = (int)value;
+                    return true;
+                case SerializedPropertyType.AnimationCurve:
+                    getter = () => property.animationCurveValue;
+                    setter = (value) => property.animationCurveValue = (AnimationCurve)value;
+                    return true;
+                case SerializedPropertyType.Bounds:
+                    getter = () => property.boundsValue;
+                    setter = (value) => property.boundsValue = (Bounds)value;
+                    return true;
+                case SerializedPropertyType.Vector2Int:
+                    getter = () => property.vector2IntValue;
+                    setter = (value) => property.vector2IntValue = (Vector2Int)value;
+                    return true;
+                case SerializedPropertyType.Vector3Int:
+                    getter = () => property.vector3IntValue;
+                    setter = (value) => property.vector3IntValue = (Vector3Int)value;
+                    return true;
+                case SerializedPropertyType.RectInt:
+                    getter = () => property.rectIntValue;
+                    setter = (value) => property.rectIntValue = (RectInt)value;
+                    return true;
+                case SerializedPropertyType.BoundsInt:
+                    getter = () => property.boundsIntValue;
+                    setter = (value) => property.boundsIntValue = (BoundsInt)value;
+                    return true;
+                case SerializedPropertyType.ManagedReference:
+                    getter = () => PropertyValueHelper.GetTargetObjectOfProperty(property);
+                    setter = (value) => property.managedReferenceValue = value;
+                    return true;
+                case SerializedPropertyType.Generic:
+                    getter = () => PropertyValueHelper.GetTargetObjectOfProperty(property);
+                    setter = (value) => PropertyValueHelper.SetTargetObjectOfProperty(property, value);
+                    return true;
+                default:
+                    getter = null;
+                    setter = null;
+                    return false;
+            }
         }
 
         // Please stop
@@ -153,8 +248,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
         }
 
         // Ah shit...
-        private static VisualElement CreateFieldByPropertyType(SerializedPropertyType type, object curValue, Action<object, object> onValueChanged)
+        private static VisualElement CreateFieldByPropertyType(SerializedProperty property, object curValue, Action<object, object> onValueChanged)
         {
+            var type = property.propertyType;
+
             switch (type)
             {
                 case SerializedPropertyType.Integer:
@@ -172,7 +269,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 case SerializedPropertyType.LayerMask:
                     return BindChange(new LayerMaskField() { value = (LayerMask)curValue }, onValueChanged);
                 case SerializedPropertyType.Enum:
-                    return BindChange(new EnumField(defaultValue: (Enum)curValue), onValueChanged);
+                    return BindChange(new EnumField(defaultValue: (Enum)PropertyValueHelper.GetTargetObjectOfProperty(property)), onValueChanged);
                 case SerializedPropertyType.Vector2:
                     return BindChange(new Vector2Field() { value = (Vector2)curValue }, onValueChanged);
                 case SerializedPropertyType.Vector3:
@@ -189,8 +286,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     return BindChange(new CurveField() { value = (AnimationCurve)curValue }, onValueChanged);
                 case SerializedPropertyType.Bounds:
                     return BindChange(new BoundsField() { value = (Bounds)curValue }, onValueChanged);
-                case SerializedPropertyType.Gradient:
-                    return BindChange(new GradientField() { value = (Gradient)curValue }, onValueChanged);
                 case SerializedPropertyType.Vector2Int:
                     return BindChange(new Vector2IntField() { value = (Vector2Int)curValue }, onValueChanged);
                 case SerializedPropertyType.Vector3Int:

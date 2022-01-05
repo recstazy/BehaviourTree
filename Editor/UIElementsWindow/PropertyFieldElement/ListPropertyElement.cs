@@ -113,7 +113,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var field = new PropertyFieldElement();
             field.OnValueChanged += AnyFieldChanged;
             _fieldElements.Add(field);
-            field.SetField(property, () => GetItemValue(index), (value) => SetItemValue(index, value));
+            field.SetProperty(property);
             field.Label = $"{index}:";
             listElement.Add(field);
             _items.Add(listElement);
