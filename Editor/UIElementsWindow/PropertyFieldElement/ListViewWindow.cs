@@ -12,6 +12,7 @@ internal class ListViewWindow : EditorWindow
 
     private static ListViewWindow s_currentInstance;
     private SerializedProperty _property;
+    private Vector2 _scrollPos;
 
     #endregion
 
@@ -39,9 +40,11 @@ internal class ListViewWindow : EditorWindow
 
     private void OnGUI()
     {
+        _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
         EditorGUI.BeginChangeCheck();
         _property.isExpanded = true;
         EditorGUILayout.PropertyField(_property);
+        EditorGUILayout.EndScrollView();
 
         if (EditorGUI.EndChangeCheck())
         {
