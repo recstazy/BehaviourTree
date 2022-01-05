@@ -19,18 +19,6 @@ namespace Recstazy.BehaviourTree
         [Tooltip("Wait until agent reached destination")]
         private bool _waitForFinished = false;
 
-        [System.Serializable]
-        private class TestStruct
-        {
-            public float _float;
-            public string _string;
-
-            public string[] _strings;
-        }
-
-        [SerializeField]
-        private TestStruct[] _testArray;
-
         #endregion
 
         #region Properties
