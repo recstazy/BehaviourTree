@@ -73,6 +73,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
             }
 
+            if (_listView != null)
+            {
+                _listView.OnChanged -= ListChanged;
+                _listView.Close();
+                _listView = null;
+            }
+
             if (_property != null) _property.Dispose();
         }
 
@@ -104,11 +111,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void ApplyChangesToTarget(object newValue)
         {
+            if (_property.isArray) return;
             SetValue(newValue);
-            var current = _property;
-            var path = _property.propertyPath;
-            var serializedObject = _property.serializedObject;
-            serializedObject.ApplyModifiedProperties();
+            _property.serializedObject.ApplyModifiedProperties();
         }
 
         private void CreateSimpleView(Label label)
@@ -170,7 +175,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateListView(VisualElement container)
         {
-            container.Add(new Label("Lists are coming soon"));
+            var listElement = new ListPropertyElement();
+            listElement.SetProperty(_property);
+            container.Add(listElement);
+            _listView = listElement;
+            _listView.OnChanged += ListChanged;
+        }
+
+        private void ListChanged()
+        {
+            OnValueChanged?.Invoke(null);
         }
 
         private object GetValue()
