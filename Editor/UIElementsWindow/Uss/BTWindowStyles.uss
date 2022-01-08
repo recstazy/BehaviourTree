@@ -54,7 +54,7 @@ PlaymodeWatcher {
     justify-content: space-around;
 }
 
-TargetTreeWatcher {
+TreeSelector {
     height: 100%;
     width: 100%;
     border-radius: 3px;
@@ -65,7 +65,7 @@ TargetTreeWatcher {
     justify-content: space-between;
 }
 
-.target-watcher-dropdown {
+.tree-selector-dropdown {
     height: 100%;
     width: 100%;
     align-items: center;
@@ -78,7 +78,7 @@ TargetTreeWatcher {
     flex-direction: row;
 }
 
-.target-watcher-dropdown:hover {
+.tree-selector-dropdown:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 

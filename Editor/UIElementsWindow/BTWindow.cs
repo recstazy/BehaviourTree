@@ -19,7 +19,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private VisualElement _toolbar;
         private BTGraph _graph;
         private PlaymodeWatcher _playmodeWatcher;
-        private TargetTreeWatcher _treeWatcher;
+        private TreeSelector _treeSelector;
         private static BTWindow s_currentWindow;
         public static BehaviourTree SharedTree { get; private set; }
 
@@ -151,7 +151,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _graphContainer = rootVisualElement.Q(name: "graph-container");
             _toolbar = rootVisualElement.Q(className: "window-toolbar");
             _playmodeWatcher = _toolbar.Q<PlaymodeWatcher>();
-            _treeWatcher = _toolbar.Q<TargetTreeWatcher>();
+            _treeSelector = _toolbar.Q<TreeSelector>();
         }
 
         private void InitializeGraph()
@@ -178,7 +178,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             _playmodeWatcher.SetDependencies(
                 edges.Concat(nodes)
-                .Concat(new IPlaymodeDependent[] { _graph, _treeWatcher })
+                .Concat(new IPlaymodeDependent[] { _graph, _treeSelector })
                 .ToArray());
         }
     }

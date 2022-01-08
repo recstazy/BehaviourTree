@@ -2,7 +2,7 @@
 <UXML xmlns="Recstazy.BehaviourTree.EditorScripts" xmlns:unity="UnityEngine.UIElements">
   <unity:VisualElement class="window-toolbar">
     <PlaymodeWatcher/>
-    <TargetTreeWatcher/>
+    <TreeSelector/>
   </unity:VisualElement>
   <unity:VisualElement name="graph-container" style="width: 100%; height: 100%;"/>
 </UXML>

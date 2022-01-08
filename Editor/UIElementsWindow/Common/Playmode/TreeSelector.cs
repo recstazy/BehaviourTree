@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    public class TargetTreeWatcher : VisualElement, IPlaymodeDependent
+    public class TreeSelector : VisualElement, IPlaymodeDependent
     {
-        public new class UxmlFactory : UxmlFactory<TargetTreeWatcher> { }
+        public new class UxmlFactory : UxmlFactory<TreeSelector> { }
 
         #region Fields
 
@@ -29,14 +29,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #endregion
 
-        public TargetTreeWatcher()
+        public TreeSelector()
         {
             var targetLabel = new Label("Target:");
             targetLabel.AddToClassList("target-label");
             Add(targetLabel);
 
             _dropdownElement = new VisualElement();
-            _dropdownElement.AddToClassList("target-watcher-dropdown");
+            _dropdownElement.AddToClassList("tree-selector-dropdown");
             Add(_dropdownElement);
 
             _currentName = new Label("No Target");
