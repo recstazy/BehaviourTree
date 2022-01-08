@@ -5,7 +5,6 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using System.IO;
 using System.Linq;
-using UnityEditor;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
@@ -89,6 +88,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         InitializeWithAsset(treeAsset);
                     }
                 }
+
+                _graph.OnStructureChanged += UpdatePlaymodeWatcher;
             }
 
             Undo.IncrementCurrentGroup();
@@ -111,15 +112,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             var toolbar = rootVisualElement.Q(className: "window-toolbar");
             _playmodeWatcher = new PlaymodeWatcher();
-            _playmodeWatcher.SetDependencies(_graph.BtNodes.ToArray());
             toolbar.Add(_playmodeWatcher);
+            _graph.OnStructureChanged += UpdatePlaymodeWatcher;
+            UpdatePlaymodeWatcher();
 
             _isInitialized = true;
         }
 
         private void Dispose()
         {
-            _graph?.Dispose();
+            if (_graph != null)
+            {
+                _graph.OnStructureChanged -= UpdatePlaymodeWatcher;
+                _graph.Dispose();
+            }
+           
             VisualElement root = rootVisualElement;
             if (root.childCount > 0) root.Clear();
             SharedTree = null;
@@ -156,6 +163,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 SharedTree.CreateEntry();
                 EditorUtility.SetDirty(SharedTree);
             }
+        }
+
+        private void UpdatePlaymodeWatcher()
+        {
+            var edges = _graph.edges.ToList().Select(e => (IPlaymodeDependent)new EdgeUpdater(e)).ToArray();
+            var nodes = _graph.BtNodes.Select(n => (IPlaymodeDependent)n).ToArray();
+            _playmodeWatcher.SetDependencies(edges.Concat(nodes).Concat(new IPlaymodeDependent[] { _graph }).ToArray());
         }
     }
 }

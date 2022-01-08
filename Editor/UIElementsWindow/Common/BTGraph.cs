@@ -10,15 +10,17 @@ using System.Linq;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    public class BTGraph : GraphView, IDisposable
+    public class BTGraph : GraphView, IDisposable, IPlaymodeDependent
     {
         public new class UxmlFactory : UxmlFactory<BTGraph> { }
+        public event Action OnStructureChanged;
 
         #region Fields
 
         private List<BTNode> _nodes;
         private bool _isInitialized;
         private BTMousePosProvider _mousePosProvider;
+        private bool _isPlaymode;
 
         #endregion
 
@@ -27,8 +29,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public BehaviourTree Tree { get; private set; }
         internal ReadOnlyCollection<BTNode> BtNodes => _nodes.AsReadOnly();
 
-        protected override bool canCopySelection => true;
-        protected override bool canPaste => true;
+        protected override bool canCutSelection => !_isPlaymode;
+        protected override bool canDeleteSelection => !_isPlaymode;
+        protected override bool canDuplicateSelection => !_isPlaymode;
+        protected override bool canCopySelection => !_isPlaymode;
+        protected override bool canPaste => !_isPlaymode;
         private Vector2 MousePosition => _mousePosProvider == null ? Vector2.zero : _mousePosProvider.MousePosition;
 
         #endregion
@@ -75,6 +80,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var connectedPorts = startPort.connections.Select(c => startPort.direction == Direction.Input ? c.output : c.input).ToArray();
             // Remove all ports which we already are connected with to avoid multi-edge generation on both in and out ports multi capacity
             return availablePorts.Where(p => !connectedPorts.Contains(p)).ToList();
+        }
+
+        public void PlaymodeChanged(bool isPlaymode)
+        {
+            _isPlaymode = isPlaymode;
         }
 
         private void CreateNodes(BehaviourTree tree)
@@ -126,6 +136,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Tree.NodeData.AddData(data);
             BTWindow.SetDirty("Add Node");
             GenerateNode(data);
+            OnStructureChanged?.Invoke();
         }
 
         private GraphViewChange GraphChanged(GraphViewChange change)
@@ -171,6 +182,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     BTNode.AnyNodeDeleted();
                 }
+
+                OnStructureChanged?.Invoke();
             }
             else if (change.movedElements != null)
             {
@@ -198,6 +211,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 {
                     n.EdgesChanged();
                 }
+
+                OnStructureChanged?.Invoke();
             }
 
             return change;
@@ -255,6 +270,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 CreateEdgesForNode(node);
             }
+
+            OnStructureChanged?.Invoke();
         }
     }
 }

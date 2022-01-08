@@ -39,6 +39,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public void SetDependencies(params IPlaymodeDependent[] dependencies)
         {
             _dependencies = dependencies;
+            UpdatePlaymodeDependencies();
         }
 
         private void Detached(DetachFromPanelEvent evt)
