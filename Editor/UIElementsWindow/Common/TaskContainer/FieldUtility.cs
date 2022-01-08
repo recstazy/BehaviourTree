@@ -170,6 +170,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     getter = () => property.boundsIntValue;
                     setter = (value) => property.boundsIntValue = (BoundsInt)value;
                     return true;
+                case SerializedPropertyType.Quaternion:
+                    getter = () => property.quaternionValue;
+                    setter = (value) => property.quaternionValue = (Quaternion)value;
+                    return true;
                 case SerializedPropertyType.ManagedReference:
                     getter = () => PropertyValueHelper.GetTargetObjectOfProperty(property);
                     setter = (value) => property.managedReferenceValue = value;
