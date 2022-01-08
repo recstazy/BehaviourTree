@@ -12,6 +12,9 @@ namespace Recstazy.BehaviourTree
     [System.Serializable]
     public class BehaviourTask
     {
+        public event System.Action<BehaviourTask> OnStarted;
+        public event System.Action<BehaviourTask> OnFinished;
+
         #region Fields
 
         /// <summary> Return -1 in <c>GetCurrentOutIndex</c> to tell player that no out can be selected to go further </summary>
@@ -44,8 +47,9 @@ namespace Recstazy.BehaviourTree
         public Blackboard Blackboard { get => GetBlackboard(); set => SetBlackboard(value); }
         protected virtual Color Color => s_DefaultColor;
 
-        internal int LastReturnedOut { get; private set; }
         internal CoroutineRunner CoroutineRunner { get; private set; }
+        internal int Index { get; set; }
+        internal int StartedFromOutPin { get; set; }
 
         #endregion
 
@@ -53,7 +57,6 @@ namespace Recstazy.BehaviourTree
         public int GetCurrentOut()
         {
             int nextOutIndex = GetCurrentOutIndex();
-            LastReturnedOut = nextOutIndex;
             return nextOutIndex;
         }
 
@@ -133,7 +136,7 @@ namespace Recstazy.BehaviourTree
 
             if (root != null)
             {
-                var branch = new BranchPlayer(root);
+                var branch = new BranchPlayer(root, outIndex);
                 _currentTaskBranches.Add(branch);
                 branch.Start();
                 return branch;
@@ -188,6 +191,7 @@ namespace Recstazy.BehaviourTree
             StopAllBranches();
             _taskBodyRoutine = null;
             IsRunning = false;
+            OnFinished?.Invoke(this);
         }
 
         internal void Initialize()
@@ -212,6 +216,7 @@ namespace Recstazy.BehaviourTree
             Succeed = true;
             _taskBodyIsRunning = true;
             _taskBodyRoutine = CoroutineRunner.StartCoroutine(TaskBodyCoroutine());
+            OnStarted?.Invoke(this);
             yield return new WaitUntil(() => !_taskBodyIsRunning);
             AfterBodyFinished();
         }

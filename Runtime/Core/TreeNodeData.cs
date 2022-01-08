@@ -149,6 +149,7 @@ namespace Recstazy.BehaviourTree
                 }
 
                 TaskImplementation.SetRuntimeConnections(connections);
+                TaskImplementation.Index = Index;
                 TaskImplementation.Initialize();
             }
         }

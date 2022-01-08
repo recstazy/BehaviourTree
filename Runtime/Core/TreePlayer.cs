@@ -14,6 +14,7 @@ namespace Recstazy.BehaviourTree
         private BranchPlayer _treeBranchPlayer;
         private CoroutineRunner _coroutineRunner;
         private string _name;
+        private TaskStack _taskStack;
 
         #endregion
 
@@ -31,6 +32,7 @@ namespace Recstazy.BehaviourTree
         public bool Succeed => _treeBranchPlayer.BranchSucceed;
 
         internal static List<TreePlayer> PlayersCache { get; private set; } = new List<TreePlayer>();
+        internal TaskStack Stack => _taskStack;
 
         #endregion
 
@@ -40,12 +42,20 @@ namespace Recstazy.BehaviourTree
             _coroutineRunner = coroutineRunner;
             SharedTree = tree;
             Tree = tree.CreateRuntimeImplementation(coroutineRunner, blackboard);
+            
+            if (Application.isEditor)
+            {
+                _taskStack = new TaskStack(tree.NodeData);
+                BindToTreeTasks();
+            }
+           
             AddTreePlayer(this);
         }
 
         public IEnumerator PlayTreeRoutine()
         {
-            _treeBranchPlayer = new BranchPlayer(Tree.EntryNode?.TaskImplementation);
+            _taskStack.Clear();
+            _treeBranchPlayer = new BranchPlayer(Tree.EntryNode?.TaskImplementation, BehaviourTask.NoOut);
             _treeBranchPlayer.Start();
             yield return new WaitUntil(() => !_treeBranchPlayer.IsRunning);
             yield return null;
@@ -53,6 +63,7 @@ namespace Recstazy.BehaviourTree
 
         internal void Destroyed()
         {
+            if (Application.isEditor) UnbindFromTreeTasks();
             RemoveTreePlayer(this);
         }
 
@@ -79,6 +90,27 @@ namespace Recstazy.BehaviourTree
             string treeName = SharedTree != null ? SharedTree.name : "[No Tree]";
             string customName = string.IsNullOrEmpty(_name) ? string.Empty : $" ({_name})";
             return $"{GameObject.name} - {treeName} {customName}";
+        }
+
+        private void BindToTreeTasks()
+        {
+            foreach (var t in Tree.NodeData.Data)
+            {
+                t.TaskImplementation.OnStarted += TaskStarted;
+            }
+        }
+
+        private void UnbindFromTreeTasks()
+        {
+            foreach (var t in Tree.NodeData.Data)
+            {
+                t.TaskImplementation.OnStarted -= TaskStarted;
+            }
+        }
+
+        private void TaskStarted(BehaviourTask task)
+        {
+            _taskStack.TaskStarted(task.Index, task.StartedFromOutPin);
         }
     }
 }

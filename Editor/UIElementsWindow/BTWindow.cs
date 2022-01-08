@@ -85,7 +85,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             TaskFactory.UpdateTaskTypes();
             ImportLayout();
             _nodeHighlighter = new PlaymodeNodeHighlighter();
-            _nodeHighlighter.Bind(() => _graph.BtNodes, () => _graph.Edges);
+            _nodeHighlighter.Bind(() => _graph.BtNodes);
             TreeSelector.OnTreeChanged += TreeSelectorTreeChanged;
 
             if (_lastAssetId != 0)

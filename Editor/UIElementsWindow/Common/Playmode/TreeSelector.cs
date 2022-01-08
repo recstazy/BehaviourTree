@@ -26,7 +26,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #region Properties
 
-        public TreePlayer CurrentPlayer => s_treePlayers[s_currentIndex];
+        public static TreePlayer CurrentPlayer => s_treePlayers[s_currentIndex];
 
         #endregion
 

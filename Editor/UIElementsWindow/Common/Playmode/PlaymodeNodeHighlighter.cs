@@ -12,8 +12,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Fields
 
         private Func<IList<BTNode>> _nodes;
-        private Func<IList<EdgeReference>> _edges;
         private Dictionary<VisualElement, VisualElement> _highlights;
+        private TreePlayer _currentPlayer;
+        private Dictionary<BTNode, VisualElement> _nodesInChain;
 
         #endregion
 
@@ -21,16 +22,28 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #endregion
 
-        public void Bind(Func<IList<BTNode>> nodes, Func<IList<EdgeReference>> edges)
+        public void Bind(Func<IList<BTNode>> nodes)
         {
             Clear();
             _nodes = nodes;
-            _edges = edges;
         }
 
+        // This also called when tree asset is changed 
+        // because BTWindow will set new dependencies to "PlaymodeWatcher"
         public void PlaymodeChanged(bool isPlaymode)
         {
-            if (isPlaymode) CreateHighlights();
+            if (_currentPlayer != null) _currentPlayer.Stack.OnStackChanged -= StackChanged;
+            
+            if (isPlaymode)
+            {
+                _currentPlayer = TreeSelector.CurrentPlayer;
+
+                if (_currentPlayer != null)
+                {
+                    CreateHighlights();
+                    _currentPlayer.Stack.OnStackChanged += StackChanged;
+                }
+            }
             else Clear();
         }
 
@@ -47,19 +60,47 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _highlights = null;
         }
 
+        private void StackChanged()
+        {
+            foreach (var n in _nodesInChain)
+            {
+                SetHighlightActive(n.Value, false);
+            }
+
+            _nodesInChain.Clear();
+
+            foreach (var info in _currentPlayer.Stack.Stack)
+            {
+                var node = _nodes().FirstOrDefault(n => n.Data.Index == info.Node);
+
+                if (node != null)
+                {
+                    var highlight = _highlights[node];
+                    SetHighlightActive(highlight, true);
+                    _nodesInChain.Add(node, highlight);
+                }
+            }
+        }
+
         private void CreateHighlights()
         {
             _highlights = new Dictionary<VisualElement, VisualElement>();
+            _nodesInChain = new Dictionary<BTNode, VisualElement>();
             var nodes = _nodes().ToArray();
 
             foreach (var n in nodes)
             {
                 var element = new VisualElement();
                 element.AddToClassList("node-highlight");
-                element.SetEnabled(false);
+                SetHighlightActive(element, false);
                 n.Add(element);
                 _highlights.Add(n, element);
             }
+        }
+
+        private void SetHighlightActive(VisualElement highlight, bool isActive)
+        {
+            highlight.style.opacity = isActive ? 1f : 0f;
         }
     }
 }

@@ -110,7 +110,3 @@ TreeSelector {
     border-radius: 8px;
     align-self: center;
 }
-
-.node-highlight:disabled {
-    opacity: 0;
-}
