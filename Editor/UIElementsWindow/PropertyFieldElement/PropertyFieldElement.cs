@@ -111,7 +111,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void ApplyChangesToTarget(object newValue)
         {
-            if (_property.isArray) return;
+            if (_property.isArray && _property.propertyType != SerializedPropertyType.String) return;
             SetValue(newValue);
             _property.serializedObject.ApplyModifiedProperties();
         }
