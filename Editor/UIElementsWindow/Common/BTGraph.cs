@@ -164,6 +164,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     foreach (var n in nodes)
                     {
                         _nodes.Remove(n);
+                        n.WasDeleted();
                     }
 
                     BTNode.AnyNodeDeleted();

@@ -64,7 +64,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (property == null) return;
 
             property = property.Copy();
-            var fieldInfo = _data.GetType().GetField(TaskImplName, BindingFlags.NonPublic | BindingFlags.Instance);
             _field = new PropertyFieldElement();
             _field.SetProperty(property, true);
             _field.OnValueChanged += FieldChanged;

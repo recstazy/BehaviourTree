@@ -129,6 +129,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
+        public void WasDeleted()
+        {
+            Dispose();
+        }
+
         protected string GetName()
         {
             return Data.TaskImplementation == null ? "Empty Task" : ObjectNames.NicifyVariableName(Data.TaskImplementation.GetType().Name);
