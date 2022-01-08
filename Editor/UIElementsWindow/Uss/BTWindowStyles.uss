@@ -21,12 +21,6 @@ NodeTaskProvider:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-PlaymodeWatcher {
-    height: 100%;
-    width: 55px;
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
 .task-container {
     width: 100%;
     height: 100%;
@@ -39,7 +33,7 @@ PlaymodeWatcher {
     padding: 0px;
 }
 
-.title-container {
+.node-title-container {
     flex-direction: row;
     width: 100%;
 }
@@ -49,6 +43,43 @@ PlaymodeWatcher {
     width: 100%;
     -unity-text-align: middle-left;
     padding-left: 5px;
+}
+
+PlaymodeWatcher {
+    height: 100%;
+    width: 55px;
+    background-color: rgba(0, 0, 0, 0.1);
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+TargetTreeWatcher {
+    height: 100%;
+    width: 100%;
+    border-radius: 3px;
+    padding-left: 5px;
+    background-color: rgba(0, 0, 0, 0.1);
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.target-watcher-dropdown {
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(40, 40, 40);
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.target-watcher-dropdown:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .window-toolbar {
@@ -62,5 +93,10 @@ PlaymodeWatcher {
 
 .playmode-label {
     -unity-text-align: middle-center;
-    font-size: 16;
+    font-size: 14;
+}
+
+.target-label {
+    -unity-text-align: middle-left;
+    font-size: 14;
 }

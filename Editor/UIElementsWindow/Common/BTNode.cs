@@ -48,7 +48,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var titleElement = titleContainer.Children().First();
                 titleContainer.Remove(titleElement);
                 titleContainer.Insert(0, _taskProvider);
-                titleContainer.AddToClassList("title-container");
+                titleContainer.AddToClassList("node-title-container");
                 titleContainer.style.height = 25;
 
                 _taskContainer = new TaskContainer();

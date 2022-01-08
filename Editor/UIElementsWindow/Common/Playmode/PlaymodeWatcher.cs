@@ -9,6 +9,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     public class PlaymodeWatcher : VisualElement
     {
+        public new class UxmlFactory : UxmlFactory<PlaymodeWatcher> { }
+
         #region Fields
 
         private IPlaymodeDependent[] _dependencies;

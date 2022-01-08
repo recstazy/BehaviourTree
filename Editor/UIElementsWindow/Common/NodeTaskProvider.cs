@@ -40,7 +40,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             manipulator.activators.Add(new ManipulatorActivationFilter() { button = MouseButton.LeftMouse, clickCount = 1 });
 
             _label = new Label();
-            _label.text = TaskFactory.NamesEditor[_currentTaskIndex];
+            _label.text = ObjectNames.NicifyVariableName(TaskFactory.NamesEditor[_currentTaskIndex]);
             _label.style.fontSize = 13;
             _label.AddToClassList("node-task-button");
             _label.AddManipulator(manipulator);
@@ -73,7 +73,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             _currentTaskIndex = taskIndex;
             CurrentType = TaskFactory.TypesEditor[taskIndex];
-            _label.text = TaskFactory.NamesEditor[_currentTaskIndex];
+            _label.text = ObjectNames.NicifyVariableName(TaskFactory.NamesEditor[_currentTaskIndex]);
             OnTaskChanged?.Invoke();
         }
 

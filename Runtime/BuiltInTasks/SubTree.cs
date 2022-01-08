@@ -12,6 +12,9 @@ namespace Recstazy.BehaviourTree
         [SerializeField]
         private BehaviourTree _tree;
 
+        [SerializeField]
+        private string _displayName = "Sub Tree";
+
         private TreePlayer _treePlayer;
 
         private static readonly Color s_backColor = new Color(0.1f, 0.2f, 0.3f, 0.5f);
@@ -21,6 +24,7 @@ namespace Recstazy.BehaviourTree
         #region Properties
 
         protected override Color Color => s_backColor;
+        public string DisplayName { get => _displayName; }
 
         #endregion
 
@@ -31,7 +35,7 @@ namespace Recstazy.BehaviourTree
 
         protected override void Initialized()
         {
-            _treePlayer = new TreePlayer(_tree, _tree.Blackboard, CoroutineRunner, $"SubTree");
+            _treePlayer = new TreePlayer(_tree, _tree.Blackboard, CoroutineRunner, _displayName);
         }
 
         protected override IEnumerator TaskRoutine()

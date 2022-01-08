@@ -14,9 +14,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private int _lastAssetID;
 
-        private bool _isInitialized;
+        private bool _hasTreeInitialized;
+        private VisualElement _graphContainer;
+        private VisualElement _toolbar;
         private BTGraph _graph;
         private PlaymodeWatcher _playmodeWatcher;
+        private TargetTreeWatcher _treeWatcher;
         private static BTWindow s_currentWindow;
         public static BehaviourTree SharedTree { get; private set; }
 
@@ -76,6 +79,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void OnEnable()
         {
             TaskFactory.UpdateTaskTypes();
+            ImportLayout();
 
             if (_lastAssetID != 0)
             {
@@ -88,8 +92,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         InitializeWithAsset(treeAsset);
                     }
                 }
-
-                _graph.OnStructureChanged += UpdatePlaymodeWatcher;
             }
 
             Undo.IncrementCurrentGroup();
@@ -99,39 +101,37 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             SetDirty();
             Undo.IncrementCurrentGroup();
-            Dispose();
+            DisposeTree();
+            VisualElement root = rootVisualElement;
+            if (root.childCount > 0) root.Clear();
         }
 
         private void InitializeWithAsset(BehaviourTree asset)
         {
-            if (_isInitialized) Dispose();
+            if (_hasTreeInitialized) DisposeTree();
             SharedTree = asset;
             _lastAssetID = asset.GetInstanceID();
-            ImportLayout();
+            
             InitializeGraph();
-
-            var toolbar = rootVisualElement.Q(className: "window-toolbar");
-            _playmodeWatcher = new PlaymodeWatcher();
-            toolbar.Add(_playmodeWatcher);
             _graph.OnStructureChanged += UpdatePlaymodeWatcher;
             UpdatePlaymodeWatcher();
 
-            _isInitialized = true;
+            _hasTreeInitialized = true;
         }
 
-        private void Dispose()
+        private void DisposeTree()
         {
             if (_graph != null)
             {
                 _graph.OnStructureChanged -= UpdatePlaymodeWatcher;
                 _graph.Dispose();
+                _graphContainer.Clear();
+                _graph = null;
             }
-           
-            VisualElement root = rootVisualElement;
-            if (root.childCount > 0) root.Clear();
+            
             SharedTree = null;
             s_currentWindow = null;
-            _isInitialized = false;
+            _hasTreeInitialized = false;
         }
 
         private void ImportLayout()
@@ -147,13 +147,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
             // Import USS
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(Path.Combine(MainPaths.UssRoot, "BTWindowStyles.uss"));
             root.styleSheets.Add(styleSheet);
+
+            _graphContainer = rootVisualElement.Q(name: "graph-container");
+            _toolbar = rootVisualElement.Q(className: "window-toolbar");
+            _playmodeWatcher = _toolbar.Q<PlaymodeWatcher>();
+            _treeWatcher = _toolbar.Q<TargetTreeWatcher>();
         }
 
         private void InitializeGraph()
         {
             InitializeEntry();
-            _graph = rootVisualElement.Q<BTGraph>();
+            _graph = new BTGraph();
             _graph.Initialize(SharedTree);
+            _graphContainer.Add(_graph);
         }
 
         private void InitializeEntry()
@@ -167,9 +173,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UpdatePlaymodeWatcher()
         {
-            var edges = _graph.edges.ToList().Select(e => (IPlaymodeDependent)new EdgeUpdater(e)).ToArray();
+            var edges = _graph.edges.ToList().Select(e => (IPlaymodeDependent)new EdgeReference(e)).ToArray();
             var nodes = _graph.BtNodes.Select(n => (IPlaymodeDependent)n).ToArray();
-            _playmodeWatcher.SetDependencies(edges.Concat(nodes).Concat(new IPlaymodeDependent[] { _graph }).ToArray());
+
+            _playmodeWatcher.SetDependencies(
+                edges.Concat(nodes)
+                .Concat(new IPlaymodeDependent[] { _graph, _treeWatcher })
+                .ToArray());
         }
     }
 }

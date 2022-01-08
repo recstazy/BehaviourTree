@@ -7,11 +7,11 @@ using UnityEngine.UIElements;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    public class EdgeUpdater : IPlaymodeDependent
+    public class EdgeReference : IPlaymodeDependent
     {
         private Edge _edge;
 
-        public EdgeUpdater(Edge edge)
+        public EdgeReference(Edge edge)
         {
             _edge = edge;
         }
