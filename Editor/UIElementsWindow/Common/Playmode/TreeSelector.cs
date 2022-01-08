@@ -10,6 +10,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
     public class TreeSelector : VisualElement, IPlaymodeDependent
     {
         public new class UxmlFactory : UxmlFactory<TreeSelector> { }
+        public static event System.Action<BehaviourTree> OnTreeChanged;
 
         #region Fields
 
@@ -82,9 +83,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void SetNewTarget(int index)
         {
+            if (s_currentIndex == index) return;
+
             s_currentIndex = index;
             s_currentName = s_playersNames[s_currentIndex];
             _currentName.text = s_currentName;
+            OnTreeChanged?.Invoke(CurrentPlayer?.SharedTree);
         }
 
         private DropdownMenuAction.Status StatusCallback(DropdownMenuAction action)

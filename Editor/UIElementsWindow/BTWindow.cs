@@ -8,11 +8,12 @@ using System.Linq;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    public class BTWindow : EditorWindow
+    public class BTWindow : EditorWindow, IPlaymodeDependent
     {
         #region Fields
 
-        private int _lastAssetID;
+        private int _lastAssetId;
+        private int _lastEditedId;
 
         private bool _hasTreeInitialized;
         private VisualElement _graphContainer;
@@ -20,6 +21,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private BTGraph _graph;
         private PlaymodeWatcher _playmodeWatcher;
         private TreeSelector _treeSelector;
+        private PlaymodeNodeHighlighter _nodeHighlighter;
+
         private static BTWindow s_currentWindow;
         public static BehaviourTree SharedTree { get; private set; }
 
@@ -49,6 +52,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (assetObject is BehaviourTree treeAsset)
             {
                 ShowBtWindow(treeAsset);
+                s_currentWindow._lastEditedId = instanceID;
                 return true;
             }
 
@@ -80,10 +84,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             TaskFactory.UpdateTaskTypes();
             ImportLayout();
+            _nodeHighlighter = new PlaymodeNodeHighlighter();
+            _nodeHighlighter.Bind(() => _graph.BtNodes, () => _graph.Edges);
+            TreeSelector.OnTreeChanged += TreeSelectorTreeChanged;
 
-            if (_lastAssetID != 0)
+            if (_lastAssetId != 0)
             {
-                var assetObject = EditorUtility.InstanceIDToObject(_lastAssetID);
+                var assetObject = EditorUtility.InstanceIDToObject(_lastAssetId);
 
                 if (assetObject is BehaviourTree treeAsset)
                 {
@@ -99,6 +106,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void OnDisable()
         {
+            TreeSelector.OnTreeChanged -= TreeSelectorTreeChanged;
             SetDirty();
             Undo.IncrementCurrentGroup();
             DisposeTree();
@@ -106,11 +114,23 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (root.childCount > 0) root.Clear();
         }
 
+        public void PlaymodeChanged(bool isPlaymode)
+        {
+            if (!isPlaymode)
+            {
+                if (_lastEditedId != 0 && _lastEditedId != _lastAssetId)
+                {
+                    var newTree = (BehaviourTree)EditorUtility.InstanceIDToObject(_lastEditedId);
+                    InitializeWithAsset(newTree);
+                }
+            }
+        }
+
         private void InitializeWithAsset(BehaviourTree asset)
         {
             if (_hasTreeInitialized) DisposeTree();
             SharedTree = asset;
-            _lastAssetID = asset.GetInstanceID();
+            _lastAssetId = asset.GetInstanceID();
             
             InitializeGraph();
             _graph.OnStructureChanged += UpdatePlaymodeWatcher;
@@ -128,7 +148,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 _graphContainer.Clear();
                 _graph = null;
             }
-            
+
+            _nodeHighlighter.Clear();
             SharedTree = null;
             s_currentWindow = null;
             _hasTreeInitialized = false;
@@ -173,13 +194,25 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UpdatePlaymodeWatcher()
         {
-            var edges = _graph.edges.ToList().Select(e => (IPlaymodeDependent)new EdgeReference(e)).ToArray();
+            var edges = _graph.Edges.ToArray();
             var nodes = _graph.BtNodes.Select(n => (IPlaymodeDependent)n).ToArray();
 
             _playmodeWatcher.SetDependencies(
                 edges.Concat(nodes)
-                .Concat(new IPlaymodeDependent[] { _graph, _treeSelector })
+                .Concat(new IPlaymodeDependent[] { this, _graph, _treeSelector, _nodeHighlighter })
                 .ToArray());
+        }
+
+        private void TreeSelectorTreeChanged(BehaviourTree newTree)
+        {
+            DisposeTree();
+
+            if (newTree == null)
+            {
+                newTree = (BehaviourTree)EditorUtility.InstanceIDToObject(_lastEditedId);
+            }
+
+            InitializeWithAsset(newTree);
         }
     }
 }

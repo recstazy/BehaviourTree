@@ -18,6 +18,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Fields
 
         private List<BTNode> _nodes;
+        private List<EdgeReference> _edges;
         private bool _isInitialized;
         private BTMousePosProvider _mousePosProvider;
         private bool _isPlaymode;
@@ -28,6 +29,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public BehaviourTree Tree { get; private set; }
         internal ReadOnlyCollection<BTNode> BtNodes => _nodes.AsReadOnly();
+        internal ReadOnlyCollection<EdgeReference> Edges => _edges.AsReadOnly();
 
         protected override bool canCutSelection => !_isPlaymode;
         protected override bool canDeleteSelection => !_isPlaymode;
@@ -69,7 +71,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
-            evt.menu.AppendAction("Create Node", ContextCreateDataAndNode, DropdownMenuAction.Status.Normal);
+            if (!_isPlaymode)
+            {
+                evt.menu.AppendAction("Create Node", ContextCreateDataAndNode, DropdownMenuAction.Status.Normal);
+            }
+            
             base.BuildContextualMenu(evt);
         }
 
@@ -109,6 +115,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateEdges()
         {
+            _edges = new List<EdgeReference>();
+
             foreach (var n in _nodes)
             {
                 CreateEdgesForNode(n);
@@ -126,6 +134,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var inPort = _nodes.First(node => node.Data.Index == c.InNode).inputContainer.Q<Port>();
                 var edge = outPort.ConnectTo(inPort);
                 AddElement(edge);
+                _edges.Add(new EdgeReference(edge));
             }
         }
 
@@ -158,7 +167,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         RemoveConnectionByEdge(e);
                     }
 
-                    BTWindow.SetDirty("Delete Connectiions");
+                    var removedSet = new HashSet<Edge>(edges);
+                    _edges = _edges.Where(edg => !removedSet.Contains(edg.Edge)).ToList();
+
+                    BTWindow.SetDirty("Delete Connections");
 
                     foreach (var n in nodesToUpdate)
                     {

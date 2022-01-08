@@ -93,10 +93,24 @@ TreeSelector {
 
 .playmode-label {
     -unity-text-align: middle-center;
-    font-size: 14;
+    font-size: 14px;
 }
 
 .target-label {
     -unity-text-align: middle-left;
-    font-size: 14;
+    font-size: 14px;
+}
+
+.node-highlight {
+    position: absolute;
+    width: 102%;
+    height: 102%;
+    border-color: green;
+    border-width: 2px;
+    border-radius: 8px;
+    align-self: center;
+}
+
+.node-highlight:disabled {
+    opacity: 0;
 }

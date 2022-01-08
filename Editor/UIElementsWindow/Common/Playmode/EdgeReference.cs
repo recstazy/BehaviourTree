@@ -10,6 +10,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
     public class EdgeReference : IPlaymodeDependent
     {
         private Edge _edge;
+        public Edge Edge => _edge;
 
         public EdgeReference(Edge edge)
         {
