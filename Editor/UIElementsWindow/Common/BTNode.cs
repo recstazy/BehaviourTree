@@ -9,7 +9,7 @@ using System;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    internal class BTNode : Node
+    internal class BTNode : Node, IPlaymodeDependent
     {
         private static event Action OnAnyDeleted;
 
@@ -72,6 +72,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             var currentRect = GetPosition();
             return currentRect.position;
+        }
+
+        public void PlaymodeChanged(bool isPlaymode)
+        {
+            SetEnabled(!isPlaymode);
         }
 
         public void EdgesChanged()

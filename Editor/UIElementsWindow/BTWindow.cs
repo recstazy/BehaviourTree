@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using System.IO;
 using System.Linq;
+using UnityEditor;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
@@ -16,6 +17,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private bool _isInitialized;
         private BTGraph _graph;
+        private PlaymodeWatcher _playmodeWatcher;
         private static BTWindow s_currentWindow;
         public static BehaviourTree SharedTree { get; private set; }
 
@@ -56,7 +58,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             BTWindow wnd = GetWindow<BTWindow>();
             s_currentWindow = wnd;
             wnd.Show();
-            wnd.titleContent = new GUIContent(asset.name);
+            wnd.titleContent = new GUIContent(ObjectNames.NicifyVariableName(asset.name));
             wnd.InitializeWithAsset(asset);
         }
 
@@ -106,6 +108,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _lastAssetID = asset.GetInstanceID();
             ImportLayout();
             InitializeGraph();
+
+            var toolbar = rootVisualElement.Q(className: "window-toolbar");
+            _playmodeWatcher = new PlaymodeWatcher();
+            _playmodeWatcher.SetDependencies(_graph.BtNodes.ToArray());
+            toolbar.Add(_playmodeWatcher);
+
             _isInitialized = true;
         }
 
@@ -137,7 +145,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void InitializeGraph()
         {
             InitializeEntry();
-            var _graph = rootVisualElement.Q<BTGraph>();
+            _graph = rootVisualElement.Q<BTGraph>();
             _graph.Initialize(SharedTree);
         }
 

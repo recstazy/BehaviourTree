@@ -17,6 +17,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private SerializedProperty _property;
         private PropertyFieldElement _field;
         private const string TaskImplName = "_taskImplementation";
+        private string _currentClass;
 
         #endregion
 
@@ -46,8 +47,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Clear();
             bool hasEditor = !CheckForNoEditor(_data.TaskImplementation);
             if (hasEditor) CreatePropertyField();
-
-            SetEnabled(hasEditor);
+            AssignClass(hasEditor);
         }
 
         private static bool CheckForNoEditor(BehaviourTask task)
@@ -104,6 +104,24 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             return null;
+        }
+
+        private void AssignClass(bool hasEditor)
+        {
+            string newClass = "task-container";
+            if (!hasEditor) newClass += "-noeditor";
+
+            if (_currentClass != newClass)
+            {
+                if (!string.IsNullOrEmpty(_currentClass))
+                {
+                    RemoveFromClassList(_currentClass);
+                }
+                
+                AddToClassList(newClass);
+            }
+
+            _currentClass = newClass;
         }
     }
 }

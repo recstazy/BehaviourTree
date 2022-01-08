@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
@@ -24,6 +25,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Properties
 
         public BehaviourTree Tree { get; private set; }
+        internal ReadOnlyCollection<BTNode> BtNodes => _nodes.AsReadOnly();
 
         protected override bool canCopySelection => true;
         protected override bool canPaste => true;
