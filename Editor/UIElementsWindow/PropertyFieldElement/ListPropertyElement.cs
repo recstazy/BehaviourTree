@@ -43,6 +43,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var window = ListViewWindow.Show(_listProperty);
             window.OnChanged += AnyFieldChanged;
             window.OnClosed += EditClosed;
+            _window = window;
         }
 
         private void Unsubscribe()

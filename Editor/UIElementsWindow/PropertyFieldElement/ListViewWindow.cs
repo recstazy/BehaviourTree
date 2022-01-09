@@ -55,11 +55,7 @@ internal class ListViewWindow : EditorWindow
 
     private void OnEnable()
     {
-        if (s_currentInstance != null)
-        {
-            s_currentInstance.Close();
-        }
-
+        CloseIfAny();
         s_currentInstance = this;
     }
 
