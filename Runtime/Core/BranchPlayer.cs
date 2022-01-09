@@ -16,7 +16,6 @@ namespace Recstazy.BehaviourTree
 
         private Coroutine _branchRountine;
         private CoroutineRunner _coroutineRunner;
-        private int _startedFromPin;
 
         #endregion
 
@@ -33,12 +32,11 @@ namespace Recstazy.BehaviourTree
             yield return new WaitUntil(() => !IsRunning);
         }
 
-        internal BranchPlayer(BehaviourTask root, int startedFromPin)
+        internal BranchPlayer(BehaviourTask root)
         {
             if (root == null) throw new System.NullReferenceException("BranchPlayer root task must not be null");
             _root = root;
             _coroutineRunner = _root.CoroutineRunner;
-            _startedFromPin = startedFromPin;
         }
 
         internal void Start()
@@ -70,7 +68,6 @@ namespace Recstazy.BehaviourTree
 
             while (_currentTask != null)
             {
-                _currentTask.StartedFromOutPin = _startedFromPin;
                 yield return _currentTask.StartTask();
 
                 if (_currentTask.Succeed)
@@ -85,7 +82,6 @@ namespace Recstazy.BehaviourTree
                     }
 
                     _currentTask = next;
-                    _startedFromPin = newOut;
                 }
                 else
                 {

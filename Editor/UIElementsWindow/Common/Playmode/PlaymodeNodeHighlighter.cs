@@ -11,10 +11,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private Func<IList<BTNode>> _nodes;
-        private Dictionary<VisualElement, VisualElement> _highlights;
+        private Func<IList<BTNode>> _getNodes;
         private TreePlayer _currentPlayer;
-        private Dictionary<BTNode, VisualElement> _nodesInChain;
+        private BTNode[] _nodeAccessor;
+        private Dictionary<int, VisualElement> _currentHighlights = new Dictionary<int, VisualElement>();
 
         #endregion
 
@@ -25,23 +25,26 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public void Bind(Func<IList<BTNode>> nodes)
         {
             Clear();
-            _nodes = nodes;
+            _getNodes = nodes;
         }
 
         // This also called when tree asset is changed 
         // because BTWindow will set new dependencies to "PlaymodeWatcher"
         public void PlaymodeChanged(bool isPlaymode)
         {
-            if (_currentPlayer != null) _currentPlayer.Stack.OnStackChanged -= StackChanged;
-            
             if (isPlaymode)
             {
+                var lastPlayer = _currentPlayer;
                 _currentPlayer = TreeSelector.CurrentPlayer;
 
                 if (_currentPlayer != null)
                 {
-                    CreateHighlights();
-                    _currentPlayer.Stack.OnStackChanged += StackChanged;
+                    if (_currentPlayer != lastPlayer)
+                    {
+                        RegenerateNodeAccessor();
+                        BindToTasks(lastPlayer, false);
+                        BindToTasks(_currentPlayer, true);
+                    }
                 }
             }
             else Clear();
@@ -49,58 +52,69 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void Clear()
         {
-            if (_highlights == null) return;
-
-            foreach (var pair in _highlights)
+            foreach (var h in _currentHighlights)
             {
-                pair.Key.Remove(pair.Value);
+                h.Value.RemoveFromHierarchy();
             }
 
-            _highlights.Clear();
-            _highlights = null;
+            _currentHighlights.Clear();
+            BindToTasks(_currentPlayer, false);
         }
 
-        private void StackChanged()
+        // ShouldBind == false means unbind
+        private void BindToTasks(TreePlayer player, bool shouldBind)
         {
-            foreach (var n in _nodesInChain)
+            if (player != null)
             {
-                SetHighlightActive(n.Value, false);
-            }
-
-            _nodesInChain.Clear();
-
-            foreach (var info in _currentPlayer.Stack.Stack)
-            {
-                var node = _nodes().FirstOrDefault(n => n.Data.Index == info.Node);
-
-                if (node != null)
+                foreach (var data in player.Tree.NodeData.Data)
                 {
-                    var highlight = _highlights[node];
-                    SetHighlightActive(highlight, true);
-                    _nodesInChain.Add(node, highlight);
+                    if (shouldBind)
+                    {
+                        data.TaskImplementation.OnStarted += TaskStarted;
+                        data.TaskImplementation.OnFinished += TaskFinished;
+                    }
+                    else
+                    {
+                        data.TaskImplementation.OnStarted -= TaskStarted;
+                        data.TaskImplementation.OnFinished -= TaskFinished;
+                    }
                 }
             }
         }
 
-        private void CreateHighlights()
+        private void RegenerateNodeAccessor()
         {
-            _highlights = new Dictionary<VisualElement, VisualElement>();
-            _nodesInChain = new Dictionary<BTNode, VisualElement>();
-            var nodes = _nodes().ToArray();
+            var nodeList = _getNodes();
+            var itemsCount = nodeList.Max(n => n.Data.Index) + 1;
+            _nodeAccessor = new BTNode[itemsCount];
 
-            foreach (var n in nodes)
+            for (int i = 0; i < nodeList.Count; i++)
             {
-                var element = new VisualElement();
-                element.AddToClassList("node-highlight");
-                SetHighlightActive(element, false);
-                n.Add(element);
-                _highlights.Add(n, element);
+                _nodeAccessor[nodeList[i].Data.Index] = nodeList[i];
             }
         }
 
-        private void SetHighlightActive(VisualElement highlight, bool isActive)
+        private void TaskStarted(BehaviourTask task)
         {
-            highlight.style.opacity = isActive ? 1f : 0f;
+            var highlight = CreateHighlight(_nodeAccessor[task.Index]);
+            _currentHighlights.Add(task.Index, highlight);
+        }
+
+        private void TaskFinished(BehaviourTask task)
+        {
+            if (_currentHighlights.TryGetValue(task.Index, out var highlight))
+            {
+                highlight.RemoveFromHierarchy();
+                _currentHighlights.Remove(task.Index);
+            }
+        }
+
+        private VisualElement CreateHighlight(BTNode node)
+        {
+            var element = new VisualElement();
+            element.AddToClassList("node-highlight");
+            node.Add(element);
+            return element;
         }
     }
 }

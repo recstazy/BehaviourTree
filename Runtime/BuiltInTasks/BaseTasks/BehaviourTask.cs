@@ -49,7 +49,6 @@ namespace Recstazy.BehaviourTree
 
         internal CoroutineRunner CoroutineRunner { get; private set; }
         internal int Index { get; set; }
-        internal int StartedFromOutPin { get; set; }
 
         #endregion
 
@@ -136,7 +135,7 @@ namespace Recstazy.BehaviourTree
 
             if (root != null)
             {
-                var branch = new BranchPlayer(root, outIndex);
+                var branch = new BranchPlayer(root);
                 _currentTaskBranches.Add(branch);
                 branch.Start();
                 return branch;
@@ -215,8 +214,9 @@ namespace Recstazy.BehaviourTree
             IsRunning = true;
             Succeed = true;
             _taskBodyIsRunning = true;
-            _taskBodyRoutine = CoroutineRunner.StartCoroutine(TaskBodyCoroutine());
             OnStarted?.Invoke(this);
+
+            _taskBodyRoutine = CoroutineRunner.StartCoroutine(TaskBodyCoroutine());
             yield return new WaitUntil(() => !_taskBodyIsRunning);
             AfterBodyFinished();
         }
