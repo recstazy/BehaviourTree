@@ -105,7 +105,7 @@ TreeSelector {
     position: absolute;
     width: 102%;
     height: 102%;
-    border-color: green;
+    border-color: #848DE7;
     border-width: 2px;
     border-radius: 8px;
     align-self: center;

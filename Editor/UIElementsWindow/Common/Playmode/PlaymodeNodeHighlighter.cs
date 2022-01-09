@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System;
 using System.Linq;
+using UnityEngine.UIElements.Experimental;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
@@ -44,6 +45,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         RegenerateNodeAccessor();
                         BindToTasks(lastPlayer, false);
                         BindToTasks(_currentPlayer, true);
+
+                        foreach (var data in _currentPlayer.Tree.NodeData.Data)
+                        {
+                            if (data.TaskImplementation.IsRunning)
+                            {
+                                TaskStarted(data.TaskImplementation);
+                            }
+                        }
                     }
                 }
             }
@@ -104,8 +113,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (_currentHighlights.TryGetValue(task.Index, out var highlight))
             {
-                highlight.RemoveFromHierarchy();
                 _currentHighlights.Remove(task.Index);
+
+                var anim = ValueAnimation<float>.Create(highlight, (a, b, t) => Mathf.Lerp(a, b, Easing.OutQuad(t)));
+                anim.from = 1f;
+                anim.to = 0f;
+                anim.durationMs = 500;
+                anim.OnCompleted(highlight.RemoveFromHierarchy);
+                anim.valueUpdated = (e, value) => e.style.opacity = value;
+                anim.Start();
             }
         }
 
