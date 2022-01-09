@@ -61,9 +61,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private static void ShowBtWindow(BehaviourTree asset)
         {
-            BTWindow wnd = GetWindow<BTWindow>();
-            s_currentWindow = wnd;
-            wnd.Show();
+            if (s_currentWindow == null)
+            {
+                s_currentWindow = GetWindow<BTWindow>();
+                s_currentWindow.Show();
+            }
+            else s_currentWindow.Focus();
+
+            var wnd = s_currentWindow;
             wnd.titleContent = new GUIContent(ObjectNames.NicifyVariableName(asset.name));
             wnd.InitializeWithAsset(asset);
         }
@@ -112,6 +117,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             DisposeTree();
             VisualElement root = rootVisualElement;
             if (root.childCount > 0) root.Clear();
+            s_currentWindow = null;
         }
 
         public void PlaymodeChanged(bool isPlaymode)
@@ -131,11 +137,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (_hasTreeInitialized) DisposeTree();
             SharedTree = asset;
             _lastAssetId = asset.GetInstanceID();
-            
-            InitializeGraph();
-            _graph.OnStructureChanged += UpdatePlaymodeWatcher;
-            UpdatePlaymodeWatcher();
 
+            InitializeGraph();
             _hasTreeInitialized = true;
         }
 
@@ -145,13 +148,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 _graph.OnStructureChanged -= UpdatePlaymodeWatcher;
                 _graph.Dispose();
+                _graph.SetEnabled(false);
+                _graph.Unbind();
+                _graph.RemoveFromHierarchy();
                 _graphContainer.Clear();
                 _graph = null;
             }
 
             _nodeHighlighter.Clear();
             SharedTree = null;
-            s_currentWindow = null;
+            
             _hasTreeInitialized = false;
         }
 
@@ -178,9 +184,36 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void InitializeGraph()
         {
             InitializeEntry();
+            AddGraphDelayed();
+        }
+
+        // Seems GraphView needs some time to detach from parent 
+        // and if we instantly add new graph after deleting old one it doesn't detach
+        private void AddGraphDelayed()
+        {
+            rootVisualElement.SetEnabled(false);
+
+            // Using Animation here as coroutine with callback
+            var anim = UnityEngine.UIElements.Experimental
+                .ValueAnimation<bool>.Create(rootVisualElement, (a, b, t) => false);
+            
+            anim.OnCompleted(() =>
+            {
+                AddGraphImmediate();
+                rootVisualElement.SetEnabled(true);
+            });
+
+            anim.durationMs = 1;
+            anim.Start();
+        }
+
+        private void AddGraphImmediate()
+        {
             _graph = new BTGraph();
             _graph.Initialize(SharedTree);
             _graphContainer.Add(_graph);
+            _graph.OnStructureChanged += UpdatePlaymodeWatcher;
+            UpdatePlaymodeWatcher();
         }
 
         private void InitializeEntry()

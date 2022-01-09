@@ -66,6 +66,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
             serializeGraphElements -= SerializeForCopy;
             unserializeAndPaste -= UnserializeAndPaste;
             graphViewChanged -= GraphChanged;
+
+            foreach (var n in _nodes)
+            {
+                n.Dispose();
+            }
+
             _nodes = null;
         }
 

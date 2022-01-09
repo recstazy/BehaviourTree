@@ -114,6 +114,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (_property.isArray && _property.propertyType != SerializedPropertyType.String) return;
             SetValue(newValue);
             _property.serializedObject.ApplyModifiedProperties();
+            _property.serializedObject.UpdateIfRequiredOrScript();
         }
 
         private void CreateSimpleView(Label label)

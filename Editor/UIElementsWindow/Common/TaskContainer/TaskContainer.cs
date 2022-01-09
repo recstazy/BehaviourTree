@@ -36,6 +36,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public void Dispose()
         {
             if (_field != null) _field.OnValueChanged -= FieldChanged;
+            if(_property != null) _property.Dispose();
+
+            if (_serializedObject != null)
+            {
+                _serializedObject.ApplyModifiedPropertiesWithoutUndo();
+                _serializedObject.Dispose();
+            }
+
             _serializedObject = null;
             _property = null;
             _data = null;

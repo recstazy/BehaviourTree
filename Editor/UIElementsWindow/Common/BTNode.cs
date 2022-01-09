@@ -139,6 +139,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Dispose();
         }
 
+        public void Dispose()
+        {
+            UnregisterCallback<DetachFromPanelEvent>(Detached);
+            OnAnyDeleted -= UpdateTaskContainer;
+            _taskContainer?.Dispose();
+            extensionContainer.Clear();
+            if (_taskProvider != null) _taskProvider.OnTaskChanged -= TaskChanged;
+            _taskProvider = null;
+            titleContainer.Clear();
+        }
+
         protected string GetName()
         {
             return Data.TaskImplementation == null ? "Empty Task" : ObjectNames.NicifyVariableName(Data.TaskImplementation.GetType().Name);
@@ -147,15 +158,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void Detached(DetachFromPanelEvent evt)
         {
             Dispose();
-        }
-
-        private void Dispose()
-        {
-            UnregisterCallback<DetachFromPanelEvent>(Detached);
-            OnAnyDeleted -= UpdateTaskContainer;
-            _taskContainer?.Dispose();
-            if (_taskProvider != null) _taskProvider.OnTaskChanged -= TaskChanged;
-            _taskProvider = null;
         }
 
         private void UpdateTaskContainer()
