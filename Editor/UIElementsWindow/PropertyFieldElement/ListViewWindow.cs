@@ -3,65 +3,105 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-internal class ListViewWindow : EditorWindow
+namespace Recstazy.BehaviourTree.EditorScripts
 {
-    public event System.Action OnClosed;
-    public event System.Action OnChanged;
-
-    #region Fields
-
-    private static ListViewWindow s_currentInstance;
-    private SerializedProperty _property;
-    private Vector2 _scrollPos;
-
-    #endregion
-
-    #region Properties
-
-    #endregion
-
-    public static ListViewWindow Show(SerializedProperty property)
+    internal class ListViewWindow : EditorWindow
     {
-        var window = new ListViewWindow();
-        window.titleContent = new GUIContent(property.displayName);
-        window._property = property;
-        window.ShowUtility();
-        window.Focus();
-        return window;
-    }
+        public event System.Action OnClosed;
+        public event System.Action OnChanged;
 
-    public static void CloseIfAny()
-    {
-        if (s_currentInstance != null)
+        #region Fields
+
+        private static ListViewWindow s_currentInstance;
+        private static bool s_isShowing;
+        private Vector2 _scrollPos;
+
+        private Object _serializedTargetObject;
+        private string _propertyPath;
+        private SerializedObject _sObject;
+        private SerializedProperty _property;
+        private bool _disposed;
+
+        #endregion
+
+        #region Properties
+
+        public int ArraySize { get; private set; }
+
+        #endregion
+
+        public static ListViewWindow Show(Object targetObject, string propertyPath, string displayName)
         {
-            s_currentInstance.Close();
+            var window = new ListViewWindow();
+            window._serializedTargetObject = targetObject;
+            window._propertyPath = propertyPath;
+            window.titleContent = new GUIContent(displayName);
+            window.ShowUtility();
+            window.Focus();
+            return window;
         }
-    }
 
-    private void OnGUI()
-    {
-        _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
-        EditorGUI.BeginChangeCheck();
-        _property.isExpanded = true;
-        EditorGUILayout.PropertyField(_property);
-        EditorGUILayout.EndScrollView();
-
-        if (EditorGUI.EndChangeCheck())
+        public static void CloseIfAny()
         {
-            _property.serializedObject.ApplyModifiedProperties();
-            OnChanged?.Invoke();
+            while (!HasOpenInstances<ListViewWindow>())
+            {
+                GetWindow<ListViewWindow>().Close();
+            }
+
+            s_currentInstance = null;
         }
-    }
 
-    private void OnEnable()
-    {
-        CloseIfAny();
-        s_currentInstance = this;
-    }
+        private void OnGUI()
+        {
+            
 
-    private void OnDisable()
-    {
-        s_currentInstance = null;
-        OnClosed?.Invoke();
+            if (_sObject == null || _property == null)
+            {
+                FieldUtility.CreateSerializedObjectAndProperty(_serializedTargetObject, _propertyPath, out _sObject, out _property);
+                if (_sObject == null || _property == null) return;
+
+                _disposed = false;
+                ArraySize = _property.arraySize;
+            }
+
+            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
+            EditorGUI.BeginChangeCheck();
+            _property.isExpanded = true;
+            EditorGUILayout.PropertyField(_property);
+            EditorGUILayout.EndScrollView();
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                ArraySize = _property.arraySize;
+                _property.serializedObject.ApplyModifiedProperties();
+                _property.Dispose();
+                _sObject.Dispose();
+                _property = null;
+                _sObject = null;
+                _disposed = true;
+                OnChanged?.Invoke();
+            }
+        }
+
+        private void OnEnable()
+        {
+            CloseIfAny();
+            s_currentInstance = this;
+            s_isShowing = true;
+        }
+
+        private void OnDisable()
+        {
+            s_currentInstance = null;
+            s_isShowing = false;
+
+            if (!_disposed)
+            {
+                _sObject.Dispose();
+                _property.Dispose();
+            }
+
+            OnClosed?.Invoke();
+        }
     }
 }

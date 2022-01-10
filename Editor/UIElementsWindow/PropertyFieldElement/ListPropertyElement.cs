@@ -16,18 +16,25 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #region Fields
 
-        private SerializedProperty _listProperty;
+        private UnityEngine.Object _serializedTargetObject;
+        private string _propertyPath;
         private ListViewWindow _window;
+        private string _windowName;
 
         #endregion
 
         #region Properties
 
+        public int ArraySize { get; private set; }
+
         #endregion
 
         public void SetProperty(SerializedProperty property)
         {
-            _listProperty = property;
+            _serializedTargetObject = property.serializedObject.targetObject;
+            _propertyPath = property.propertyPath;
+            _windowName = property.displayName;
+            ArraySize = property.arraySize;
             var button = new Button(EditClicked);
             button.text = "Edit";
             Add(button);
@@ -40,7 +47,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void EditClicked()
         {
-            var window = ListViewWindow.Show(_listProperty);
+            var window = ListViewWindow.Show(_serializedTargetObject, _propertyPath, _windowName);
             window.OnChanged += AnyFieldChanged;
             window.OnClosed += EditClosed;
             _window = window;
@@ -63,6 +70,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void AnyFieldChanged()
         {
+            ArraySize = _window.ArraySize;
             OnChanged?.Invoke();
         }
     }

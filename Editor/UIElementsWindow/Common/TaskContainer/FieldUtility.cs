@@ -15,7 +15,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public static VisualElement ComplexLabel => new Label("Complex Field");
         public static VisualElement NotSupportedLabel => new Label("Not Supported");
         public static VisualElement NoneLabel => new Label("None");
-        
+
         public static bool IsComplex(SerializedPropertyType type)
         {
             switch (type)
@@ -82,6 +82,20 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return GetGetterAndSetter(property, out getter, out setter);
         }
 
+        public static void CreateSerializedObjectAndProperty(UnityEngine.Object target, string path, out SerializedObject serializedObject, out SerializedProperty property)
+        {
+            if (target != null && !string.IsNullOrEmpty(path))
+            {
+                serializedObject = new SerializedObject(target);
+                property = serializedObject.FindProperty(path);
+            }
+            else
+            {
+                serializedObject = null;
+                property = null;
+            }
+        }
+
         private static VisualElement BindChange<T>(BaseField<T> field, Action<object, object> onChanged)
         {
             field.RegisterValueChangedCallback((change) => onChanged?.Invoke(change.previousValue, change.newValue));
@@ -89,6 +103,171 @@ namespace Recstazy.BehaviourTree.EditorScripts
         }
 
         // having fun here
+        public static object GetValue(UnityEngine.Object target, string serializedPropertyPath)
+        {
+            SerializedObject sObject;
+            SerializedProperty property;
+            CreateSerializedObjectAndProperty(target, serializedPropertyPath, out sObject, out property);
+            if (sObject == null || property == null) return null;
+
+            object result;
+
+            switch (property.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    result = property.intValue;
+                    break;
+                case SerializedPropertyType.Boolean:
+                    result = property.boolValue;
+                    break;
+                case SerializedPropertyType.Float:
+                    result = property.floatValue;
+                    break;
+                case SerializedPropertyType.String:
+                    result = property.stringValue;
+                    break;
+                case SerializedPropertyType.Color:
+                    result = property.colorValue;
+                    break;
+                case SerializedPropertyType.ObjectReference:
+                    result = property.objectReferenceValue;
+                    break;
+                case SerializedPropertyType.LayerMask:
+                    result = (LayerMask)property.intValue;
+                    break;
+                case SerializedPropertyType.Enum:
+                    result = property.enumValueIndex;
+                    break;
+                case SerializedPropertyType.Vector2:
+                    result = property.vector2Value;
+                    break;
+                case SerializedPropertyType.Vector3:
+                    result = property.vector3Value;
+                    break;
+                case SerializedPropertyType.Vector4:
+                    result = property.vector4Value;
+                    break;
+                case SerializedPropertyType.Rect:
+                    result = property.rectValue;
+                    break;
+                case SerializedPropertyType.ArraySize:
+                    result = property.arraySize;
+                    break;
+                case SerializedPropertyType.AnimationCurve:
+                    result = property.animationCurveValue;
+                    break;
+                case SerializedPropertyType.Bounds:
+                    result = property.boundsValue;
+                    break;
+                case SerializedPropertyType.Vector2Int:
+                    result = property.vector2IntValue;
+                    break;
+                case SerializedPropertyType.Vector3Int:
+                    result = property.vector3IntValue;
+                    break;
+                case SerializedPropertyType.RectInt:
+                    result = property.rectIntValue;
+                    break;
+                case SerializedPropertyType.BoundsInt:
+                    result = property.boundsIntValue;
+                    break;
+                case SerializedPropertyType.ManagedReference:
+                    result = PropertyValueHelper.GetTargetObjectOfProperty(property);
+                    break;
+                case SerializedPropertyType.Generic:
+                    result = PropertyValueHelper.GetTargetObjectOfProperty(property);
+                    break;
+                default:
+                    result = null;
+                    break;
+            }
+
+            property.Dispose();
+            sObject.Dispose();
+            return result;
+        }
+
+        // nice
+        public static void SetValue(UnityEngine.Object target, string serializedPropertyPath, object value)
+        {
+            SerializedObject sObject;
+            SerializedProperty property;
+            CreateSerializedObjectAndProperty(target, serializedPropertyPath, out sObject, out property);
+            if (sObject == null || property == null) return;
+
+            switch (property.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    property.intValue = (int)value;
+                    break;
+                case SerializedPropertyType.Boolean:
+                    property.boolValue = (bool)value;
+                    break;
+                case SerializedPropertyType.Float:
+                    property.floatValue = (float)value;
+                    break;
+                case SerializedPropertyType.String:
+                    property.stringValue = (string)value;
+                    break;
+                case SerializedPropertyType.Color:
+                    property.colorValue = (Color)value;
+                    break;
+                case SerializedPropertyType.ObjectReference:
+                    property.objectReferenceValue = (UnityEngine.Object)value;
+                    break;
+                case SerializedPropertyType.LayerMask:
+                    property.intValue = (LayerMask)value;
+                    break;
+                case SerializedPropertyType.Enum:
+                    property.enumValueIndex = (int)value;
+                    break;
+                case SerializedPropertyType.Vector2:
+                    property.vector2Value = (Vector2)value;
+                    break;
+                case SerializedPropertyType.Vector3:
+                    property.vector3Value = (Vector3)value;
+                    break;
+                case SerializedPropertyType.Vector4:
+                    property.vector4Value = (Vector4)value;
+                    break;
+                case SerializedPropertyType.Rect:
+                    property.rectValue = (Rect)value;
+                    break;
+                case SerializedPropertyType.ArraySize:
+                    property.arraySize = (int)value;
+                    break;
+                case SerializedPropertyType.AnimationCurve:
+                    property.animationCurveValue = (AnimationCurve)value;
+                    break;
+                case SerializedPropertyType.Bounds:
+                    property.boundsValue = (Bounds)value;
+                    break;
+                case SerializedPropertyType.Vector2Int:
+                    property.vector2IntValue = (Vector2Int)value;
+                    break;
+                case SerializedPropertyType.Vector3Int:
+                    property.vector3IntValue = (Vector3Int)value;
+                    break;
+                case SerializedPropertyType.RectInt:
+                    property.rectIntValue = (RectInt)value;
+                    break;
+                case SerializedPropertyType.BoundsInt:
+                    property.boundsIntValue = (BoundsInt)value;
+                    break;
+                case SerializedPropertyType.ManagedReference:
+                    property.managedReferenceValue = value;
+                    break;
+                case SerializedPropertyType.Generic:
+                    PropertyValueHelper.SetTargetObjectOfProperty(property, value);
+                    break;
+            }
+
+            sObject.ApplyModifiedProperties();
+            property.Dispose();
+            sObject.Dispose();
+        }
+
+        // best solutions I've ever made
         private static bool GetGetterAndSetter(SerializedProperty property, out Func<object> getter, out Action<object> setter)
         {
             switch (property.propertyType)
@@ -184,7 +363,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        // Ah shit...
+        // woa
         private static VisualElement CreateFieldByPropertyType(SerializedProperty property, object curValue, Action<object, object> onValueChanged)
         {
             var type = property.propertyType;
