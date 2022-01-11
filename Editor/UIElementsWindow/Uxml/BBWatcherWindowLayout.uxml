@@ -4,5 +4,5 @@
     <PlaymodeWatcher/>
     <TreeSelector/>
   </unity:VisualElement>
-  <unity:VisualElement name="bb-container" style="width: 100%; height: 100%;"/>
+  <unity:VisualElement name="bb-container" class="bb-container"/>
 </UXML>
