@@ -21,6 +21,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private static string[] s_playersNames;
         private static int s_currentIndex;
         private static string s_currentName;
+        private static bool s_isPlaymode;
+
+        private const string NoTargetText = "No Target";
 
         #endregion
 
@@ -40,7 +43,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _dropdownElement.AddToClassList("tree-selector-dropdown");
             Add(_dropdownElement);
 
-            _currentName = new Label("No Target");
+            _currentName = new Label(NoTargetText);
             _dropdownElement.Add(_currentName);
 
             var manipulator = new ContextualMenuManipulator(CreateMenu);
@@ -49,21 +52,43 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void PlaymodeChanged(bool isPlaymode)
         {
-            if (isPlaymode)
-            {
-                UpdatePlayers();
-                BehaviourPlayer.OnInstancedOrDestroyed += UpdatePlayers;
-            }
-            else
-            {
-                BehaviourPlayer.OnInstancedOrDestroyed -= UpdatePlayers;
-                s_playersNames = null;
-                s_treePlayers = null;
-                s_currentIndex = 0;
-                _currentName.text = "No Target";
-            }
+            if (isPlaymode) OnTreeChanged += TargetChanged_Internal;
 
             SetEnabled(isPlaymode);
+            PlaymodeChanged_Internal(isPlaymode);
+
+            if (!isPlaymode) OnTreeChanged -= TargetChanged_Internal;
+        }
+
+        private static void PlaymodeChanged_Internal(bool isPlaymode)
+        {
+            if (isPlaymode != s_isPlaymode)
+            {
+                s_isPlaymode = isPlaymode;
+
+                if (isPlaymode)
+                {
+                    UpdatePlayers();
+                    BehaviourPlayer.OnInstancedOrDestroyed += UpdatePlayers;
+                }
+                else
+                {
+                    OnTreeChanged?.Invoke(null);
+                    BehaviourPlayer.OnInstancedOrDestroyed -= UpdatePlayers;
+                    s_playersNames = null;
+                    s_treePlayers = null;
+                    s_currentIndex = 0;
+                }
+            }
+        }
+
+        private static void SetNewTarget(int index)
+        {
+            if (s_currentIndex == index) return;
+
+            s_currentIndex = index;
+            s_currentName = s_playersNames[s_currentIndex];
+            OnTreeChanged?.Invoke(CurrentPlayer?.SharedTree);
         }
 
         private void CreateMenu(ContextualMenuPopulateEvent evt)
@@ -81,14 +106,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
             SetNewTarget((int)action.userData);
         }
 
-        private void SetNewTarget(int index)
+        private void TargetChanged_Internal(BehaviourTree newTree)
         {
-            if (s_currentIndex == index) return;
+            string currentTargetText = NoTargetText;
 
-            s_currentIndex = index;
-            s_currentName = s_playersNames[s_currentIndex];
-            _currentName.text = s_currentName;
-            OnTreeChanged?.Invoke(CurrentPlayer?.SharedTree);
+            if (s_currentIndex > 0)
+            {
+                currentTargetText = s_playersNames[s_currentIndex];
+            }
+
+            _currentName.text = currentTargetText;
         }
 
         private DropdownMenuAction.Status StatusCallback(DropdownMenuAction action)

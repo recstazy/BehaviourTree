@@ -10,6 +10,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
     public class PlaymodeWatcher : VisualElement
     {
         public new class UxmlFactory : UxmlFactory<PlaymodeWatcher> { }
+        private static event System.Action OnUpdate;
 
         #region Fields
 
@@ -30,6 +31,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public PlaymodeWatcher()
         {
+            OnUpdate += UpdatePlaymodeDependencies;
             RegisterCallback<DetachFromPanelEvent>(Detached);
             IsPlaymode = Application.isPlaying;
             EditorApplication.playModeStateChanged += PlaymodeCahanged;
@@ -47,11 +49,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void Detached(DetachFromPanelEvent evt)
         {
             EditorApplication.playModeStateChanged -= PlaymodeCahanged;
+            OnUpdate -= UpdatePlaymodeDependencies;
             UnregisterCallback<DetachFromPanelEvent>(Detached);
             _dependencies = null;
         }
 
-        private void PlaymodeCahanged(PlayModeStateChange state)
+        private static void PlaymodeCahanged(PlayModeStateChange state)
         {
             bool lastMode = IsPlaymode;
 
@@ -65,7 +68,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     break;
             }
 
-            if (lastMode != IsPlaymode) UpdatePlaymodeDependencies();
+            if (lastMode != IsPlaymode) OnUpdate?.Invoke();
         }
 
         private void UpdatePlaymodeDependencies()

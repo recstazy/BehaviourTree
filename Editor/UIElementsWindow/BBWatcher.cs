@@ -65,7 +65,24 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void TreeSelectorTreeChanged(BehaviourTree newTree)
         {
+            if (_bbContainer.childCount > 0) _bbContainer.Clear();
 
+            if (newTree != null && newTree.Blackboard != null)
+            {
+                var blackboard = newTree.Blackboard;
+                var serializedObject = new SerializedObject(blackboard);
+
+                var property = serializedObject.GetIterator();
+                if (!property.Next(true)) return;
+                property = property.Copy();
+
+                while (property.NextVisible(false))
+                {
+                    var field = new PropertyFieldElement();
+                    field.SetProperty(property);
+                    _bbContainer.Add(field);
+                }
+            }
         }
     }
 }
