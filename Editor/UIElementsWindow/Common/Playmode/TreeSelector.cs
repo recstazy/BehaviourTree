@@ -52,7 +52,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void PlaymodeChanged(bool isPlaymode)
         {
-            if (isPlaymode) OnTreeChanged += TargetChanged_Internal;
+            if (isPlaymode)
+            {
+                TargetChanged_Instance();
+                OnTreeChanged += TargetChanged_Internal;
+            }
 
             SetEnabled(isPlaymode);
             PlaymodeChanged_Internal(isPlaymode);
@@ -107,6 +111,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         }
 
         private void TargetChanged_Internal(BehaviourTree newTree)
+        {
+            TargetChanged_Instance();
+        }
+
+        private void TargetChanged_Instance()
         {
             string currentTargetText = NoTargetText;
 

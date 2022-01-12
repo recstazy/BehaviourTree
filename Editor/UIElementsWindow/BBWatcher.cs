@@ -76,6 +76,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 if (!property.Next(true)) return;
                 property = property.Copy();
 
+                //Skipping Script reference
+                property.NextVisible(false);
+
                 while (property.NextVisible(false))
                 {
                     var field = new PropertyFieldElement();
