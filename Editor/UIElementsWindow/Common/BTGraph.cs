@@ -136,11 +136,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             foreach (var c in n.Data.Connections)
             {
-                var outPort = outputPorts.First(p => p.node == n && (int)p.userData == c.OutPin);
-                var inPort = _nodes.First(node => node.Data.Index == c.InNode).inputContainer.Q<Port>();
-                var edge = outPort.ConnectTo(inPort);
-                AddElement(edge);
-                _edges.Add(new EdgeReference(edge));
+                try
+                {
+                    var outPort = outputPorts.First(p => p.node == n && (int)p.userData == c.OutPin);
+                    var inPort = _nodes.First(node => node.Data.Index == c.InNode).inputContainer.Q<Port>();
+                    var edge = outPort.ConnectTo(inPort);
+                    AddElement(edge);
+                    _edges.Add(new EdgeReference(edge));
+                }
+                catch { }
             }
         }
 
@@ -212,7 +216,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     n.Data.Position = n.GetWorldPosition();
                 }
 
-                BTWindow.SetDirty("Move Nodes");
+                BTWindow.SetDirty($"Move Nodes #{UnityEngine.Random.Range(0, 100)}");
             }
             else if (change.edgesToCreate != null && change.edgesToCreate.Count > 0)
             {

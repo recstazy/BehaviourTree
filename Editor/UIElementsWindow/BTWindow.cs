@@ -73,20 +73,27 @@ namespace Recstazy.BehaviourTree.EditorScripts
             wnd.InitializeWithAsset(asset);
         }
 
+        private static void UndoRedoPreformed()
+        {
+            if (SharedTree == null) return;
+
+            if (BTUndo.ApplyUndoRedo(SharedTree))
+            {
+                EditorUtility.SetDirty(SharedTree);
+                s_currentWindow.InitializeWithAsset(SharedTree);
+            }
+        }
+
         internal static void SetDirty(string undoDescription = "")
         {
             bool canUndo = !string.IsNullOrEmpty(undoDescription);
-            if (canUndo) Undo.RecordObject(SharedTree, undoDescription);
+            if (canUndo) BTUndo.RegisterUndo(SharedTree, undoDescription);
             EditorUtility.SetDirty(SharedTree);
-        }
-
-        internal static void UndoRedoPreformed()
-        {
-            s_currentWindow.InitializeWithAsset(SharedTree);
         }
 
         private void OnEnable()
         {
+            s_currentWindow = this;
             TaskFactory.UpdateTaskTypes();
             ImportLayout();
             _nodeHighlighter = new PlaymodeNodeHighlighter();
@@ -106,14 +113,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 }
             }
 
-            Undo.IncrementCurrentGroup();
+            Undo.undoRedoPerformed += UndoRedoPreformed;
         }
 
         private void OnDisable()
         {
             TreeSelector.OnTreeChanged -= TreeSelectorTreeChanged;
             SetDirty();
-            Undo.IncrementCurrentGroup();
+            Undo.undoRedoPerformed -= UndoRedoPreformed;
             DisposeTree();
             VisualElement root = rootVisualElement;
             if (root.childCount > 0) root.Clear();
@@ -129,6 +136,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     var newTree = (BehaviourTree)EditorUtility.InstanceIDToObject(_lastEditedId);
                     InitializeWithAsset(newTree);
                 }
+            }
+        }
+
+        private void ExecuteCommand(ExecuteCommandEvent evt)
+        {
+            if (evt.commandName == "UndoRedoPerformed")
+            {
+                evt.StopImmediatePropagation();
+                evt.imguiEvent.Use();
+                UndoRedoPreformed();
             }
         }
 

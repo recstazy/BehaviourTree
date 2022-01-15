@@ -14,47 +14,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Structs
 
         [System.Serializable]
-        private struct NodeDescription
-        {
-            public int Index;
-            public int TaskTypeIndex;
-            public string TaskJson;
-            public TaskConnection[] Connections;
-            public Vector2 Position;
-
-            public NodeDescription(BTNode node)
-            {
-                Index = node.Data.Index;
-                TaskTypeIndex = node.TaskTypeIndex;
-                TaskJson = JsonUtility.ToJson(node.Data.TaskImplementation);
-                Connections = node.Data.Connections.ToArray();
-                Position = node.GetWorldPosition();
-            }
-
-            public void OffsetAllIndices(int offset)
-            {
-                Index += offset;
-
-                if (Connections != null)
-                {
-                    for (int i = 0; i < Connections.Length; i++)
-                    {
-                        Connections[i] = new TaskConnection(Connections[i].OutPin, Connections[i].InNode + offset);
-                    }
-                }
-            }
-
-            public NodeData GenerateData()
-            {
-                var task = TaskFactory.CreateTaskImplementationEditor(TaskTypeIndex);
-                JsonUtility.FromJsonOverwrite(TaskJson, task);
-                var data = new NodeData(Index, task, Connections);
-                data.Position = Position;
-                return data;
-            }
-        }
-
-        [System.Serializable]
         private struct SerializedStructure
         {
             public Vector2 AvgPosition;
@@ -62,7 +21,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             public SerializedStructure(BTNode[] nodes)
             {
-                Nodes = nodes.Select(n => new NodeDescription(n)).ToArray();
+                Nodes = nodes.Select(n => new NodeDescription(n.Data)).ToArray();
                 var availableNodeIndices = new HashSet<int>(Nodes.Select(n => n.Index));
 
                 for (int i = 0; i < Nodes.Length; i++)
@@ -95,7 +54,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             public NodeData[] GenerateData()
             {
                 if (Nodes == null) return new NodeData[0];
-                var data = Nodes.Select(n => n.GenerateData()).ToArray();
+                var data = Nodes.Select(n => n.GenerateData(false)).ToArray();
                 return data;
             }
         }
