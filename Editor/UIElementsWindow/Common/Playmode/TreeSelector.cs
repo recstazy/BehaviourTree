@@ -21,6 +21,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private static string[] s_playersNames;
         private static int s_currentIndex;
         private static string s_currentName;
+        private static string s_lastSelectedName;
         private static bool s_isPlaymode;
 
         private const string NoTargetText = "No Target";
@@ -107,6 +108,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void TargetSelected(DropdownMenuAction action)
         {
+            s_lastSelectedName = s_playersNames[(int)action.userData];
             SetNewTarget((int)action.userData);
         }
 
@@ -136,8 +138,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             s_treePlayers = new TreePlayer[1].Concat(TreePlayer.PlayersCache).ToArray();
             s_playersNames = s_treePlayers.Select(a => a == null ? "Empty" : a.FullName).ToArray();
-            s_currentIndex = System.Array.IndexOf(s_playersNames, s_currentName);
+            s_currentIndex = System.Array.IndexOf(s_playersNames, s_lastSelectedName);
             if (s_currentIndex < 0) s_currentIndex = 0;
+            s_currentName = s_playersNames[s_currentIndex];
+            OnTreeChanged?.Invoke(CurrentPlayer?.Tree);
         }
     }
 }
