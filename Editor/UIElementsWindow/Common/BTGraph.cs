@@ -216,7 +216,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     n.Data.Position = n.GetWorldPosition();
                 }
 
-                BTWindow.SetDirty($"Move Nodes #{UnityEngine.Random.Range(0, 100)}");
+                BTWindow.SetDirty($"Move Nodes");
             }
             else if (change.edgesToCreate != null && change.edgesToCreate.Count > 0)
             {
