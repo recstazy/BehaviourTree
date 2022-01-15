@@ -20,7 +20,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private static TreePlayer[] s_treePlayers;
         private static string[] s_playersNames;
         private static int s_currentIndex;
-        private static string s_currentName;
         private static string s_lastSelectedName;
         private static bool s_isPlaymode;
 
@@ -92,7 +91,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (s_currentIndex == index) return;
 
             s_currentIndex = index;
-            s_currentName = s_playersNames[s_currentIndex];
             OnTreeChanged?.Invoke(CurrentPlayer?.SharedTree);
         }
 
@@ -140,7 +138,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             s_playersNames = s_treePlayers.Select(a => a == null ? "Empty" : a.FullName).ToArray();
             s_currentIndex = System.Array.IndexOf(s_playersNames, s_lastSelectedName);
             if (s_currentIndex < 0) s_currentIndex = 0;
-            s_currentName = s_playersNames[s_currentIndex];
             OnTreeChanged?.Invoke(CurrentPlayer?.Tree);
         }
     }
