@@ -61,7 +61,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             this.AddManipulator(_mousePosProvider);
             SetupZoom(minScale, maxScale);
 
-            UpdateViewTransform(tree.GraphPosition, tree.Zoom * Vector3.one);
+            Vector3 zoom = new Vector3(tree.Zoom, tree.Zoom, 1);
+            UpdateViewTransform(tree.GraphPosition, zoom);
 
             serializeGraphElements += SerializeForCopy;
             unserializeAndPaste += UnserializeAndPaste;
