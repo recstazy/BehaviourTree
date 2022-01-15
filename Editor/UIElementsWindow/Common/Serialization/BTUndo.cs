@@ -81,7 +81,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private static BehaviourTree s_currentTree;
         private static BTUndoContainer s_container;
-        private static Stack<string> _serializedVersions;
 
         #endregion
 
@@ -89,15 +88,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
 	
         #endregion
 
-        public static void RegisterUndo(BehaviourTree tree, string name)
+        public static void Initialize(BehaviourTree tree)
         {
-            if (tree != s_currentTree)
+            if (s_currentTree != tree)
             {
                 s_container = new BTUndoContainer();
-                _serializedVersions = new Stack<string>();
                 s_currentTree = tree;
+                s_container.Serialize(s_currentTree);
+                EditorUtility.SetDirty(s_container);
             }
+        }
 
+        public static void RegisterUndo(BehaviourTree tree, string name)
+        {
             Undo.RegisterCompleteObjectUndo(s_container, name);
             s_container.Serialize(tree);
             EditorUtility.SetDirty(s_container);

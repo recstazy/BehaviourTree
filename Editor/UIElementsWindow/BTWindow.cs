@@ -156,6 +156,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _lastAssetId = asset.GetInstanceID();
 
             InitializeGraph();
+            BTUndo.Initialize(SharedTree);
             _hasTreeInitialized = true;
         }
 
