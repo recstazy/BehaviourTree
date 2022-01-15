@@ -30,11 +30,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             public void Serialize(BehaviourTree tree)
             {
                 _serializedNodeData = new TreeNodeDataDescription(tree.NodeData).Serialize();
-                Debug.Log(_serializedNodeData);
             }
 
             public void Apply(BehaviourTree tree)
             {
+                if (string.IsNullOrEmpty(_serializedNodeData)) return;
                 var desc = JsonUtility.FromJson<TreeNodeDataDescription>(_serializedNodeData);
                 tree.NodeData = desc.CreateNodeData();
                 EditorUtility.SetDirty(tree);
@@ -98,8 +98,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 s_currentTree = tree;
             }
 
-            s_container.Serialize(tree);
             Undo.RegisterCompleteObjectUndo(s_container, name);
+            s_container.Serialize(tree);
             EditorUtility.SetDirty(s_container);
         }
 
