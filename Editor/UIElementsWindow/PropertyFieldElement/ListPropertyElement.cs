@@ -10,14 +10,10 @@ using System.Linq;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    public class ListPropertyElement : VisualElement
+    public class ListPropertyElement : BasePropertyFieldElement
     {
-        public event Action OnChanged;
-
         #region Fields
 
-        private UnityEngine.Object _serializedTargetObject;
-        private string _propertyPath;
         private ListViewWindow _window;
         private string _windowName;
 
@@ -29,15 +25,24 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #endregion
 
-        public void SetProperty(SerializedProperty property)
+        public override void SetProperty(SerializedProperty property, bool hideLabelAndUnwrap = false)
         {
-            _serializedTargetObject = property.serializedObject.targetObject;
-            _propertyPath = property.propertyPath;
+            base.SetProperty(property, true);
             _windowName = property.displayName;
             ArraySize = property.arraySize;
+        }
+
+        protected override void Detached(DetachFromPanelEvent evt)
+        {
+            base.Detached(evt);
+            Close();
+        }
+
+        protected override void CreateVisualElements(SerializedProperty property)
+        {
             var button = new Button(EditClicked);
             button.text = "Edit";
-            Add(button);
+            FieldsContainer.Add(button);
         }
 
         public void Close()
@@ -71,7 +76,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void AnyFieldChanged()
         {
             ArraySize = _window.ArraySize;
-            OnChanged?.Invoke();
+            CallChanged();
         }
     }
 }

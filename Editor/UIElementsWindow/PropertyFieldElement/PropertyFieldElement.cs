@@ -10,153 +10,73 @@ using System.Linq;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    public class PropertyFieldElement : VisualElement
+    public class PropertyFieldElement : BasePropertyFieldElement
     {
-        public event Action<object> OnValueChanged;
-
         #region Fields
 
-        private static StyleSheet PropertyStyles = 
-            AssetDatabase.LoadAssetAtPath<StyleSheet>(System.IO.Path.Combine(MainPaths.UssRoot, "PropertyFieldElementStyles.uss"));
-
-        private VisualElement _inputField;
-        private PropertyFieldElement[] _subFields;
-        private ListPropertyElement _listView;
-        private bool _unwrap;
-        private Label _label;
-
-        private UnityEngine.Object _serializedTargetObject;
-        private string _propertyPath;
-        private string _displayName;
-        private bool _isArrayAndNotString;
+        private Func<int> _getArraySize;
 
         #endregion
 
         #region Properties
 
-        public string Label { get => _label.text; set => _label.text = value; }
-
         #endregion
 
-        public PropertyFieldElement()
+        protected override void CreateVisualElements(SerializedProperty property)
         {
-            styleSheets.Add(PropertyStyles);
-            RegisterCallback<DetachFromPanelEvent>(Detached);
+            if (FieldsContainer.childCount > 0) FieldsContainer.Clear();
+            if (!IsComplex) CreateSimpleView(property);
+            else CreateComplexView(property);
         }
 
-        public void SetProperty(SerializedProperty property, bool hideLabelAndUnwrap = false)
+        protected override void Detached(DetachFromPanelEvent evt)
         {
-            _serializedTargetObject = property.serializedObject.targetObject;
-            _propertyPath = property.propertyPath;
-            _displayName = property.displayName;
-            _unwrap = hideLabelAndUnwrap;
-            CreateInputField();
+            base.Detached(evt);
+            _getArraySize = null;
         }
 
-        private void Detached(DetachFromPanelEvent evt)
+        private void SimpleValueChanged(object oldValue, object newValue)
         {
-            UnregisterCallback<DetachFromPanelEvent>(Detached);
+            if (!IsArrayAndNotString) SetTargetObjectValue(newValue);
+            CallChanged();
+        }
 
-            if (_subFields != null)
+        protected override void SubfieldChanged()
+        {
+            if (IsArrayAndNotString)
             {
-                foreach (var s in _subFields)
-                {
-                    s.OnValueChanged -= SubfieldChanged;
-                }
+                LabelText = $"{_displayName} [{_getArraySize?.Invoke()}]";
             }
-
-            if (_listView != null)
-            {
-                _listView.OnChanged -= ListChanged;
-                _listView.Close();
-                _listView = null;
-            }
-        }
-
-        private void CreateInputField()
-        {
-            if (_inputField != null)
-            {
-                Remove(_inputField);
-                _inputField = null;
-            }
-
-            FieldUtility.CreateSerializedObjectAndProperty(_serializedTargetObject, _propertyPath, out var sObject, out var property);
-
-            using (sObject)
-            {
-                using (property)
-                {
-                    _isArrayAndNotString = property.isArray && property.propertyType != SerializedPropertyType.String;
-                    _label = new Label(_displayName);
-                    bool isComplex = FieldUtility.IsComplex(property.propertyType);
-
-                    if (!isComplex) CreateSimpleView(property);
-                    else CreateComplexView(property);
-                }
-            }
-        }
-
-        private void ValueChanged(object oldValue, object newValue)
-        {
-            ApplyChangesToTarget(newValue);
-            OnValueChanged?.Invoke(newValue);
-        }
-
-        private void SubfieldChanged(object newValue)
-        {
-            OnValueChanged?.Invoke(GetValue());
-        }
-
-        private void ApplyChangesToTarget(object newValue)
-        {
-            if (_isArrayAndNotString) return;
-            SetValue(newValue);
         }
 
         private void CreateSimpleView(SerializedProperty property)
         {
-            _inputField = FieldUtility.GetFieldByType(property, GetValue(), ValueChanged);
-            _inputField.AddToClassList("simple-prop-value");
+            var simpleField = FieldUtility.GetFieldByType(property, GetTargetObjectValue(), SimpleValueChanged);
+            simpleField.AddToClassList("simple-prop-value");
             var simpleContainer = new VisualElement();
             simpleContainer.AddToClassList("simple-prop-container");
-            Add(simpleContainer);
-            simpleContainer.Add(_label);
-            simpleContainer.Add(_inputField);
+            simpleContainer.Add(Label);
+            simpleContainer.Add(simpleField);
+            FieldsContainer.Add(simpleContainer);
         }
 
         private void CreateComplexView(SerializedProperty property)
         {
-            VisualElement container;
-
-            if (_unwrap)
-            {
-                container = this;
-            }
-            else
-            {
-                Add(_label);
-                container = new VisualElement();
-                container.AddToClassList("complex-prop-container");
-                Add(container);
-            }
-
-            if (_isArrayAndNotString) CreateListView(property, container);
-            else CreateSubfieldsView(property, container);
+            if (IsArrayAndNotString) CreateListView(property);
+            else CreateSubfieldsView(property);
         }
 
-        private void CreateSubfieldsView(SerializedProperty serializedProperty, VisualElement container)
+        private void CreateSubfieldsView(SerializedProperty serializedProperty)
         {
-            var value = GetValue();
+            var value = GetTargetObjectValue();
 
             if (value == null)
             {
-                container.Add(FieldUtility.NoneLabel);
+                FieldsContainer.Add(FieldUtility.NoneLabel);
                 return;
             }
 
             var subInfos = value.GetType().GetSerializedFieldsUpToBase();
-            _subFields = new PropertyFieldElement[subInfos.Length];
 
             for (int i = 0; i < subInfos.Length; i++)
             {
@@ -164,36 +84,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var property = serializedProperty.FindPropertyRelative(subProp.Name);
                 var subField = new PropertyFieldElement();
                 subField.SetProperty(property);
-                _subFields[i] = subField;
-                container.Add(subField);
-                subField.OnValueChanged += SubfieldChanged;
+                AddSubfield(subField);
             }
         }
 
-        private void CreateListView(SerializedProperty serializedProperty, VisualElement container)
+        private void CreateListView(SerializedProperty serializedProperty)
         {
             var listElement = new ListPropertyElement();
             listElement.SetProperty(serializedProperty);
-            container.Add(listElement);
-            _listView = listElement;
-            _label.text = $"{_displayName} [{_listView.ArraySize}]";
-            _listView.OnChanged += ListChanged;
-        }
-
-        private void ListChanged()
-        {
-            _label.text = $"{_displayName} [{_listView.ArraySize}]";
-            OnValueChanged?.Invoke(null);
-        }
-
-        private object GetValue()
-        {
-            return FieldUtility.GetValue(_serializedTargetObject, _propertyPath);
-        }
-
-        private void SetValue(object value)
-        {
-            FieldUtility.SetValue(_serializedTargetObject, _propertyPath, value);
+            AddSubfield(listElement);
+            LabelText = $"{_displayName} [{listElement.ArraySize}]";
+            _getArraySize = () => listElement.ArraySize;
         }
     }
 }
