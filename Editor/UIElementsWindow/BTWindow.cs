@@ -88,6 +88,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             bool canUndo = !string.IsNullOrEmpty(undoDescription);
             if (canUndo) BTUndo.RegisterUndo(SharedTree, undoDescription);
+            SharedTree.GraphPosition = s_currentWindow._graph.CurrentPosition;
+            SharedTree.Zoom = s_currentWindow._graph.CurrentZoom;
             EditorUtility.SetDirty(SharedTree);
         }
 
@@ -210,19 +212,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void AddGraphDelayed()
         {
             rootVisualElement.SetEnabled(false);
-
-            // Using Animation here as coroutine with callback
-            var anim = UnityEngine.UIElements.Experimental
-                .ValueAnimation<bool>.Create(rootVisualElement, (a, b, t) => false);
-            
-            anim.OnCompleted(() =>
+            CallDelayed(1, () =>
             {
-                AddGraphImmediate();
                 rootVisualElement.SetEnabled(true);
+                AddGraphImmediate();
             });
-
-            anim.durationMs = 1;
-            anim.Start();
         }
 
         private void AddGraphImmediate()
@@ -264,6 +258,18 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             InitializeWithAsset(newTree);
+        }
+
+        // Using Animation here as coroutine with callback
+        private void CallDelayed(int timeMS, System.Action action)
+        {
+            var anim = UnityEngine.UIElements.Experimental
+                .ValueAnimation<bool>.Create(rootVisualElement, (a, b, t) => false);
+
+            anim.Ease(UnityEngine.UIElements.Experimental.Easing.Linear);
+            anim.OnCompleted(() => action?.Invoke());
+            anim.durationMs = timeMS;
+            anim.Start();
         }
     }
 }

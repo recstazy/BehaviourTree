@@ -28,6 +28,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Properties
 
         public BehaviourTree Tree { get; private set; }
+        public Vector3 CurrentPosition => viewTransform.position;
+        public float CurrentZoom => viewTransform.scale.x;
+
         internal ReadOnlyCollection<BTNode> BtNodes => _nodes.AsReadOnly();
         internal ReadOnlyCollection<EdgeReference> Edges => _edges.AsReadOnly();
 
@@ -46,7 +49,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             CreateNodes(tree);
             CreateEdges();
             graphViewChanged += GraphChanged;
-            this.AddManipulator(new ContentDragger());
+
+            var contentDragger = new ContentDragger();
+            this.AddManipulator(contentDragger);
             var selectionDragger = new SelectionDragger();
             this.AddManipulator(selectionDragger);
             this.AddManipulator(new ClickSelector());
@@ -55,6 +60,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _mousePosProvider = new BTMousePosProvider();
             this.AddManipulator(_mousePosProvider);
             SetupZoom(minScale, maxScale);
+
+            UpdateViewTransform(tree.GraphPosition, tree.Zoom * Vector3.one);
 
             serializeGraphElements += SerializeForCopy;
             unserializeAndPaste += UnserializeAndPaste;
