@@ -294,6 +294,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             OnStructureChanged?.Invoke();
+            BTWindow.SetDirty("Paste Elements");
         }
     }
 }
