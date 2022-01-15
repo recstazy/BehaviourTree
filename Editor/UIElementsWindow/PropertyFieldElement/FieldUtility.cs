@@ -77,17 +77,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return fields.ToArray();
         }
 
-        public static void CreateSerializedObjectAndProperty(UnityEngine.Object target, string path, out SerializedObject serializedObject, out SerializedProperty property)
+        public static bool CreateSerializedObjectAndProperty(UnityEngine.Object target, string path, out SerializedObject serializedObject, out SerializedProperty property)
         {
             if (target != null && !string.IsNullOrEmpty(path))
             {
                 serializedObject = new SerializedObject(target);
                 property = serializedObject.FindProperty(path);
+                return true;
             }
             else
             {
                 serializedObject = null;
                 property = null;
+                return false;
             }
         }
 
