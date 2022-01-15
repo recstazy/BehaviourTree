@@ -6,7 +6,7 @@ using UnityEditor;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    [CustomPropertyElement(typeof(BlackboardGetter))]
+    [CustomPropertyElement(typeof(BlackboardName))]
     public class BBNameElement : BasePropertyFieldElement
     {
         #region Fields
