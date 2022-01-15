@@ -22,11 +22,44 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #endregion
 
+        protected static Type GetCustomElementTypeForProperty(SerializedProperty property)
+        {
+            PropertyValueHelper.GetTargetObjectOfProperty(property, out var fieldType);
+
+            if (fieldType != null)
+            {
+                var elementTypes = TypeCache.GetTypesDerivedFrom<BasePropertyFieldElement>().ToArray();
+
+                foreach (var t in elementTypes)
+                {
+                    var attribute = t.GetCustomAttribute<CustomPropertyElementAttribute>();
+
+                    if (attribute != null && attribute.PropertyType.IsAssignableFrom(fieldType))
+                    {
+                        return t;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         protected override void CreateVisualElements(SerializedProperty property)
         {
             if (FieldsContainer.childCount > 0) FieldsContainer.Clear();
-            if (!IsComplex) CreateSimpleView(property);
-            else CreateComplexView(property);
+            var customPropertyType = GetCustomElementTypeForProperty(property);
+
+            if (customPropertyType != null)
+            {
+                var instance = Activator.CreateInstance(customPropertyType) as BasePropertyFieldElement;
+                instance.SetProperty(property);
+                AddSubfield(instance);
+            }
+            else
+            {
+                if (!IsComplex) CreateSimpleView(property);
+                else CreateComplexView(property);
+            }
         }
 
         protected override void Detached(DetachFromPanelEvent evt)
