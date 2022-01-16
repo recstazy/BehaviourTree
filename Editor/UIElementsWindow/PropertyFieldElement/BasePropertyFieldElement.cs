@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
+using System.Reflection;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
@@ -21,6 +22,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private static StyleSheet PropertyStyles =
             AssetDatabase.LoadAssetAtPath<StyleSheet>(System.IO.Path.Combine(MainPaths.UssRoot, "PropertyFieldElementStyles.uss"));
 
+        private FieldInfo _fieldInfo;
+
         #endregion
 
         #region Properties
@@ -30,6 +33,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         protected bool IsArrayAndNotString { get; private set; }
         protected Label Label { get; private set; }
         protected VisualElement FieldsContainer { get; private set; }
+        protected FieldInfo FieldInfo => _fieldInfo;
         
         #endregion
 
@@ -45,6 +49,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _propertyPath = property.propertyPath;
             _displayName = property.displayName;
             _unwrap = hideLabelAndUnwrap;
+            PropertyValueHelper.GetTargetObjectOfProperty(property, out _fieldInfo);
+
             CreateField();
         }
 
@@ -95,6 +101,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             OnChanged?.Invoke();
         }
 
+        public object GetRelativeValue(string relativePath)
+        {
+            return FieldUtility.GetValue(_serializedTargetObject, $"{_propertyPath}.{relativePath}");
+        }
+
         public object GetTargetObjectValue()
         {
             return FieldUtility.GetValue(_serializedTargetObject, _propertyPath);
@@ -103,6 +114,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public void SetTargetObjectValue(object value)
         {
             FieldUtility.SetValue(_serializedTargetObject, _propertyPath, value);
+        }
+
+        public void SetRelativeValue(string relativePath, object value)
+        {
+            FieldUtility.SetValue(_serializedTargetObject, $"{_propertyPath}.{relativePath}", value);
         }
 
         protected void AddSubfield(BasePropertyFieldElement field)

@@ -15,12 +15,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
         /// <summary> Gets the object the property represents. </summary>
         public static object GetTargetObjectOfProperty(SerializedProperty property)
         {
-            return GetTargetObjectOfProperty(property, out var fieldType);
+            return GetTargetObjectOfProperty(property, out FieldInfo fieldinfo);
         }
 
         public static object GetTargetObjectOfProperty(SerializedProperty property, out Type fieldType)
         {
-            fieldType = null;
+            var value = GetTargetObjectOfProperty(property, out FieldInfo fieldInfo);
+            fieldType = GetFieldType(fieldInfo);
+            return value;
+        }
+
+        public static object GetTargetObjectOfProperty(SerializedProperty property, out FieldInfo fieldInfo)
+        {
+            fieldInfo = null;
             if (property == null) return null;
 
             var path = property.propertyPath.Replace(".Array.data[", "[");
@@ -29,15 +36,27 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var elements = path.Split('.');
             string lastName = elements.Last();
             elements = elements.Take(elements.Length - 1).ToArray();
-            
+
             foreach (var element in elements)
             {
                 obj = GetValueByPropertyPathName(obj, element, out objectType);
             }
 
             var lastValue = GetValueByPropertyPathName(obj, lastName, out var lastObjectType);
-            fieldType = GetFieldType_Imp(obj, lastName);
+            fieldInfo = GetFieldInfo_Imp(obj.GetType(), lastName);
             return lastValue;
+        }
+
+        public static Type GetFieldType(FieldInfo fieldInfo)
+        {
+            var fieldType = fieldInfo?.FieldType;
+
+            if (fieldType != null && typeof(IEnumerable).IsAssignableFrom(fieldType))
+            {
+                fieldType = GetArrayElementType(fieldType);
+            }
+
+            return fieldType;
         }
 
         public static void SetTargetObjectOfProperty(SerializedProperty prop, object value)
@@ -153,27 +172,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return current;
         }
 
-        private static Type GetFieldType_Imp(object source, string element)
+        private static Type GetArrayElementType(Type enumerableType)
         {
-            Type type;
-
-            if (element.Contains("["))
-            {
-                var elementName = element.Substring(0, element.IndexOf("["));
-                var enumerableType = GetType_Imp(source.GetType(), elementName);
-                var interfaceType = enumerableType.GetInterface(typeof(IEnumerable<>).Name);
-                var tType = interfaceType.GenericTypeArguments.First();
-                type = tType;
-            }
-            else
-            {
-                type = GetType_Imp(source.GetType(), element);
-            }
-
-            return type;
+            var interfaceType = enumerableType.GetInterface(typeof(IEnumerable<>).Name);
+            return interfaceType.GenericTypeArguments.First();
         }
 
-        private static Type GetType_Imp(Type source, string name)
+        private static FieldInfo GetFieldInfo_Imp(Type source, string name)
         {
             if (source == null) return null;
             var type = source;
@@ -181,10 +186,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
             while (type != null)
             {
                 var field = type.GetField(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-                
+
                 if (field != null)
                 {
-                    return field.FieldType;
+                    return field;
                 }
 
                 type = type.BaseType;

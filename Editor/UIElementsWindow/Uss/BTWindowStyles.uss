@@ -120,3 +120,24 @@ TreeSelector {
     height: 100%;
     padding: 5px;
 }
+
+.bb-name-dropdown {
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(40, 40, 40);
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+}
+
+.bb-name-dropdown:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}

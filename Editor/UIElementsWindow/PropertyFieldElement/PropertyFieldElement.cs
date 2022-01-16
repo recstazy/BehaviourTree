@@ -24,7 +24,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         protected static Type GetCustomElementTypeForProperty(SerializedProperty property)
         {
-            PropertyValueHelper.GetTargetObjectOfProperty(property, out var fieldType);
+            PropertyValueHelper.GetTargetObjectOfProperty(property, out FieldInfo fieldInfo);
+            var fieldType = PropertyValueHelper.GetFieldType(fieldInfo);
 
             if (fieldType != null)
             {
@@ -47,12 +48,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
         protected override void CreateVisualElements(SerializedProperty property)
         {
             if (FieldsContainer.childCount > 0) FieldsContainer.Clear();
-            var customPropertyType = GetCustomElementTypeForProperty(property);
+            var customPropertyType = IsArrayAndNotString ? null : GetCustomElementTypeForProperty(property);
 
             if (customPropertyType != null)
             {
                 var instance = Activator.CreateInstance(customPropertyType) as BasePropertyFieldElement;
-                instance.SetProperty(property);
+                instance.SetProperty(property, true);
                 AddSubfield(instance);
             }
             else

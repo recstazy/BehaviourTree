@@ -91,7 +91,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (s_currentIndex == index) return;
 
             s_currentIndex = index;
-            OnTreeChanged?.Invoke(CurrentPlayer?.SharedTree);
+            OnTreeChanged?.Invoke(CurrentPlayer?.Tree);
         }
 
         private void CreateMenu(ContextualMenuPopulateEvent evt)

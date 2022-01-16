@@ -282,7 +282,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 case SerializedPropertyType.Color:
                     return BindChange(new ColorField() { value = (Color)curValue }, onValueChanged);
                 case SerializedPropertyType.ObjectReference:
-                    PropertyValueHelper.GetTargetObjectOfProperty(property, out var fieldType);
+                    PropertyValueHelper.GetTargetObjectOfProperty(property, out Type fieldType);
                     return BindChange(new ObjectField() { value = (UnityEngine.Object)curValue, objectType = fieldType, allowSceneObjects = false }, onValueChanged);
                 case SerializedPropertyType.LayerMask:
                     return BindChange(new LayerMaskField() { value = (LayerMask)curValue }, onValueChanged);
