@@ -89,7 +89,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 Data.SetConnections(Data.Connections.Take(Mathf.Min(Data.Connections.Length, newOuts.Length)).ToArray());
             }
 
-            OutsOrderChanged();
             var sortedPorts = outputContainer.Query<Port>().Build().ToList();
             if (sortedPorts == null) sortedPorts = new List<Port>();
 
@@ -121,16 +120,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 sortedPorts[i].userData = newOuts[i].Index;
                 sortedPorts[i].portName = newOuts[i].Name;
-            }
-        }
-
-        public void OutsOrderChanged()
-        {
-            var sortedPorts = outputContainer.Query<Port>().Build().ToList().OrderBy(p => (int)p.userData).ToArray();
-
-            foreach (var p in sortedPorts)
-            {
-                p.BringToFront();
             }
         }
 
