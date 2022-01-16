@@ -92,7 +92,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (s_currentTree != tree)
             {
-                s_container = new BTUndoContainer();
+                s_container = ScriptableObject.CreateInstance<BTUndoContainer>();
                 s_currentTree = tree;
                 s_container.Serialize(s_currentTree);
                 EditorUtility.SetDirty(s_container);

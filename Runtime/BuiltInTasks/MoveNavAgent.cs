@@ -25,11 +25,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        public override string GetDescription()
-        {
-            return $"Move to {_destination}";
-        }
-
         protected override IEnumerator NavAgentTaskRoutine(NavMeshAgent navAgent)
         {
             if (Blackboard.TryGetValue(_destination, out object destinationValue))

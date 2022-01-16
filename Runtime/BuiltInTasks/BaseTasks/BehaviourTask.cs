@@ -31,8 +31,6 @@ namespace Recstazy.BehaviourTree
         private HashSet<Coroutine> _currentTaskCoroutines = new HashSet<Coroutine>();
         private HashSet<BranchPlayer> _currentTaskBranches = new HashSet<BranchPlayer>();
 
-        protected static readonly Color s_DefaultColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
-
         #endregion
 
         #region Properties
@@ -45,7 +43,6 @@ namespace Recstazy.BehaviourTree
 
         public bool IsRunning { get; private set; }
         public Blackboard Blackboard { get => GetBlackboard(); set => SetBlackboard(value); }
-        protected virtual Color Color => s_DefaultColor;
 
         internal CoroutineRunner CoroutineRunner { get; private set; }
         internal int Index { get; set; }
@@ -57,12 +54,6 @@ namespace Recstazy.BehaviourTree
         {
             int nextOutIndex = GetCurrentOutIndex();
             return nextOutIndex;
-        }
-
-        /// <summary> Provide description to show in behaviour tree </summary>
-        public virtual string GetDescription()
-        {
-            return null;
         }
 
         /// <summary> Finish task without waiting to it's end and force to succeed or fail </summary>
@@ -235,11 +226,6 @@ namespace Recstazy.BehaviourTree
             }
 
             return copy as BehaviourTask;
-        }
-
-        internal Color GetColor()
-        {
-            return Color;
         }
 
         [RuntimeInstanced]

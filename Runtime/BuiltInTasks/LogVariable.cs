@@ -19,11 +19,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        public override string GetDescription()
-        {
-            return $"{_logType}: {_name}";
-        }
-
         protected override string GetLogString()
         {
             if (Blackboard.TryGetValue(_name, out var value))

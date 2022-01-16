@@ -23,11 +23,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        protected override string GetGateDescription()
-        {
-            return $"{_name} is true";
-        }
-
         protected override bool CheckGateCondition()
         {
             if (Blackboard.TryGetValue(_name, out bool bbValue))

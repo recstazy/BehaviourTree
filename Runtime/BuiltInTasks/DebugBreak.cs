@@ -17,11 +17,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        public override string GetDescription()
-        {
-            return "Pause Playmode";
-        }
-
         protected override IEnumerator TaskRoutine()
         {
             Succeed = true;

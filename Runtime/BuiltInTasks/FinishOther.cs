@@ -21,11 +21,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        public override string GetDescription()
-        {
-            return $"{(_succeedAll ? "Succeed" : "Fail")} all connected tasks";
-        }
-
         protected override IEnumerator TaskRoutine()
         {
             foreach (var c in Connections)

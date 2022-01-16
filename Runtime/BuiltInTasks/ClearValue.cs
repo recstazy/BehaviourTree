@@ -19,11 +19,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        public override string GetDescription()
-        {
-            return $"Clear {_name}";
-        }
-
         protected override IEnumerator TaskRoutine()
         {
             Blackboard.ClearValue(_name);

@@ -23,7 +23,6 @@ namespace Recstazy.BehaviourTree
         #region Properties
 
         public LogType LogStringType => _logType;
-        protected override Color Color => GetDrawColor();
 
         #endregion
 

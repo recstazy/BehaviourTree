@@ -19,11 +19,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        public override string GetDescription()
-        {
-            return "Run random out";
-        }
-
         protected override int GetCurrentOutIndex()
         {
             return Random.Range(0, Connections.Count);

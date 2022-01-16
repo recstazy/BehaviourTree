@@ -22,11 +22,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        public override string GetDescription()
-        {
-            return $"{_logType}: {_logString}";
-        }
-
         protected override string GetLogString()
         {
             return _logString;

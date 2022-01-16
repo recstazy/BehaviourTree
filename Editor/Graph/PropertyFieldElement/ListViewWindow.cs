@@ -13,7 +13,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Fields
 
         private static ListViewWindow s_currentInstance;
-        private static bool s_isShowing;
         private Vector2 _scrollPos;
 
         private Object _serializedTargetObject;
@@ -87,13 +86,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             CloseIfAny();
             s_currentInstance = this;
-            s_isShowing = true;
         }
 
         private void OnDisable()
         {
             s_currentInstance = null;
-            s_isShowing = false;
 
             if (!_disposed)
             {

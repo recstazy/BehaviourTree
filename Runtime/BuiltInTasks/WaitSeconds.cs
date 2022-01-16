@@ -23,11 +23,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        public override string GetDescription()
-        {
-            return $"Wait {_time} seconds";
-        }
-
         protected override IEnumerator TaskRoutine()
         {
             yield return new WaitForSeconds(Time);

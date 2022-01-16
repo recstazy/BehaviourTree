@@ -19,11 +19,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        protected override string GetGateDescription()
-        {
-            return $"{_value} is set";
-        }
-
         protected override bool CheckGateCondition()
         {
             var isSet = Blackboard.IsValueSetAndNotNull(_value);

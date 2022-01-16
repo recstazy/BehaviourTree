@@ -16,14 +16,11 @@ namespace Recstazy.BehaviourTree
         [HideInInspector]
         private int _outsCount;
 
-        private static readonly Color s_backColor = new Color(0.1f, 0.1f, 0.175f, 0.5f);
-
         #endregion
 
         #region Properties
 
         public int OutsCount => _outsCount;
-        protected override Color Color => s_backColor;
 
         #endregion
 
