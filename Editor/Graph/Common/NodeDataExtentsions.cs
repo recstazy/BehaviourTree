@@ -30,22 +30,25 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static TaskOutAttribute[] GetOuts(this NodeData data)
         {
+            var attributes = data?.TaskImplementation?.GetType()?.GetCustomAttributes(typeof(TaskOutAttribute), false) as TaskOutAttribute[];
+
             if (data?.TaskImplementation is MultioutTask)
             {
-                return GenerateOuts(data.Connections.Length, true);
+                int solidOutsCount = attributes.Length;
+                attributes = attributes.Concat(GenerateOuts(data.Connections.Length - solidOutsCount, solidOutsCount, true)).ToArray();
             }
 
-            return data?.TaskImplementation?.GetType()?.GetCustomAttributes(typeof(TaskOutAttribute), false) as TaskOutAttribute[];
+            return attributes;
         }
 
-        private static TaskOutAttribute[] GenerateOuts(int count, bool generatePlusSign)
+        private static TaskOutAttribute[] GenerateOuts(int count, int startIndex, bool generatePlusSign)
         {
             count = Mathf.Max(count, 0) + 1;
             var outs = new TaskOutAttribute[count];
 
             for (int i = 0; i < outs.Length; i++)
             {
-                outs[i] = new TaskOutAttribute(i, generatePlusSign && i == outs.Length - 1 ? "+" : i.ToString());
+                outs[i] = new TaskOutAttribute(startIndex + i, generatePlusSign && i == outs.Length - 1 ? "+" : i.ToString());
             }
 
             return outs;

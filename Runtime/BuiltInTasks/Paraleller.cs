@@ -9,6 +9,7 @@ namespace Recstazy.BehaviourTree
     /// </summary>
     [NoInspector]
     [TaskMenu("Multiout/Paraleller")]
+    [TaskOut(0, "Main Task")]
     public class Paraleller : MultioutTask
     {
         #region Fields
