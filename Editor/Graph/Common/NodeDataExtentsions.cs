@@ -6,11 +6,26 @@ using UnityEditor.Experimental.GraphView;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    internal static class NodeDataExtentsions
+    internal static class BTNodeExtensions
     {
-        public static TaskOutAttribute[] GetOuts(this BehaviourTreeNode node)
+        public static TaskOutAttribute[] GetOuts(this BTNode node)
         {
             return node?.Data?.GetOuts();
+        }
+
+        public static bool IsEntryNode(this GraphElement element)
+        {
+            return element is BTNode btNode && btNode.IsEntry;
+        }
+
+        public static bool IsEntryOutputEdge(this GraphElement element)
+        {
+            return element is Edge edge && edge.output != null && edge.output.node.IsEntryNode();
+        }
+
+        public static IEnumerable<BTNode> OnlyNodes(this IEnumerable<GraphElement> elements)
+        {
+            return elements.Where(e => e is BTNode).Select(e => (BTNode)e);
         }
 
         public static TaskOutAttribute[] GetOuts(this NodeData data)
@@ -34,29 +49,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             return outs;
-        }
-    }
-
-    internal static class BTNodeExtensions
-    {
-        public static TaskOutAttribute[] GetOuts(this BTNode node)
-        {
-            return node?.Data?.GetOuts();
-        }
-
-        public static bool IsEntryNode(this GraphElement element)
-        {
-            return element is BTNode btNode && btNode.IsEntry;
-        }
-
-        public static bool IsEntryOutputEdge(this GraphElement element)
-        {
-            return element is Edge edge && edge.output != null && edge.output.node.IsEntryNode();
-        }
-
-        public static IEnumerable<BTNode> OnlyNodes(this IEnumerable<GraphElement> elements)
-        {
-            return elements.Where(e => e is BTNode).Select(e => (BTNode)e);
         }
     }
 }
