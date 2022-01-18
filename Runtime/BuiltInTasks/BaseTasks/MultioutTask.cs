@@ -29,11 +29,11 @@ namespace Recstazy.BehaviourTree
 
             for (int i = 0; i < connections.Length; i++)
             {
-                if (connections[i].OutPin >= concreteOutsCount)
+                if (connections[i].OutPin < concreteOutsCount)
                 {
-                    reordablesStartIndex = i;
-                    break;
+                    reordablesStartIndex++;
                 }
+                else break;
             }
 
             var reordableOuts = new TaskConnection[connections.Length - reordablesStartIndex];
