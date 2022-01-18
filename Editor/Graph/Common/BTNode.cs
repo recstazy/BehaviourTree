@@ -11,6 +11,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     internal class BTNode : Node, IPlaymodeDependent
     {
+        public event Action<BTNode> OnReconnect;
         private static event Action OnAnyDeleted;
 
         #region Fields
@@ -79,7 +80,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
             SetEnabled(!isPlaymode);
         }
 
-        public void EdgesChanged()
+        public void UpdateEdges()
+        {
+            OnReconnect?.Invoke(this);
+        }
+
+        public void UpdateOutPorts()
         {
             var newOuts = Data.GetOuts();
             if (newOuts == null) return;
@@ -87,40 +93,36 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (Data.Connections.Length != newOuts.Length)
             {
                 Data.SetConnections(Data.Connections.Take(Mathf.Min(Data.Connections.Length, newOuts.Length)).ToArray());
+                newOuts = Data.GetOuts();
             }
 
-            var sortedPorts = outputContainer.Query<Port>().Build().ToList();
-            if (sortedPorts == null) sortedPorts = new List<Port>();
+            var ports = outputContainer.Query<Port>().Build().ToList();
+            if (ports == null) ports = new List<Port>();
 
             // Remove extra ports
-            for (int i = sortedPorts.Count - 1; i >= newOuts.Length; i--)
+            for (int i = ports.Count - 1; i >= newOuts.Length; i--)
             {
-                var edges = sortedPorts[i].connections.ToArray();
-
-                for (int j = 0; j < edges.Length; j++)
-                {
-                    var edge = edges[j];
-                    edge.input.Disconnect(edge);
-                    edge.output.Disconnect(edge);
-                    edge.parent.Remove(edge);
-                }
-
-                outputContainer.Remove(sortedPorts[i]);
+                outputContainer.Remove(ports[i]);
             }
 
             // Add ports wich are lack
-            for (int i = sortedPorts.Count; i < newOuts.Length; i++)
+            for (int i = ports.Count; i < newOuts.Length; i++)
             {
-                CreateOutputPort(newOuts[i]);
+                var port = CreateOutputPort(newOuts[i]);
+                ports.Add(port);
             }
 
-            sortedPorts = sortedPorts.Where(p => p.parent == outputContainer).ToList();
+            // Remove all removed from hierarchy ports from list
+            ports = ports.Where(p => p.parent == outputContainer).OrderBy(p => p.parent.IndexOf(p)).ToList();
+
             // Update ports info
-            for (int i = 0; i < sortedPorts.Count; i++)
+            for (int i = 0; i < ports.Count; i++)
             {
-                sortedPorts[i].userData = newOuts[i].Index;
-                sortedPorts[i].portName = newOuts[i].Name;
+                ports[i].userData = newOuts[i].Index;
+                ports[i].portName = newOuts[i].Name;
             }
+
+            RefreshPorts();
         }
 
         public void WasDeleted()
@@ -156,7 +158,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UpdateTaskDependencies()
         {
-            EdgesChanged();
             title = GetName();
             UpdateTaskContainer();
             RefreshExpandedState();
@@ -176,14 +177,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Data.TaskImplementation = TaskFactory.CreateTaskImplementationEditor(_taskProvider.CurrentIndex);
             BTWindow.SetDirty("Change Task");
             UpdateTaskDependencies();
+            UpdateEdges();
         }
 
-        private void CreateOutputPort(TaskOutAttribute outAttribute)
+        private Port CreateOutputPort(TaskOutAttribute outAttribute)
         {
             var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(float));
             port.portName = outAttribute.Name;
             port.userData = outAttribute.Index;
             outputContainer.Add(port);
+            return port;
         }
     }
 }

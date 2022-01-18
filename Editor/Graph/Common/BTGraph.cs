@@ -77,6 +77,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             foreach (var n in _nodes)
             {
+                n.OnReconnect -= ReconnectNode;
                 n.Dispose();
             }
 
@@ -122,6 +123,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             var node = new BTNode(data);
             _nodes.Add(node);
+            node.OnReconnect += ReconnectNode;
             AddElement(node);
             node.ApplyPositionFromData();
             return node;
@@ -139,21 +141,39 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateEdgesForNode(BTNode n)
         {
-            var outputPorts = ports.ToList().Where(p => p.direction == Direction.Output).ToArray();
-            if (outputPorts.Length == 0) return;
+            n.UpdateOutPorts();
+            var nodeOutputs = n.outputContainer.Query<Port>().Build().ToList();
 
             foreach (var c in n.Data.Connections)
             {
-                try
-                {
-                    var outPort = outputPorts.First(p => p.node == n && (int)p.userData == c.OutPin);
-                    var inPort = _nodes.First(node => node.Data.Index == c.InNode).inputContainer.Q<Port>();
-                    var edge = outPort.ConnectTo(inPort);
-                    AddElement(edge);
-                    _edges.Add(new EdgeReference(edge));
-                }
-                catch { }
+                var outPort = nodeOutputs.First(p => (int)p.userData == c.OutPin);
+                var inPort = _nodes.First(node => node.Data.Index == c.InNode).inputContainer.Q<Port>();
+                var edge = outPort.ConnectTo(inPort);
+                AddElement(edge);
+                _edges.Add(new EdgeReference(edge));
             }
+        }
+
+        private void ReconnectNode(BTNode node)
+        {
+            var ports = node.outputContainer.Query<Port>().Build().ToList();
+            var removedEdgesSet = new HashSet<Edge>();
+
+            foreach (var p in ports)
+            {
+                var portEdges = p.connections.ToArray();
+
+                foreach (var edge in portEdges)
+                {
+                    edge.input.Disconnect(edge);
+                    edge.output.Disconnect(edge);
+                    edge.RemoveFromHierarchy();
+                    removedEdgesSet.Add(edge);
+                }
+            }
+
+            _edges = _edges.Where(edg => !removedEdgesSet.Contains(edg.Edge)).ToList();
+            CreateEdgesForNode(node);
         }
 
         private void ContextCreateDataAndNode(DropdownMenuAction args)
@@ -192,7 +212,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     foreach (var n in nodesToUpdate)
                     {
-                        n.EdgesChanged();
+                        n.UpdateEdges();
                     }
                 }
 
@@ -207,6 +227,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     foreach (var n in nodes)
                     {
                         _nodes.Remove(n);
+                        n.OnReconnect -= ReconnectNode;
                         n.WasDeleted();
                     }
 
@@ -239,7 +260,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 foreach (var n in nodesToUpdate)
                 {
-                    n.EdgesChanged();
+                    n.UpdateEdges();
                 }
 
                 OnStructureChanged?.Invoke();

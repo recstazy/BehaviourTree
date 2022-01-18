@@ -239,5 +239,10 @@ namespace Recstazy.BehaviourTree
         {
             CoroutineRunner = runner;
         }
+
+        internal virtual TaskConnection[] PostProcessConnectionsAfterChange(TaskConnection[] connections)
+        {
+            return connections;
+        }
     }
 }

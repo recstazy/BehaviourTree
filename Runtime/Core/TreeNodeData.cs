@@ -45,24 +45,6 @@ namespace Recstazy.BehaviourTree
             SetConnections(connections);
         }
 
-        public NodeData CreateCopy(bool copyTask)
-        {
-            var data = new NodeData(_index, TaskImplementation, Connections);
-
-            if (copyTask)
-            {
-                data.TaskImplementation = TaskImplementation?.CreateShallowCopy();
-            }
-            
-            data.Position = Position;
-            return data;
-        }
-
-        public void OverrideIndex(int newIndex)
-        {
-            _index = newIndex;
-        }
-
         public void SetConnections(params TaskConnection[] connections)
         {
             if (connections == null) Connections = new TaskConnection[0];
@@ -104,6 +86,11 @@ namespace Recstazy.BehaviourTree
                 newArray[i - offset] = _connections[i];
             }
 
+            if (TaskImplementation != null)
+            {
+                newArray = TaskImplementation.PostProcessConnectionsAfterChange(newArray);
+            }
+
             SetConnections(newArray);
             return true;
         }
@@ -115,13 +102,15 @@ namespace Recstazy.BehaviourTree
 
             var currentConnections = _connections == null ? new TaskConnection[0] : _connections;
             var connection = new TaskConnection(outPin, inNode);
-            SetConnections(currentConnections.Concat(new TaskConnection[] { connection }).ToArray());
-            return true;
-        }
+            var newArray = currentConnections.Concat(new TaskConnection[] { connection }).ToArray();
 
-        public void ReorderConnections(System.Func<TaskConnection, float> orderBy)
-        {
-            System.Array.Sort(_connections, (c, next) => orderBy(c) > orderBy(next) ? 1 : -1);
+            if (TaskImplementation != null)
+            {
+                newArray = TaskImplementation.PostProcessConnectionsAfterChange(newArray);
+            }
+
+            SetConnections(newArray);
+            return true;
         }
 
         [RuntimeInstanced]
