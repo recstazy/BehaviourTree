@@ -45,9 +45,7 @@ namespace Recstazy.BehaviourTree
 
             for (int i = 0; i < reordableOuts.Length; i++)
             {
-                int oldPin = reordableOuts[i].OutPin;
                 var newConnection = new TaskConnection(i + concreteOutsCount, reordableOuts[i].InNode);
-                newConnection.OldOutPin = oldPin;
                 reordableOuts[i] = newConnection;
             }
 

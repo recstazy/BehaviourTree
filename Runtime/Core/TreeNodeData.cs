@@ -68,23 +68,10 @@ namespace Recstazy.BehaviourTree
             return false;
         }
 
-        public bool RemoveConnectionAtIndex(int index)
+        public void RemoveConnectionsWithIndices(params int[] indicies)
         {
-            if (_connections == null || _connections.Length == 0 || index < 0 || index >= _connections.Length) return false;
-
-            var newArray = new TaskConnection[_connections.Length - 1];
-
-            int offset = 0;
-            for (int i = 0; i < _connections.Length; i++)
-            {
-                if (i == index)
-                {
-                    offset = 1;
-                    continue;
-                }
-
-                newArray[i - offset] = _connections[i];
-            }
+            if (_connections == null || _connections.Length == 0 || indicies == null || indicies.Length == 0) return;
+            var newArray = _connections.Where((c, index) => !indicies.Contains(index)).ToArray();
 
             if (TaskImplementation != null)
             {
@@ -92,7 +79,6 @@ namespace Recstazy.BehaviourTree
             }
 
             SetConnections(newArray);
-            return true;
         }
 
         public bool AddConnection(int outPin, int inNode)

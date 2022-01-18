@@ -198,13 +198,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 if (edges.Length > 0)
                 {
-                    var nodesToUpdate = edges.Select(e => e.output.node as BTNode).ToList();
-
-                    foreach (var e in edges)
-                    {
-                        RemoveConnectionByEdge(e);
-                    }
-
+                    var nodesToUpdate = RemoveConnectionsByEdges(edges);
                     var removedSet = new HashSet<Edge>(edges);
                     _edges = _edges.Where(edg => !removedSet.Contains(edg.Edge)).ToList();
 
@@ -249,7 +243,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
             else if (change.edgesToCreate != null && change.edgesToCreate.Count > 0)
             {
-                var nodesToUpdate = change.edgesToCreate.Select(e => e.output.node as BTNode).ToList();
+                var nodesToUpdate = new HashSet<BTNode>(change.edgesToCreate.Select(e => e.output.node as BTNode).ToArray());
 
                 foreach (var e in change.edgesToCreate)
                 {
@@ -269,15 +263,35 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return change;
         }
 
-        private void RemoveConnectionByEdge(Edge edge)
+        private bool TryGetConnectionIndex(Edge edge, out int index)
         {
             var outputNode = edge.output.node as BTNode;
             var inputNode = edge.input.node as BTNode;
-            
-            if (outputNode.Data.TryFindIndexOfConnection((int)edge.output.userData, inputNode.Data.Index, out int connectionIndex))
+            return outputNode.Data.TryFindIndexOfConnection((int)edge.output.userData, inputNode.Data.Index, out index);
+        }
+
+        // Remove connections in data and return modified nodes
+        private BTNode[] RemoveConnectionsByEdges(Edge[] edges)
+        {
+            var grouped = edges.GroupBy(e => e.output.node).ToDictionary(group => (BTNode)group.Key, group => group.ToArray());
+            List<int> validConnectionsToDelete = new List<int>();
+
+            foreach (var group in grouped)
             {
-                outputNode.Data.RemoveConnectionAtIndex(connectionIndex);
+                validConnectionsToDelete.Clear();
+
+                foreach (var edge in group.Value)
+                {
+                    if (TryGetConnectionIndex(edge, out var index))
+                    {
+                        validConnectionsToDelete.Add(index);
+                    }
+                }
+
+                group.Key.Data.RemoveConnectionsWithIndices(validConnectionsToDelete.ToArray());
             }
+
+            return grouped.Select(pair => pair.Key).ToArray();
         }
 
         private void CreateConnectionByEdge(Edge edge)

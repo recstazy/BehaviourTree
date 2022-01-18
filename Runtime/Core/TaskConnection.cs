@@ -15,12 +15,10 @@ namespace Recstazy.BehaviourTree
 
         public int OutPin => _outPin;
         public int InNode => _inNode;
-        public int OldOutPin { get; set; }
         public bool IsValid { get; private set; }
 
         public TaskConnection(int outPin, int inNode)
         {
-            OldOutPin = outPin;
             _outPin = outPin;
             _inNode = inNode;
             IsValid = true;
