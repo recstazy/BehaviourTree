@@ -6,7 +6,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     [TaskOut("Condition")][TaskOut("Execute")][TaskOut("Exit")]
     [NoInspector]
-    [TaskMenu("Multiout/While Loop")]
+    [TaskMenu("Tasks/While Loop")]
     public class While : BehaviourTask
     {
         #region Fields
