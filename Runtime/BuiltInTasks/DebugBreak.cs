@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     [NoInspector]
     [TaskMenu("Debug/Break")]
     public class DebugBreak : BehaviourTask

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     [TaskMenu("Value/Clear Value")]
     public class ClearValue : BehaviourTask
     {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    [TaskOut(0, "Condition")][TaskOut(1, "Execute")][TaskOut(2, "Exit")]
+    [TaskOut("Condition")][TaskOut("Execute")][TaskOut("Exit")]
     [NoInspector]
     [TaskMenu("Multiout/While Loop")]
     public class While : BehaviourTask

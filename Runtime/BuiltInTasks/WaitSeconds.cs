@@ -7,7 +7,7 @@ namespace Recstazy.BehaviourTree
     /// <summary>
     /// Wait seconds and succeed
     /// </summary>
-    [TaskOut(0)]
+    [TaskOut]
     public class WaitSeconds : BehaviourTask
     {
         #region Fields

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     public abstract class BaseLogTask : BehaviourTask
     {
         public enum LogType { Log, Warning, Error }

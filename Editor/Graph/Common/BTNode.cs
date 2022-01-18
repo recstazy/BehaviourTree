@@ -180,11 +180,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             UpdateEdges();
         }
 
-        private Port CreateOutputPort(TaskOutAttribute outAttribute)
+        private Port CreateOutputPort(TaskOutDescription outDesc)
         {
             var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(float));
-            port.portName = outAttribute.Name;
-            port.userData = outAttribute.Index;
+            port.portName = outDesc.Name;
+            port.userData = outDesc.Index;
             outputContainer.Add(port);
             return port;
         }

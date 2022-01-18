@@ -22,15 +22,26 @@ namespace Recstazy.BehaviourTree
         {
             if (connections == null || connections.Length == 0) return connections;
 
+            // Find from witch connection we can start output recalculation
+            System.Array.Sort(connections, (c, next) => c.OutPin > next.OutPin ? 1 : -1);
+            int reordablesStartIndex = 0;
             int concreteOutsCount = GetType().GetCustomAttributes(typeof(TaskOutAttribute), true).Length;
-            TaskConnection[] reordableOuts = new TaskConnection[connections.Length - concreteOutsCount];
 
-            for (int i = concreteOutsCount; i < connections.Length; i++)
+            for (int i = 0; i < connections.Length; i++)
             {
-                reordableOuts[i - concreteOutsCount] = connections[i];
+                if (connections[i].OutPin >= concreteOutsCount)
+                {
+                    reordablesStartIndex = i;
+                    break;
+                }
             }
 
-            System.Array.Sort(reordableOuts, (c, next) => c.OutPin > next.OutPin ? 1 : -1);
+            var reordableOuts = new TaskConnection[connections.Length - reordablesStartIndex];
+
+            for (int i = reordablesStartIndex; i < connections.Length; i++)
+            {
+                reordableOuts[i - reordablesStartIndex] = connections[i];
+            }
 
             for (int i = 0; i < reordableOuts.Length; i++)
             {
@@ -40,7 +51,7 @@ namespace Recstazy.BehaviourTree
                 reordableOuts[i] = newConnection;
             }
 
-            reordableOuts.CopyTo(connections, concreteOutsCount);
+            reordableOuts.CopyTo(connections, reordablesStartIndex);
             return connections;
         }
     }

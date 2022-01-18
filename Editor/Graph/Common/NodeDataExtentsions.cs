@@ -8,7 +8,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     internal static class BTNodeExtensions
     {
-        public static TaskOutAttribute[] GetOuts(this BTNode node)
+        public static TaskOutDescription[] GetOuts(this BTNode node)
         {
             return node?.Data?.GetOuts();
         }
@@ -28,27 +28,37 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return elements.Where(e => e is BTNode).Select(e => (BTNode)e);
         }
 
-        public static TaskOutAttribute[] GetOuts(this NodeData data)
+        public static TaskOutDescription[] GetOuts(this NodeData data)
         {
             var attributes = data?.TaskImplementation?.GetType()?.GetCustomAttributes(typeof(TaskOutAttribute), false) as TaskOutAttribute[];
+            if (attributes == null) attributes = new TaskOutAttribute[0];
+
+            var descriptions = new TaskOutDescription[attributes.Length];
+
+            for (int i = 0; i < attributes.Length; i++)
+            {
+                descriptions[i] = new TaskOutDescription(i, attributes[i].Name);
+            }
 
             if (data?.TaskImplementation is MultioutTask)
             {
                 int solidOutsCount = attributes.Length;
-                attributes = attributes.Concat(GenerateOuts(data.Connections.Length - solidOutsCount, solidOutsCount, true)).ToArray();
+                int reordableCount = data.Connections.Where(c => c.OutPin >= solidOutsCount).Count();
+                var generated = GenerateOuts(reordableCount, solidOutsCount);
+                descriptions = descriptions.Concat(generated).ToArray();
             }
 
-            return attributes;
+            return descriptions;
         }
 
-        private static TaskOutAttribute[] GenerateOuts(int count, int startIndex, bool generatePlusSign)
+        private static TaskOutDescription[] GenerateOuts(int count, int startIndex)
         {
             count = Mathf.Max(count, 0) + 1;
-            var outs = new TaskOutAttribute[count];
+            var outs = new TaskOutDescription[count];
 
             for (int i = 0; i < outs.Length; i++)
             {
-                outs[i] = new TaskOutAttribute(startIndex + i, generatePlusSign && i == outs.Length - 1 ? "+" : i.ToString());
+                outs[i] = new TaskOutDescription(startIndex + i, i == outs.Length - 1 ? "+" : i.ToString());
             }
 
             return outs;

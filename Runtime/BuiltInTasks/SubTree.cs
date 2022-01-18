@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)][TaskMenu("Tasks/SubTree")]
+    [TaskOut][TaskMenu("Tasks/SubTree")]
     public class SubTree : BehaviourTask
     {
         #region Fields

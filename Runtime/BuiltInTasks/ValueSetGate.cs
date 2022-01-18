@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     [TaskMenu("Gate/Is Set Gate")]
     public class ValueSetGate : BaseGateTask
     {

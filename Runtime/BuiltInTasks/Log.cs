@@ -7,7 +7,7 @@ namespace Recstazy.BehaviourTree
     /// <summary>
     /// Log a string to console from BehaviourTree
     /// </summary>
-    [TaskOut(0)]
+    [TaskOut]
     [TaskMenu("Debug/Log")]
     public class Log : BaseLogTask
     {

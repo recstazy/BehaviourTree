@@ -8,7 +8,7 @@ namespace Recstazy.BehaviourTree
     /// <summary>
     /// Base class to derive to make your own tasks
     /// </summary>
-    [TaskOut(0)]
+    [TaskOut]
     [System.Serializable]
     public class BehaviourTask
     {

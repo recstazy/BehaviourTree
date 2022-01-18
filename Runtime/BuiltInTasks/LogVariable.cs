@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     [TaskMenu("Debug/Log Variable")]
     public class LogVariable : BaseLogTask
     {
