@@ -31,11 +31,11 @@ namespace Recstazy.BehaviourTree
 
         public void AddData(params NodeData[] data)
         {
-            var taskData = data.Where(d => d is TaskNodeData).Select(d => (TaskNodeData)d).ToArray();
+            var taskData = data.Select(d => d as TaskNodeData).Where(d => d != null).ToArray();
             _taskData = _taskData.Concat(taskData).ToArray();
 
-            var varData = data.Where(d => d is VarNodeData).Select(d => (VarNodeData)d).ToArray();
-            _varData = varData.Concat(varData).ToArray();
+            var varData = data.Select(d => d as VarNodeData).Where(d => d != null).ToArray();
+            _varData = _varData.Concat(varData).ToArray();
         }
 
         public void RemoveData(params NodeData[] data)

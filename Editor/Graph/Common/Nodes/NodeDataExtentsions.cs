@@ -14,6 +14,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 return new TaskNode(taskData);
             }
+            else if (data is VarNodeData varData)
+            {
+                return new VarNode(varData);
+            }
             else return null;
         }
 
@@ -60,6 +64,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     var generated = GenerateOuts(reordableCount, solidOutsCount);
                     descriptions = descriptions.Concat(generated).ToArray();
                 }
+            }
+            else if (data is VarNodeData varData)
+            {
+                descriptions = new TaskOutDescription[1];
+                descriptions[0] = new TaskOutDescription(0, varData.VariableName);
             }
             else descriptions = new TaskOutDescription[0];
 

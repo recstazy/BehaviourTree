@@ -175,6 +175,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 GenerateNode(n);
             }
+
+            foreach (var n in nodeData.VarData)
+            {
+                GenerateNode(n);
+            }
         }
 
         private BTNode GenerateNode(NodeData data)
