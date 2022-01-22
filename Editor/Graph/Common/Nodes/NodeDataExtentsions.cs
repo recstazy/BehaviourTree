@@ -8,6 +8,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     internal static class BTNodeExtensions
     {
+        public static BTNode CreateGraphNode(this NodeData data)
+        {
+            return new TaskNode(data);
+        }
+
         public static TaskOutDescription[] GetOuts(this BTNode node)
         {
             return node?.Data?.GetOuts();

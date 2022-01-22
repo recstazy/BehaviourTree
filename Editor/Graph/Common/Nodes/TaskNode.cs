@@ -1,45 +1,35 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using UnityEngine.UIElements;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using System.Linq;
-using System;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    internal class BTNode : Node, IPlaymodeDependent
+    internal class TaskNode : BTNode
     {
-        public event Action<BTNode> OnReconnect;
-        private static event Action OnAnyDeleted;
-
         #region Fields
 
         private NodeTaskProvider _taskProvider;
         private TaskContainer _taskContainer;
+        private bool _isEntry;
 
         #endregion
 
         #region Properties
 
         public int TaskTypeIndex => _taskProvider != null ? _taskProvider.CurrentIndex : -1;
-        public NodeData Data { get; private set; }
-        public bool IsEntry { get; private set; }
+        public override bool IsEntry => _isEntry;
 
         #endregion
 
-        public static void AnyNodeDeleted()
-        {
-            OnAnyDeleted?.Invoke();
-        }
+        public TaskNode() : base() { }
 
-        public BTNode() { }
-
-        public BTNode(NodeData data) : base()
+        public TaskNode(NodeData data) : base(data)
         {
-            Data = data;
-            IsEntry = Data.TaskImplementation is EntryTask;
+            _isEntry = Data.TaskImplementation is EntryTask;
             CreateInput();
 
             if (!IsEntry)
@@ -58,35 +48,29 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             UpdateTaskDependencies();
-            RegisterCallback<DetachFromPanelEvent>(Detached);
             OnAnyDeleted += UpdateTaskContainer;
         }
 
-        public void ApplyPositionFromData()
+        public override void Dispose()
         {
-            var currentRect = GetPosition();
-            currentRect.position = Data.Position;
-            SetPosition(currentRect);
+            base.Dispose();
+            OnAnyDeleted -= UpdateTaskContainer;
+            _taskContainer?.Dispose();
+            extensionContainer.Clear();
+            if (_taskProvider != null) _taskProvider.OnTaskChanged -= TaskChanged;
+            _taskProvider = null;
+            titleContainer.Clear();
         }
 
-        public Vector2 GetWorldPosition()
+        public override void UpdateEdges()
         {
-            var currentRect = GetPosition();
-            return currentRect.position;
+            base.UpdateEdges();
+            Reconnect();
         }
 
-        public void PlaymodeChanged(bool isPlaymode)
+        public override void UpdateOutPorts()
         {
-            SetEnabled(!isPlaymode);
-        }
-
-        public void UpdateEdges()
-        {
-            OnReconnect?.Invoke(this);
-        }
-
-        public void UpdateOutPorts()
-        {
+            base.UpdateOutPorts();
             var newOuts = Data.GetOuts();
             if (newOuts == null) return;
 
@@ -125,30 +109,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             RefreshPorts();
         }
 
-        public void WasDeleted()
-        {
-            Dispose();
-        }
-
-        public void Dispose()
-        {
-            UnregisterCallback<DetachFromPanelEvent>(Detached);
-            OnAnyDeleted -= UpdateTaskContainer;
-            _taskContainer?.Dispose();
-            extensionContainer.Clear();
-            if (_taskProvider != null) _taskProvider.OnTaskChanged -= TaskChanged;
-            _taskProvider = null;
-            titleContainer.Clear();
-        }
-
-        protected string GetName()
+        private string GetName()
         {
             return Data.TaskImplementation == null ? "Empty Task" : ObjectNames.NicifyVariableName(Data.TaskImplementation.GetType().Name);
-        }
-
-        private void Detached(DetachFromPanelEvent evt)
-        {
-            Dispose();
         }
 
         private void UpdateTaskContainer()
@@ -178,15 +141,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             BTWindow.SetDirty("Change Task");
             UpdateTaskDependencies();
             UpdateEdges();
-        }
-
-        private Port CreateOutputPort(TaskOutDescription outDesc)
-        {
-            var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(float));
-            port.portName = outDesc.Name;
-            port.userData = outDesc.Index;
-            outputContainer.Add(port);
-            return port;
         }
     }
 }

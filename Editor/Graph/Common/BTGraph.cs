@@ -146,7 +146,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private BTNode GenerateNode(NodeData data)
         {
-            var node = new BTNode(data);
+            var node = data.CreateGraphNode();
             _nodes.Add(node);
             node.OnReconnect += ReconnectNode;
             AddElement(node);
