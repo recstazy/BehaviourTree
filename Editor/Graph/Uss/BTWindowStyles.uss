@@ -3,7 +3,7 @@ BTGraph {
     height: 100%;
 }
 
-BTNode:disabled {
+TaskNode:disabled {
     opacity: 0.9;
 }
 

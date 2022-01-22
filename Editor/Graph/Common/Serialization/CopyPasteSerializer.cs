@@ -19,7 +19,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             public Vector2 AvgPosition;
             public NodeDescription[] Nodes;
 
-            public SerializedStructure(BTNode[] nodes)
+            public SerializedStructure(TaskNode[] nodes)
             {
                 Nodes = nodes.Select(n => new NodeDescription(n.Data)).ToArray();
                 var availableNodeIndices = new HashSet<int>(Nodes.Select(n => n.Index));

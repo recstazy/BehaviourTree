@@ -12,9 +12,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private Func<IList<BTNode>> _getNodes;
+        private Func<IList<TaskNode>> _getNodes;
         private TreePlayer _currentPlayer;
-        private BTNode[] _nodeAccessor;
+        private TaskNode[] _nodeAccessor;
         private Dictionary<int, VisualElement> _currentHighlights = new Dictionary<int, VisualElement>();
 
         #endregion
@@ -23,7 +23,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #endregion
 
-        public void Bind(Func<IList<BTNode>> nodes)
+        public void Bind(Func<IList<TaskNode>> nodes)
         {
             Clear();
             _getNodes = nodes;
@@ -96,7 +96,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             var nodeList = _getNodes();
             var itemsCount = nodeList.Max(n => n.Data.Index) + 1;
-            _nodeAccessor = new BTNode[itemsCount];
+            _nodeAccessor = new TaskNode[itemsCount];
 
             for (int i = 0; i < nodeList.Count; i++)
             {
@@ -126,7 +126,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        private VisualElement CreateHighlight(BTNode node)
+        private VisualElement CreateHighlight(TaskNode node)
         {
             var element = new VisualElement();
             element.AddToClassList("node-highlight");

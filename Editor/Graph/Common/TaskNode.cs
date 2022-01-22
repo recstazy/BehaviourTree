@@ -9,9 +9,9 @@ using System;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    internal class BTNode : Node, IPlaymodeDependent
+    internal class TaskNode : Node, IPlaymodeDependent
     {
-        public event Action<BTNode> OnReconnect;
+        public event Action<TaskNode> OnReconnect;
         private static event Action OnAnyDeleted;
 
         #region Fields
@@ -34,9 +34,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             OnAnyDeleted?.Invoke();
         }
 
-        public BTNode() { }
+        public TaskNode() { }
 
-        public BTNode(NodeData data) : base()
+        public TaskNode(NodeData data) : base()
         {
             Data = data;
             IsEntry = Data.TaskImplementation is EntryTask;
