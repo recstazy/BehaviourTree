@@ -81,7 +81,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         protected Port CreateOutputPort(TaskOutDescription outDesc)
         {
-            var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(float));
+            var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, outDesc.OutType);
             port.portName = outDesc.Name;
             port.userData = outDesc.Index;
             outputContainer.Add(port);

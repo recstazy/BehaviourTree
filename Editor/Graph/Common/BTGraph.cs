@@ -112,7 +112,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
         {
             // Remove all ports on same node and all ports with same direction (in/out)
-            var availablePorts = ports.ToList().Where(p => p.direction != startPort.direction && p.node != startPort.node).ToArray();
+            // Get only type-compatable ports
+            var availablePorts = ports.ToList()
+                .Where(p => p.direction != startPort.direction && p.node != startPort.node)
+                .Where(c => c.portType == startPort.portType)
+                .ToArray();
+
             var connectedPorts = startPort.connections.Select(c => startPort.direction == Direction.Input ? c.output : c.input).ToArray();
             // Remove all ports which we already are connected with to avoid multi-edge generation on both in and out ports multi capacity
             return availablePorts.Where(p => !connectedPorts.Contains(p)).ToList();
@@ -153,7 +158,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void ContextCreateVariableAndNode(DropdownMenuAction args)
         {
-            var data = new VarNodeData(GetAvailableNodeIndex(), (string)args.userData, null);
+            var variableName = (string)args.userData;
+            var accessor = Tree.Blackboard.GetterValues[variableName];
+            var data = new VarNodeData(GetAvailableNodeIndex(), variableName, accessor.PropertyType, null);
             ContextCreateNode(data);
         }
 
@@ -212,6 +219,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var outPort = nodeOutputs.First(p => (int)p.userData == c.OutPin);
                 var inPort = _nodes.First(node => node.Data.Index == c.InNode).inputContainer.Q<Port>();
                 var edge = outPort.ConnectTo(inPort);
+                
                 AddElement(edge);
                 _edges.Add(new EdgeReference(edge));
             }

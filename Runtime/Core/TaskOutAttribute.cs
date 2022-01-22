@@ -24,11 +24,13 @@ namespace Recstazy.BehaviourTree
     {
         public readonly string Name;
         public readonly int Index;
+        public readonly Type OutType;
 
-        public TaskOutDescription(int index, string name)
+        public TaskOutDescription(int index, string name, Type outType)
         {
             Name = name;
             Index = index;
+            OutType = outType == null ? typeof(ExecutionPin) : outType;
         }
     }
 }

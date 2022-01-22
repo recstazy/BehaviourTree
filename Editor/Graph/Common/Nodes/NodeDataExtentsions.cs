@@ -54,7 +54,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 for (int i = 0; i < attributes.Length; i++)
                 {
-                    descriptions[i] = new TaskOutDescription(i, attributes[i].Name);
+                    descriptions[i] = new TaskOutDescription(i, attributes[i].Name, typeof(ExecutionPin));
                 }
 
                 if (taskData.TaskImplementation is MultioutTask)
@@ -68,7 +68,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             else if (data is VarNodeData varData)
             {
                 descriptions = new TaskOutDescription[1];
-                descriptions[0] = new TaskOutDescription(0, varData.VariableName);
+                descriptions[0] = new TaskOutDescription(0, varData.VariableName, varData.VariableType);
             }
             else descriptions = new TaskOutDescription[0];
 
@@ -82,7 +82,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             for (int i = 0; i < outs.Length; i++)
             {
-                outs[i] = new TaskOutDescription(startIndex + i, i == outs.Length - 1 ? "+" : i.ToString());
+                outs[i] = new TaskOutDescription(startIndex + i, i == outs.Length - 1 ? "+" : i.ToString(), typeof(ExecutionPin));
             }
 
             return outs;

@@ -131,7 +131,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void CreateInput()
         {
             if (IsEntry) return;
-            var port = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
+            var port = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(ExecutionPin));
             port.portName = string.Empty;
             port.userData = 0;
             inputContainer.Add(port);

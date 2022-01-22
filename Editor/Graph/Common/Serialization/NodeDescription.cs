@@ -15,6 +15,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public string TaskTypeString;
         public string TaskJson;
         public string VariableName;
+        public string VariableType;
         public TaskConnection[] Connections;
         public Vector2 Position;
 
@@ -22,7 +23,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             Index = data.Index;
             IsVariableData = data is VarNodeData;
-            VariableName = string.Empty;
+            VariableName = VariableType = string.Empty;
             TaskTypeIndex = -1;
             TaskTypeString = TaskJson = string.Empty;
 
@@ -30,6 +31,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 var varData = data as VarNodeData;
                 VariableName = varData.VariableName;
+                VariableType = varData.VariableTypeName;
             }
             else if (data is TaskNodeData taskData)
             {
@@ -84,7 +86,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
             else
             {
-                data = new VarNodeData(Index, VariableName, Connections);
+                data = new VarNodeData(Index, VariableName, VariableType, Connections);
             }
 
             data.Position = Position;
