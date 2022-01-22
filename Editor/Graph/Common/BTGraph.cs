@@ -109,16 +109,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             graphViewChanged -= GraphChanged;
         }
 
-        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
-        {
-            if (!_isPlaymode)
-            {
-                evt.menu.AppendAction("Create Node", ContextCreateDataAndNode, DropdownMenuAction.Status.Normal);
-            }
-            
-            base.BuildContextualMenu(evt);
-        }
-
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
         {
             // Remove all ports on same node and all ports with same direction (in/out)
@@ -131,6 +121,49 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public void PlaymodeChanged(bool isPlaymode)
         {
             _isPlaymode = isPlaymode;
+        }
+
+        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
+        {
+            if (!_isPlaymode)
+            {
+                evt.menu.AppendAction("Create Task", ContextCreateTaskAndNode, DropdownMenuAction.Status.Normal);
+
+                if (Tree.Blackboard != null)
+                {
+                    var getterNames = Tree.Blackboard.GetNames(BlackboardProperty.Getter);
+
+                    foreach (var n in getterNames)
+                    {
+                        evt.menu.AppendAction($"Get/{n}", ContextCreateVariableAndNode, (evt) => DropdownMenuAction.Status.Normal, n);
+                    }
+                }
+
+                evt.menu.AppendSeparator();
+            }
+
+            base.BuildContextualMenu(evt);
+        }
+
+        private void ContextCreateTaskAndNode(DropdownMenuAction args)
+        {
+            var data = new TaskNodeData(GetAvailableNodeIndex(), null, null);
+            ContextCreateNode(data);
+        }
+
+        private void ContextCreateVariableAndNode(DropdownMenuAction args)
+        {
+            var data = new VarNodeData(GetAvailableNodeIndex(), (string)args.userData, null);
+            ContextCreateNode(data);
+        }
+
+        private void ContextCreateNode(NodeData data)
+        {
+            data.Position = _mousePosProvider.MousePosition;
+            Tree.NodeData.AddData(data);
+            BTWindow.SetDirty("Add Node");
+            GenerateNode(data);
+            OnStructureChanged?.Invoke();
         }
 
         private void CreateNodes(BehaviourTree tree)
@@ -199,16 +232,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             _edges = _edges.Where(edg => !removedEdgesSet.Contains(edg.Edge)).ToList();
             CreateEdgesForNode(node);
-        }
-
-        private void ContextCreateDataAndNode(DropdownMenuAction args)
-        {
-            var data = new TaskNodeData(GetAvailableNodeIndex(), null, null);
-            data.Position = _mousePosProvider.MousePosition;
-            Tree.NodeData.AddData(data);
-            BTWindow.SetDirty("Add Node");
-            GenerateNode(data);
-            OnStructureChanged?.Invoke();
         }
 
         private GraphViewChange GraphChanged(GraphViewChange change)
