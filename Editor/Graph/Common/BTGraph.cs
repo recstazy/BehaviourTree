@@ -17,7 +17,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #region Fields
 
-        private List<TaskNode> _nodes;
+        private List<BTNode> _nodes;
         private List<EdgeReference> _edges;
         private bool _isInitialized;
         private BTMousePosProvider _mousePosProvider;
@@ -31,7 +31,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public Vector3 CurrentPosition => viewTransform.position;
         public float CurrentZoom => viewTransform.scale.x;
 
-        internal ReadOnlyCollection<TaskNode> BtNodes => _nodes.AsReadOnly();
+        internal ReadOnlyCollection<BTNode> BtNodes => _nodes.AsReadOnly();
         internal ReadOnlyCollection<EdgeReference> Edges => _edges.AsReadOnly();
 
         protected override bool canCutSelection => !_isPlaymode;
@@ -135,7 +135,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateNodes(BehaviourTree tree)
         {
-            _nodes = new List<TaskNode>();
+            _nodes = new List<BTNode>();
             var nodeData = tree.NodeData;
 
             foreach (var n in nodeData.Data)
@@ -144,9 +144,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        private TaskNode GenerateNode(NodeData data)
+        private BTNode GenerateNode(NodeData data)
         {
-            var node = new TaskNode(data);
+            var node = new BTNode(data);
             _nodes.Add(node);
             node.OnReconnect += ReconnectNode;
             AddElement(node);
@@ -164,7 +164,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        private void CreateEdgesForNode(TaskNode n)
+        private void CreateEdgesForNode(BTNode n)
         {
             n.UpdateOutPorts();
             var nodeOutputs = n.outputContainer.Query<Port>().Build().ToList();
@@ -179,7 +179,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        private void ReconnectNode(TaskNode node)
+        private void ReconnectNode(BTNode node)
         {
             var ports = node.outputContainer.Query<Port>().Build().ToList();
             var removedEdgesSet = new HashSet<Edge>();
@@ -250,7 +250,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         n.WasDeleted();
                     }
 
-                    TaskNode.AnyNodeDeleted();
+                    BTNode.AnyNodeDeleted();
                 }
 
                 OnStructureChanged?.Invoke();
@@ -268,7 +268,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
             else if (change.edgesToCreate != null && change.edgesToCreate.Count > 0)
             {
-                var nodesToUpdate = new HashSet<TaskNode>(change.edgesToCreate.Select(e => e.output.node as TaskNode).ToArray());
+                var nodesToUpdate = new HashSet<BTNode>(change.edgesToCreate.Select(e => e.output.node as BTNode).ToArray());
 
                 foreach (var e in change.edgesToCreate)
                 {
@@ -290,15 +290,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private bool TryGetConnectionIndex(Edge edge, out int index)
         {
-            var outputNode = edge.output.node as TaskNode;
-            var inputNode = edge.input.node as TaskNode;
+            var outputNode = edge.output.node as BTNode;
+            var inputNode = edge.input.node as BTNode;
             return outputNode.Data.TryFindIndexOfConnection((int)edge.output.userData, inputNode.Data.Index, out index);
         }
 
         // Remove connections in data and return modified nodes
-        private TaskNode[] RemoveConnectionsByEdges(Edge[] edges)
+        private BTNode[] RemoveConnectionsByEdges(Edge[] edges)
         {
-            var grouped = edges.GroupBy(e => e.output.node).ToDictionary(group => (TaskNode)group.Key, group => group.ToArray());
+            var grouped = edges.GroupBy(e => e.output.node).ToDictionary(group => (BTNode)group.Key, group => group.ToArray());
             List<int> validConnectionsToDelete = new List<int>();
 
             foreach (var group in grouped)
@@ -321,15 +321,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateConnectionByEdge(Edge edge)
         {
-            var outputNode = edge.output.node as TaskNode;
-            var inputNode = edge.input.node as TaskNode;
+            var outputNode = edge.output.node as BTNode;
+            var inputNode = edge.input.node as BTNode;
             // Port user data is output index
             outputNode.Data.AddConnection((int)edge.output.userData, inputNode.Data.Index);
         }
 
-        private IEnumerable<TaskNode> ToNodes(IEnumerable<GraphElement> elements)
+        private IEnumerable<BTNode> ToNodes(IEnumerable<GraphElement> elements)
         {
-            return elements.Where(e => e is TaskNode).Select(e => (e as TaskNode));
+            return elements.Where(e => e is BTNode).Select(e => (e as BTNode));
         }
 
         private int GetAvailableNodeIndex()
@@ -348,7 +348,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             var newNodeData = CopyPasteSerializer.Deserialize(dataString, GetAvailableNodeIndex(), MousePosition);
             Tree.NodeData.AddData(newNodeData);
-            var newNodes = new List<TaskNode>();
+            var newNodes = new List<BTNode>();
 
             foreach (var data in newNodeData)
             {

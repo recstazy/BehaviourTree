@@ -8,14 +8,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 {
     internal static class BTNodeExtensions
     {
-        public static TaskOutDescription[] GetOuts(this TaskNode node)
+        public static TaskOutDescription[] GetOuts(this BTNode node)
         {
             return node?.Data?.GetOuts();
         }
 
         public static bool IsEntryNode(this GraphElement element)
         {
-            return element is TaskNode btNode && btNode.IsEntry;
+            return element is BTNode btNode && btNode.IsEntry;
         }
 
         public static bool IsEntryOutputEdge(this GraphElement element)
@@ -23,9 +23,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return element is Edge edge && edge.output != null && edge.output.node.IsEntryNode();
         }
 
-        public static IEnumerable<TaskNode> OnlyNodes(this IEnumerable<GraphElement> elements)
+        public static IEnumerable<BTNode> OnlyNodes(this IEnumerable<GraphElement> elements)
         {
-            return elements.Where(e => e is TaskNode).Select(e => (TaskNode)e);
+            return elements.Where(e => e is BTNode).Select(e => (BTNode)e);
         }
 
         public static TaskOutDescription[] GetOuts(this NodeData data)

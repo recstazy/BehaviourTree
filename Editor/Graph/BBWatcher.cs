@@ -70,6 +70,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (newTree != null && newTree.Blackboard != null)
             {
                 var blackboard = newTree.Blackboard;
+                Debug.Log(newTree.IsRuntime + " " + blackboard.name);
                 var serializedObject = new SerializedObject(blackboard);
 
                 var property = serializedObject.GetIterator();
