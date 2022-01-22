@@ -20,7 +20,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public VarNode(VarNodeData data) : base(data)
         {
-            var outs = data.GetOuts();
+            ImportLayout();
+            CreateOuts();
+        }
+
+        private void ImportLayout()
+        {
+            titleContainer.Clear();
+            titleContainer.RemoveFromHierarchy();
+        }
+
+        private void CreateOuts()
+        {
+            var outs = Data.GetOuts();
 
             foreach (var o in outs)
             {
