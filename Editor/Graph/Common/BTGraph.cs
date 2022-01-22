@@ -43,11 +43,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #endregion
 
-        public void Initialize(BehaviourTree tree)
+        public void Initialize()
         {
-            Tree = tree;
-            CreateNodes(tree);
-            CreateEdges();
             graphViewChanged += GraphChanged;
 
             var contentDragger = new ContentDragger();
@@ -61,27 +58,55 @@ namespace Recstazy.BehaviourTree.EditorScripts
             this.AddManipulator(_mousePosProvider);
             SetupZoom(minScale, maxScale);
 
-            Vector3 zoom = new Vector3(tree.Zoom, tree.Zoom, 1);
-            UpdateViewTransform(tree.GraphPosition, zoom);
-
             serializeGraphElements += SerializeForCopy;
             unserializeAndPaste += UnserializeAndPaste;
             _isInitialized = true;
         }
 
-        public void Dispose()
+        public void SetTree(BehaviourTree tree)
         {
-            serializeGraphElements -= SerializeForCopy;
-            unserializeAndPaste -= UnserializeAndPaste;
-            graphViewChanged -= GraphChanged;
+            ClearAll();
 
-            foreach (var n in _nodes)
+            Tree = tree;
+            CreateNodes(tree);
+            CreateEdges();
+
+            Vector3 zoom = new Vector3(tree.Zoom, tree.Zoom, 1);
+            UpdateViewTransform(tree.GraphPosition, zoom);
+        }
+
+        public void ClearAll()
+        {
+            if (_edges != null)
             {
-                n.OnReconnect -= ReconnectNode;
-                n.Dispose();
+                foreach (var e in _edges)
+                {
+                    RemoveElement(e.Edge);
+                }
+            }
+            
+            if (_nodes != null)
+            {
+                foreach (var n in _nodes)
+                {
+                    n.OnReconnect -= ReconnectNode;
+                    n.Dispose();
+                    RemoveElement(n);
+                }
             }
 
             _nodes = null;
+            _edges = null;
+            Tree = null;
+        }
+
+        public void Dispose()
+        {
+            ClearAll();
+
+            serializeGraphElements -= SerializeForCopy;
+            unserializeAndPaste -= UnserializeAndPaste;
+            graphViewChanged -= GraphChanged;
         }
 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)

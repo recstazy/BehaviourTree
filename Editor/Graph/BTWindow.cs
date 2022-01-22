@@ -141,19 +141,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        private void ExecuteCommand(ExecuteCommandEvent evt)
-        {
-            if (evt.commandName == "UndoRedoPerformed")
-            {
-                evt.StopImmediatePropagation();
-                evt.imguiEvent.Use();
-                UndoRedoPreformed();
-            }
-        }
-
         private void InitializeWithAsset(BehaviourTree asset)
         {
-            if (_hasTreeInitialized) DisposeTree();
             SharedTree = asset;
             _lastAssetId = asset.GetInstanceID();
 
@@ -199,32 +188,22 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _toolbar = rootVisualElement.Q(className: "window-toolbar");
             _playmodeWatcher = _toolbar.Q<PlaymodeWatcher>();
             _treeSelector = _toolbar.Q<TreeSelector>();
+
+            _graph = new BTGraph();
+            _graph.Initialize();
+            _graphContainer.Add(_graph);
+            _graph.OnStructureChanged += UpdatePlaymodeWatcher;
         }
 
         private void InitializeGraph()
         {
             InitializeEntry();
-            AddGraphDelayed();
+            SetGraphTree();
         }
 
-        // Seems GraphView needs some time to detach from parent 
-        // and if we instantly add new graph after deleting old one it doesn't detach
-        private void AddGraphDelayed()
+        private void SetGraphTree()
         {
-            rootVisualElement.SetEnabled(false);
-            CallDelayed(1, () =>
-            {
-                rootVisualElement.SetEnabled(true);
-                AddGraphImmediate();
-            });
-        }
-
-        private void AddGraphImmediate()
-        {
-            _graph = new BTGraph();
-            _graph.Initialize(SharedTree);
-            _graphContainer.Add(_graph);
-            _graph.OnStructureChanged += UpdatePlaymodeWatcher;
+            _graph.SetTree(SharedTree);
             UpdatePlaymodeWatcher();
         }
 
@@ -250,26 +229,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void TreeSelectorTreeChanged(BehaviourTree newTree)
         {
-            DisposeTree();
-
             if (newTree == null)
             {
                 newTree = (BehaviourTree)EditorUtility.InstanceIDToObject(_lastEditedId);
             }
 
             InitializeWithAsset(newTree);
-        }
-
-        // Using Animation here as coroutine with callback
-        private void CallDelayed(int timeMS, System.Action action)
-        {
-            var anim = UnityEngine.UIElements.Experimental
-                .ValueAnimation<bool>.Create(rootVisualElement, (a, b, t) => false);
-
-            anim.Ease(UnityEngine.UIElements.Experimental.Easing.Linear);
-            anim.OnCompleted(() => action?.Invoke());
-            anim.durationMs = timeMS;
-            anim.Start();
         }
     }
 }
