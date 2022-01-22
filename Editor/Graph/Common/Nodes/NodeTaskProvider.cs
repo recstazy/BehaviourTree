@@ -31,7 +31,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public NodeTaskProvider() { }
 
-        public NodeTaskProvider(NodeData data)
+        public NodeTaskProvider(TaskNodeData data)
         {
             CurrentType = data?.TaskImplementation?.GetType();
             _currentTaskIndex = TaskFactory.GetIndex(CurrentType);

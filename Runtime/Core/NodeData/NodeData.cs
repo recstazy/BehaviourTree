@@ -13,9 +13,6 @@ namespace Recstazy.BehaviourTree
         [SerializeField]
         private Vector2 _position;
 
-        [SerializeReference]
-        private BehaviourTask _taskImplementation;
-
         [SerializeField]
         private int _index;
 
@@ -26,7 +23,6 @@ namespace Recstazy.BehaviourTree
 
         #region Properties
 
-        public BehaviourTask TaskImplementation { get => _taskImplementation; internal set => _taskImplementation = value; }
         public int Index => _index;
         internal TaskConnection[] Connections { get => _connections; set => _connections = value; }
         internal Vector2 Position { get => _position; set => _position = value; }
@@ -38,10 +34,9 @@ namespace Recstazy.BehaviourTree
             Connections = new TaskConnection[0];
         }
 
-        public NodeData(int index, BehaviourTask taskImlpementation, params TaskConnection[] connections)
+        public NodeData(int index, params TaskConnection[] connections)
         {
             _index = index;
-            TaskImplementation = taskImlpementation;
             SetConnections(connections);
         }
 
@@ -72,11 +67,7 @@ namespace Recstazy.BehaviourTree
         {
             if (_connections == null || _connections.Length == 0 || indicies == null || indicies.Length == 0) return;
             var newArray = _connections.Where((c, index) => !indicies.Contains(index)).ToArray();
-
-            if (TaskImplementation != null)
-            {
-                newArray = TaskImplementation.PostProcessConnectionsAfterChange(newArray);
-            }
+            newArray = PostProcessConnectionsAfterChange(newArray);
 
             SetConnections(newArray);
         }
@@ -89,73 +80,32 @@ namespace Recstazy.BehaviourTree
             var currentConnections = _connections == null ? new TaskConnection[0] : _connections;
             var connection = new TaskConnection(outPin, inNode);
             var newArray = currentConnections.Concat(new TaskConnection[] { connection }).ToArray();
-
-            if (TaskImplementation != null)
-            {
-                newArray = TaskImplementation.PostProcessConnectionsAfterChange(newArray);
-            }
+            newArray = PostProcessConnectionsAfterChange(newArray);
 
             SetConnections(newArray);
             return true;
         }
 
-        [RuntimeInstanced]
-        internal void InitialzeConnections(NodeData[] treeData)
+        protected virtual TaskConnection[] PostProcessConnectionsAfterChange(TaskConnection[] newArray)
         {
-            if (TaskImplementation != null)
-            {
-                List<BehaviourTask> connections = new List<BehaviourTask>(Connections.Length);
-                int maxConnectionPinIndex = Connections.Length > 0 ? Connections.Max(c => c.OutPin) : -1;
-                int connectionsTotalCount = maxConnectionPinIndex + 1;
-
-                for (int i = 0; i < connectionsTotalCount; i++)
-                {
-                    connections.Add(null);
-                }
-
-                for (int i = 0; i < Connections.Length; i++)
-                {
-                    var nodeWithIndex = treeData.FirstOrDefault(d => d.Index == Connections[i].InNode);
-
-                    if (nodeWithIndex != null)
-                    {
-                        connections[Connections[i].OutPin] = nodeWithIndex?.TaskImplementation;
-                    }
-                }
-
-                TaskImplementation.SetRuntimeConnections(connections);
-                TaskImplementation.Index = Index;
-                TaskImplementation.Initialize();
-            }
+            return newArray;
         }
+
+        [RuntimeInstanced]
+        internal virtual void InitialzeConnections(NodeData[] nodeData) { }
     }
 
     [System.Serializable]
-    internal class TreeNodeData
+    internal class VarNodeData : NodeData
     {
         [SerializeField]
-        private NodeData[] _data;
+        private string _variableName;
 
-        public NodeData[] Data { get => _data; internal set => _data = value; }
+        public string VariableName { get => _variableName; }
 
-        public TreeNodeData() 
+        public VarNodeData(int index, string variableName, params TaskConnection[] connections) : base(index, connections)
         {
-            Data = new NodeData[0];
-        }
-
-        public TreeNodeData(NodeData[] data)
-        {
-            Data = data;
-        }
-
-        public void AddData(params NodeData[] data)
-        {
-            _data = _data.Concat(data).ToArray();
-        }
-
-        public void RemoveData(params NodeData[] data)
-        {
-            _data = _data.Where(d => !data.Contains(d)).ToArray();
+            _variableName = variableName;
         }
     }
 }

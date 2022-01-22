@@ -9,20 +9,36 @@ namespace Recstazy.BehaviourTree.EditorScripts
     [System.Serializable]
     internal struct NodeDescription
     {
+        public bool IsVariableData;
         public int Index;
         public int TaskTypeIndex;
         public string TaskTypeString;
         public string TaskJson;
+        public string VariableName;
         public TaskConnection[] Connections;
         public Vector2 Position;
 
         public NodeDescription(NodeData data)
         {
             Index = data.Index;
-            var type = data.TaskImplementation?.GetType();
-            TaskTypeIndex = TaskFactory.GetIndex(type);
-            TaskTypeString = type?.FullName;
-            TaskJson = JsonUtility.ToJson(data.TaskImplementation);
+            IsVariableData = data is VarNodeData;
+            VariableName = string.Empty;
+            TaskTypeIndex = -1;
+            TaskTypeString = TaskJson = string.Empty;
+
+            if (IsVariableData)
+            {
+                var varData = data as VarNodeData;
+                VariableName = varData.VariableName;
+            }
+            else if (data is TaskNodeData taskData)
+            {
+                var type = taskData.TaskImplementation?.GetType();
+                TaskTypeIndex = TaskFactory.GetIndex(type);
+                TaskTypeString = type?.FullName;
+                TaskJson = JsonUtility.ToJson(taskData.TaskImplementation);
+            }
+
             Connections = data.Connections.ToArray();
             Position = data.Position;
         }
@@ -40,27 +56,37 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
-        public NodeData GenerateData(bool useTypeString)
+        public NodeData GenerateData(bool useTaskTypeString)
         {
-            BehaviourTask task = null;
+            NodeData data;
 
-            if (useTypeString)
+            if (!IsVariableData)
             {
-                string typeName = TaskTypeString;
-                var type = TypeCache.GetTypesDerivedFrom<BehaviourTask>().FirstOrDefault(t => t.FullName == typeName);
+                BehaviourTask task = null;
 
-                if (type != null)
+                if (useTaskTypeString)
                 {
-                    task = (BehaviourTask)JsonUtility.FromJson(TaskJson, type);
+                    string typeName = TaskTypeString;
+                    var type = TypeCache.GetTypesDerivedFrom<BehaviourTask>().FirstOrDefault(t => t.FullName == typeName);
+
+                    if (type != null)
+                    {
+                        task = (BehaviourTask)JsonUtility.FromJson(TaskJson, type);
+                    }
                 }
+                else
+                {
+                    task = TaskFactory.CreateTaskImplementationEditor(TaskTypeIndex);
+                    if (task != null) JsonUtility.FromJsonOverwrite(TaskJson, task);
+                }
+
+                data = new TaskNodeData(Index, task, Connections);
             }
             else
             {
-                task = TaskFactory.CreateTaskImplementationEditor(TaskTypeIndex);
-                if (task != null) JsonUtility.FromJsonOverwrite(TaskJson, task);
+                data = new VarNodeData(Index, VariableName, Connections);
             }
-            
-            var data = new NodeData(Index, task, Connections);
+
             data.Position = Position;
             return data;
         }

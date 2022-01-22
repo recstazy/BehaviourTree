@@ -47,7 +47,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         BindToTasks(lastPlayer, false);
                         BindToTasks(_currentPlayer, true);
 
-                        foreach (var data in _currentPlayer.Tree.NodeData.Data)
+                        foreach (var data in _currentPlayer.Tree.NodeData.TaskData)
                         {
                             if (data.TaskImplementation.IsRunning)
                             {
@@ -76,7 +76,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             if (player != null)
             {
-                foreach (var data in player.Tree.NodeData.Data)
+                foreach (var data in player.Tree.NodeData.TaskData)
                 {
                     if (shouldBind)
                     {

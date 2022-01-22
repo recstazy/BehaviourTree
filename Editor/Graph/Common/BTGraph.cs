@@ -138,7 +138,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _nodes = new List<BTNode>();
             var nodeData = tree.NodeData;
 
-            foreach (var n in nodeData.Data)
+            foreach (var n in nodeData.TaskData)
             {
                 GenerateNode(n);
             }
@@ -203,7 +203,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void ContextCreateDataAndNode(DropdownMenuAction args)
         {
-            var data = new NodeData(GetAvailableNodeIndex(), null, null);
+            var data = new TaskNodeData(GetAvailableNodeIndex(), null, null);
             data.Position = _mousePosProvider.MousePosition;
             Tree.NodeData.AddData(data);
             BTWindow.SetDirty("Add Node");

@@ -52,29 +52,6 @@ namespace Recstazy.BehaviourTree
             return null;
         }
 
-        public static GenericMenu CreateGenericMenu(BehaviourTask selectedTask, GenericMenu.MenuFunction2 onSelected)
-        {
-            var selectedType = selectedTask == null ? null : selectedTask.GetType();
-            var menu = new GenericMenu();
-
-            for (int i = 0; i < TypesEditor.Length; i++)
-            {
-                string path = string.IsNullOrEmpty(PathsEditor[i]) ? ObjectNames.NicifyVariableName(NamesEditor[i]) : PathsEditor[i];
-                menu.AddItem(new GUIContent(path), Equals(TypesEditor[i], selectedType), onSelected, i);
-            }
-
-            return menu;
-        }
-
-        public static string GetName(Type type)
-        {
-            if (type == null) return NoTaskLabel;
-            var index = Array.IndexOf(TypesEditor, type);
-            if (index == -1) return NoTaskLabel;
-
-            return NamesEditor[index];
-        }
-
         public static int GetIndex(Type type)
         {
             if (type == null) return 0;

@@ -12,7 +12,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
-        private NodeData _data;
+        private TaskNodeData _data;
         private SerializedObject _serializedObject;
         private SerializedProperty _property;
         private PropertyFieldElement _field;
@@ -27,7 +27,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #endregion
 
-        public void SetData(NodeData data)
+        public void SetData(TaskNodeData data)
         {
             _data = data;
             UpdateField();
@@ -92,9 +92,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     _serializedObject = new SerializedObject(Tree);
                     int dataIndex = -1;
 
-                    for (int i = 0; i < Tree.NodeData.Data.Length; i++)
+                    for (int i = 0; i < Tree.NodeData.TaskData.Length; i++)
                     {
-                        if (Tree.NodeData.Data[i].Index == _data.Index)
+                        if (Tree.NodeData.TaskData[i].Index == _data.Index)
                         {
                             dataIndex = i;
                             break;
@@ -103,7 +103,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     if (dataIndex >= 0)
                     {
-                        var datasArray = _serializedObject.FindProperty("_nodeData._data");
+                        var datasArray = _serializedObject.FindProperty("_nodeData._taskData");
                         _property = datasArray.GetArrayElementAtIndex(dataIndex).FindPropertyRelative(TaskImplName);
                     }
                 }

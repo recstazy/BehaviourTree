@@ -22,19 +22,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public int TaskTypeIndex => _taskProvider != null ? _taskProvider.CurrentIndex : -1;
         public override bool IsEntry => _isEntry;
+        public TaskNodeData TaskData { get; private set; }
 
         #endregion
 
         public TaskNode() : base() { }
 
-        public TaskNode(NodeData data) : base(data)
+        public TaskNode(TaskNodeData data) : base(data)
         {
-            _isEntry = Data.TaskImplementation is EntryTask;
+            TaskData = data;
+            _isEntry = TaskData.TaskImplementation is EntryTask;
             CreateInput();
 
             if (!IsEntry)
             {
-                _taskProvider = new NodeTaskProvider(Data);
+                _taskProvider = new NodeTaskProvider(TaskData);
                 _taskProvider.OnTaskChanged += TaskChanged;
                 var titleElement = titleContainer.Children().First();
                 titleContainer.Remove(titleElement);
@@ -111,12 +113,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private string GetName()
         {
-            return Data.TaskImplementation == null ? "Empty Task" : ObjectNames.NicifyVariableName(Data.TaskImplementation.GetType().Name);
+            return TaskData.TaskImplementation == null ? "Empty Task" : ObjectNames.NicifyVariableName(TaskData.TaskImplementation.GetType().Name);
         }
 
         private void UpdateTaskContainer()
         {
-            _taskContainer?.SetData(Data);
+            _taskContainer?.SetData(TaskData);
         }
 
         private void UpdateTaskDependencies()
@@ -137,7 +139,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void TaskChanged()
         {
-            Data.TaskImplementation = TaskFactory.CreateTaskImplementationEditor(_taskProvider.CurrentIndex);
+            TaskData.TaskImplementation = TaskFactory.CreateTaskImplementationEditor(_taskProvider.CurrentIndex);
             BTWindow.SetDirty("Change Task");
             UpdateTaskDependencies();
             UpdateEdges();

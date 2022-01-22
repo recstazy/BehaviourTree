@@ -10,7 +10,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         public static BTNode CreateGraphNode(this NodeData data)
         {
-            return new TaskNode(data);
+            if (data is TaskNodeData taskData)
+            {
+                return new TaskNode(taskData);
+            }
+            else return null;
         }
 
         public static TaskOutDescription[] GetOuts(this BTNode node)
@@ -35,23 +39,29 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static TaskOutDescription[] GetOuts(this NodeData data)
         {
-            var attributes = data?.TaskImplementation?.GetType()?.GetCustomAttributes(typeof(TaskOutAttribute), false) as TaskOutAttribute[];
-            if (attributes == null) attributes = new TaskOutAttribute[0];
+            TaskOutDescription[] descriptions;
 
-            var descriptions = new TaskOutDescription[attributes.Length];
-
-            for (int i = 0; i < attributes.Length; i++)
+            if (data is TaskNodeData taskData)
             {
-                descriptions[i] = new TaskOutDescription(i, attributes[i].Name);
-            }
+                var attributes = taskData.TaskImplementation?.GetType()?.GetCustomAttributes(typeof(TaskOutAttribute), false) as TaskOutAttribute[];
+                if (attributes == null) attributes = new TaskOutAttribute[0];
 
-            if (data?.TaskImplementation is MultioutTask)
-            {
-                int solidOutsCount = attributes.Length;
-                int reordableCount = data.Connections.Where(c => c.OutPin >= solidOutsCount).Count();
-                var generated = GenerateOuts(reordableCount, solidOutsCount);
-                descriptions = descriptions.Concat(generated).ToArray();
+                descriptions = new TaskOutDescription[attributes.Length];
+
+                for (int i = 0; i < attributes.Length; i++)
+                {
+                    descriptions[i] = new TaskOutDescription(i, attributes[i].Name);
+                }
+
+                if (taskData.TaskImplementation is MultioutTask)
+                {
+                    int solidOutsCount = attributes.Length;
+                    int reordableCount = taskData.Connections.Where(c => c.OutPin >= solidOutsCount).Count();
+                    var generated = GenerateOuts(reordableCount, solidOutsCount);
+                    descriptions = descriptions.Concat(generated).ToArray();
+                }
             }
+            else descriptions = new TaskOutDescription[0];
 
             return descriptions;
         }

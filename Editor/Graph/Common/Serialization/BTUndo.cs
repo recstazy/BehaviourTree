@@ -56,18 +56,20 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             public TreeNodeDataDescription(TreeNodeData nodeData)
             {
-                _dataArray = new NodeDescription[nodeData.Data.Length];
+                _dataArray = new NodeDescription[nodeData.TaskData.Length];
 
                 for (int i = 0; i < _dataArray.Length; i++)
                 {
-                    _dataArray[i] = new NodeDescription(nodeData.Data[i]);
+                    _dataArray[i] = new NodeDescription(nodeData.TaskData[i]);
                 }
             }
 
             public TreeNodeData CreateNodeData()
             {
                 var dataArray = _dataArray.Select(d => d.GenerateData(true)).ToArray();
-                var data = new TreeNodeData(dataArray);
+                var taskData = dataArray.Select(d => d as TaskNodeData).Where(d => d != null).ToArray();
+                var varData = dataArray.Select(d => d as VarNodeData).Where(d => d != null).ToArray();
+                var data = new TreeNodeData(taskData, varData);
                 return data;
             }
 
