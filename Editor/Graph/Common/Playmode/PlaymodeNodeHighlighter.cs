@@ -42,6 +42,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 {
                     if (_currentPlayer != lastPlayer)
                     {
+                        Clear();
                         RegenerateNodeAccessor();
                         BindToTasks(lastPlayer, false);
                         BindToTasks(_currentPlayer, true);
