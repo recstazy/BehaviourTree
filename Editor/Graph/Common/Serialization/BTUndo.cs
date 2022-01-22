@@ -56,11 +56,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             public TreeNodeDataDescription(TreeNodeData nodeData)
             {
-                _dataArray = new NodeDescription[nodeData.TaskData.Length];
+                var sumData = ((NodeData[])nodeData.TaskData).Concat(nodeData.VarData).ToArray();
+                _dataArray = new NodeDescription[sumData.Length];
 
                 for (int i = 0; i < _dataArray.Length; i++)
                 {
-                    _dataArray[i] = new NodeDescription(nodeData.TaskData[i]);
+                    _dataArray[i] = new NodeDescription(sumData[i]);
                 }
             }
 
