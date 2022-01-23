@@ -32,7 +32,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             TaskData = data;
             _isEntry = TaskData.TaskImplementation is EntryTask;
-            CreateInput();
+            CreateInputs();
 
             if (!IsEntry)
             {
@@ -128,13 +128,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
             RefreshExpandedState();
         }
 
-        private void CreateInput()
+        private void CreateInputs()
         {
             if (IsEntry) return;
-            var port = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(ExecutionPin));
-            port.portName = string.Empty;
-            port.userData = 0;
-            inputContainer.Add(port);
+            // Create Execution input
+            CreateInputPort(InputDescription.ExecutionInput);
+
+            // Create Value inputs
+            var inputs = TaskData.TaskImplementation.GetInputs();
+
+            foreach (var i in inputs)
+            {
+                CreateInputPort(i);
+            }
+
+            RefreshPorts();
         }
 
         private void TaskChanged()

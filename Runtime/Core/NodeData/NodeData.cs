@@ -46,13 +46,13 @@ namespace Recstazy.BehaviourTree
             else Connections = connections;
         }
 
-        public bool TryFindIndexOfConnection(int outPin, int inNodeIndex, out int connectionIndex)
+        public bool TryFindIndexOfConnection(int outPin, int inNodeIndex, string inName, out int connectionIndex)
         {
             for (int i = 0; i < _connections.Length; i++)
             {
                 var c = _connections[i];
 
-                if (c.OutPin == outPin && c.InNode == inNodeIndex)
+                if (c.OutPin == outPin && c.InNode == inNodeIndex && c.InName == inName)
                 {
                     connectionIndex = i;
                     return true;
@@ -72,13 +72,13 @@ namespace Recstazy.BehaviourTree
             SetConnections(newArray);
         }
 
-        public bool AddConnection(int outPin, int inNode)
+        public bool AddConnection(int outPin, int inNode, string inName)
         {
             bool hasConnections = _connections != null && _connections.Length > 0;
             if (hasConnections && _connections.Any(c => c.OutPin == outPin && c.InNode == inNode)) return false;
 
             var currentConnections = _connections == null ? new TaskConnection[0] : _connections;
-            var connection = new TaskConnection(outPin, inNode);
+            var connection = new TaskConnection(outPin, inNode, inName);
             var newArray = currentConnections.Concat(new TaskConnection[] { connection }).ToArray();
             newArray = PostProcessConnectionsAfterChange(newArray);
 

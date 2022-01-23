@@ -53,7 +53,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 for (int i = 0; i < Connections.Length; i++)
                 {
-                    Connections[i] = new TaskConnection(Connections[i].OutPin, Connections[i].InNode + offset);
+                    Connections[i] = new TaskConnection(Connections[i].OutPin, Connections[i].InNode + offset, Connections[i].InName);
                 }
             }
         }

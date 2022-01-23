@@ -87,5 +87,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
             outputContainer.Add(port);
             return port;
         }
+
+        protected Port CreateInputPort(InputDescription description)
+        {
+            if (IsEntry) return null;
+            bool isExecution = description.ValueType == typeof(ExecutionPin);
+            bool isMulti = isExecution;
+            var capacity = isMulti ? Port.Capacity.Multi : Port.Capacity.Single;
+            var port = InstantiatePort(Orientation.Horizontal, Direction.Input, capacity, description.ValueType);
+            port.portName = isExecution ? string.Empty : ObjectNames.NicifyVariableName(description.Name);
+            port.userData = description.Name;
+            inputContainer.Add(port);
+
+            return port;
+        }
     }
 }
