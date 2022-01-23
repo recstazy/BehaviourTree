@@ -21,7 +21,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #endregion
 
-        [MenuItem("Window/Behaviour Tree/Blackboard Watcher 2")]
+        [MenuItem("Window/Behaviour Tree/Blackboard Watcher")]
         private static void OpenWatcherWindow()
         {
             var window = GetWindow<BBWatcher>();

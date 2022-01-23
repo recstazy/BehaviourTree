@@ -20,6 +20,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #region Properties
 
+        /// <summary> Use only before SetProperty call </summary>
+        public bool HideUnsupported { get; set; }
+        public int SubfieldsCount => _subfields.Count;
+
         #endregion
 
         protected static Type GetCustomElementTypeForProperty(SerializedProperty property)
@@ -117,7 +121,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var subProp = subInfos[i];
                 var property = serializedProperty.FindPropertyRelative(subProp.Name);
                 var subField = new PropertyFieldElement();
+                subField.HideUnsupported = HideUnsupported;
                 subField.SetProperty(property);
+
+                if (HideUnsupported && _subfields.Count == 0) continue;
                 AddSubfield(subField);
             }
         }

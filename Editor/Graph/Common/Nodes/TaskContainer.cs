@@ -54,7 +54,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _serializedObject = null;
             Clear();
             bool hasEditor = !CheckForNoEditor(_data.TaskImplementation);
-            if (hasEditor) CreatePropertyField();
+
+            if (hasEditor)
+            {
+                bool hasProperties = CreatePropertyField();
+                hasEditor = hasEditor && hasProperties;
+            }
+
             AssignClass(hasEditor);
         }
 
@@ -66,16 +72,24 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return false;
         }
 
-        private void CreatePropertyField()
+        private bool CreatePropertyField()
         {
             var property = CreateOrGetTaskProperty();
-            if (property == null) return;
+            if (property == null) return false;
 
             property = property.Copy();
             _field = new PropertyFieldElement();
+            _field.HideUnsupported = true;
             _field.SetProperty(property, true);
-            _field.OnChanged += FieldChanged;
-            Add(_field);
+
+            if (_field.SubfieldsCount != 0)
+            {
+                _field.OnChanged += FieldChanged;
+                Add(_field);
+                return true;
+            }
+
+            return false;
         }
 
         private void FieldChanged()

@@ -12,7 +12,7 @@ namespace Recstazy.BehaviourTree
         public readonly string Name;
 
         public static InputDescription ExecutionInput => new InputDescription(typeof(ExecutionPin), false, ExecutionInName);
-        public const string ExecutionInName = "__execution__";
+        public const string ExecutionInName = "[execution]";
 
         public InputDescription(Type valueType, bool isGetter, string name)
         {
