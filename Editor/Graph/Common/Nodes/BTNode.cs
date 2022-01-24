@@ -67,7 +67,37 @@ namespace Recstazy.BehaviourTree.EditorScripts
         }
 
         public virtual void UpdateEdges() { }
-        public virtual void UpdateOutPorts() { }
+        public virtual void UpdateAllPorts() { }
+
+        protected void UpdatePorts(VisualElement container, IConnectionDescription[] newPorts, Func<IConnectionDescription, Port> createPortAction)
+        {
+            var ports = container.Query<Port>().Build().ToList();
+            if (ports == null) ports = new List<Port>();
+
+            // Remove extra ports
+            for (int i = ports.Count - 1; i >= newPorts.Length; i--)
+            {
+                container.Remove(ports[i]);
+            }
+
+            // Add ports wich are lack
+            for (int i = ports.Count; i < newPorts.Length; i++)
+            {
+                var port = createPortAction(newPorts[i]);
+                ports.Add(port);
+            }
+
+            // Remove all removed from hierarchy ports from list
+            ports = ports.Where(p => p.parent == container).OrderBy(p => p.parent.IndexOf(p)).ToList();
+
+            // Update ports info
+            for (int i = 0; i < ports.Count; i++)
+            {
+                ports[i].portType = newPorts[i].PortType;
+                ports[i].userData = newPorts[i].UserData;
+                ports[i].portName = ObjectNames.NicifyVariableName(newPorts[i].PortName);
+            }
+        }
 
         protected void Reconnect()
         {
@@ -95,8 +125,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
             bool isMulti = isExecution;
             var capacity = isMulti ? Port.Capacity.Multi : Port.Capacity.Single;
             var port = InstantiatePort(Orientation.Horizontal, Direction.Input, capacity, description.ValueType);
-            port.portName = isExecution ? string.Empty : ObjectNames.NicifyVariableName(description.Name);
-            port.userData = description.Name;
+            port.portName = isExecution ? string.Empty : ObjectNames.NicifyVariableName(description.IdName);
+            port.userData = description.IdName;
             inputContainer.Add(port);
 
             return port;

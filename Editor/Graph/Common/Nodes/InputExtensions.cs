@@ -35,7 +35,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 {
                     var inputObject = (InputBase)f.GetValue(task);
                     var definition = f.FieldType.GetGenericTypeDefinition();
-                    var description = new InputDescription(inputObject.ValueType, definition == typeof(InputGet<>), f.Name);
+                    var description = new InputDescription(inputObject.ValueType, definition == typeof(InputGet<>), f.Name, f.Name);
                     inputs.Add(description);
                 }
             }

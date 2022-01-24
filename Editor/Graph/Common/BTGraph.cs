@@ -211,16 +211,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateEdgesForNode(BTNode n)
         {
-            n.UpdateOutPorts();
             var nodeOutputs = n.outputContainer.Query<Port>().Build().ToList();
 
             foreach (var c in n.Data.Connections)
             {
                 var outPort = nodeOutputs.First(p => (int)p.userData == c.OutPin);
-                var inPort = _nodes
-                    .First(node => node.Data.Index == c.InNode)
-                        .inputContainer.Query<Port>().Build().ToList()
-                        .First(p => (string)p.userData == c.InName);
+                var inNode = _nodes.First(node => node.Data.Index == c.InNode);
+                var inNodeInputs = inNode.inputContainer.Query<Port>().Build().ToList();
+                var inPort = inNodeInputs.First(p => (string)p.userData == c.InName);
 
                 var edge = outPort.ConnectTo(inPort);
                 AddElement(edge);
@@ -247,6 +245,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             _edges = _edges.Where(edg => !removedEdgesSet.Contains(edg.Edge)).ToList();
+            node.UpdateAllPorts();
             CreateEdgesForNode(node);
         }
 

@@ -32,7 +32,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             TaskData = data;
             _isEntry = TaskData.TaskImplementation is EntryTask;
-            CreateInputs();
 
             if (!IsEntry)
             {
@@ -49,6 +48,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 extensionContainer.Add(_taskContainer);
             }
 
+            UpdateAllPorts();
             UpdateTaskDependencies();
             OnAnyDeleted += UpdateTaskContainer;
         }
@@ -70,9 +70,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Reconnect();
         }
 
-        public override void UpdateOutPorts()
+        public override void UpdateAllPorts()
         {
-            base.UpdateOutPorts();
+            base.UpdateAllPorts();
             var newOuts = Data.GetOuts();
             if (newOuts == null) return;
 
@@ -82,32 +82,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 newOuts = Data.GetOuts();
             }
 
-            var ports = outputContainer.Query<Port>().Build().ToList();
-            if (ports == null) ports = new List<Port>();
+            UpdatePorts(outputContainer, newOuts.Select(o => (IConnectionDescription)o).ToArray(), (desc) => CreateOutputPort((TaskOutDescription)desc));
 
-            // Remove extra ports
-            for (int i = ports.Count - 1; i >= newOuts.Length; i--)
+            if (!IsEntry)
             {
-                outputContainer.Remove(ports[i]);
+                var newInputs = new List<IConnectionDescription> { InputDescription.ExecutionInput }
+                .Concat(TaskData.TaskImplementation.GetInputs().Select(i => (IConnectionDescription)i))
+                .ToArray();
+
+                UpdatePorts(inputContainer, newInputs, (desc) => CreateInputPort((InputDescription)desc));
             }
-
-            // Add ports wich are lack
-            for (int i = ports.Count; i < newOuts.Length; i++)
-            {
-                var port = CreateOutputPort(newOuts[i]);
-                ports.Add(port);
-            }
-
-            // Remove all removed from hierarchy ports from list
-            ports = ports.Where(p => p.parent == outputContainer).OrderBy(p => p.parent.IndexOf(p)).ToList();
-
-            // Update ports info
-            for (int i = 0; i < ports.Count; i++)
-            {
-                ports[i].userData = newOuts[i].Index;
-                ports[i].portName = newOuts[i].Name;
-            }
-
+            
             RefreshPorts();
         }
 
@@ -126,23 +111,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             title = GetName();
             UpdateTaskContainer();
             RefreshExpandedState();
-        }
-
-        private void CreateInputs()
-        {
-            if (IsEntry) return;
-            // Create Execution input
-            CreateInputPort(InputDescription.ExecutionInput);
-
-            // Create Value inputs
-            var inputs = TaskData.TaskImplementation.GetInputs();
-
-            foreach (var i in inputs)
-            {
-                CreateInputPort(i);
-            }
-
-            RefreshPorts();
         }
 
         private void TaskChanged()

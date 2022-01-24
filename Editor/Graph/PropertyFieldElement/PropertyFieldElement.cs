@@ -22,7 +22,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         /// <summary> Use only before SetProperty call </summary>
         public bool HideUnsupported { get; set; }
-        public int SubfieldsCount => _subfields.Count;
+        public int SubfieldsCount => FieldsContainer.childCount;
 
         #endregion
 
@@ -123,8 +123,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var subField = new PropertyFieldElement();
                 subField.HideUnsupported = HideUnsupported;
                 subField.SetProperty(property);
+                if (HideUnsupported && subField.SubfieldsCount == 0) continue;
 
-                if (HideUnsupported && _subfields.Count == 0) continue;
                 AddSubfield(subField);
             }
         }
