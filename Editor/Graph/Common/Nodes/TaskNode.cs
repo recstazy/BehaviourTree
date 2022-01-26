@@ -82,7 +82,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 newOuts = Data.GetOuts();
             }
 
-            UpdatePorts(outputContainer, newOuts.Select(o => (IConnectionDescription)o).ToArray(), (desc) => CreateOutputPort((TaskOutDescription)desc));
+            UpdatePorts(outputContainer, newOuts.Select(o => (IConnectionDescription)o).ToArray(), (desc) => CreateOutputPort((OutputDescription)desc));
 
             if (!IsEntry)
             {
@@ -119,6 +119,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             BTWindow.SetDirty("Change Task");
             UpdateTaskDependencies();
             UpdateEdges();
+            ValidateOuts();
         }
     }
 }

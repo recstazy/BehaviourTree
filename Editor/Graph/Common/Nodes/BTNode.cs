@@ -13,6 +13,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         public event Action<BTNode> OnReconnect;
         protected static event Action OnAnyDeleted;
+        private static event Action OnValidateConnections;
 
         #region Fields
 
@@ -30,12 +31,18 @@ namespace Recstazy.BehaviourTree.EditorScripts
             OnAnyDeleted?.Invoke();
         }
 
+        public static void ValidateOuts()
+        {
+            OnValidateConnections?.Invoke();
+        }
+
         public BTNode() : base() { }
 
         public BTNode(NodeData data) : base()
         {
             Data = data;
             RegisterCallback<DetachFromPanelEvent>(Detached);
+            OnValidateConnections += ValidateConnections;
         }
 
         public void ApplyPositionFromData()
@@ -64,6 +71,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public virtual void Dispose()
         {
             UnregisterCallback<DetachFromPanelEvent>(Detached);
+            OnValidateConnections -= ValidateConnections;
         }
 
         public virtual void UpdateEdges() { }
@@ -94,7 +102,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             for (int i = 0; i < ports.Count; i++)
             {
                 ports[i].portType = newPorts[i].PortType;
-                ports[i].userData = newPorts[i].UserData;
+                ports[i].userData = newPorts[i];
                 ports[i].portName = ObjectNames.NicifyVariableName(newPorts[i].PortName);
             }
         }
@@ -109,11 +117,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Dispose();
         }
 
-        protected Port CreateOutputPort(TaskOutDescription outDesc)
+        protected Port CreateOutputPort(OutputDescription outDesc)
         {
             var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, outDesc.OutType);
             port.portName = ObjectNames.NicifyVariableName(outDesc.Name);
-            port.userData = outDesc.Index;
+            port.userData = outDesc;
             outputContainer.Add(port);
             return port;
         }
@@ -126,10 +134,52 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var capacity = isMulti ? Port.Capacity.Multi : Port.Capacity.Single;
             var port = InstantiatePort(Orientation.Horizontal, Direction.Input, capacity, description.ValueType);
             port.portName = isExecution ? string.Empty : ObjectNames.NicifyVariableName(description.IdName);
-            port.userData = description.IdName;
+            port.userData = description;
             inputContainer.Add(port);
 
             return port;
+        }
+
+        private void ValidateConnections()
+        {
+            bool shouldReconnect = false;
+            var outPorts = outputContainer.Query<Port>().Build().ToList();
+
+            foreach (var outPort in outPorts)
+            {
+                if (outPort.connected)
+                {
+                    foreach (var edge in outPort.connections)
+                    {
+                        bool shouldRemoveConnectionFromData = false;
+                        var outDesc = outPort.GetOutDescription();
+
+                        if (edge.input == null || edge.input.parent == null)
+                        {
+                            shouldRemoveConnectionFromData = true;
+                        }
+                        else
+                        {
+                            var inDescription = edge.input.GetInputDescription();
+                            bool validNameBinding = inDescription.PortName == outDesc.LastConnectedInput.PortName;
+                            bool validTyping = inDescription.PortType == outDesc.LastConnectedInput.PortType;
+
+                            if (!validNameBinding || !validTyping) shouldRemoveConnectionFromData = true;
+                        }
+
+                        if (shouldRemoveConnectionFromData)
+                        {
+                            Data.RemoveConnectionByLastInput(outDesc);
+                            shouldReconnect = true;
+                        }
+                    }
+                }
+            }
+
+            if (shouldReconnect)
+            {
+                Reconnect();
+            }
         }
     }
 }

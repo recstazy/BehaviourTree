@@ -70,6 +70,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Tree = tree;
             CreateNodes(tree);
             CreateEdges();
+            BTNode.ValidateOuts();
 
             Vector3 zoom = new Vector3(tree.Zoom, tree.Zoom, 1);
             UpdateViewTransform(tree.GraphPosition, zoom);
@@ -215,10 +216,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             foreach (var c in n.Data.Connections)
             {
-                var outPort = nodeOutputs.First(p => (int)p.userData == c.OutPin);
+                var outPort = nodeOutputs.First(p => p.GetOutDescription().Index == c.OutPin);
                 var inNode = _nodes.First(node => node.Data.Index == c.InNode);
                 var inNodeInputs = inNode.inputContainer.Query<Port>().Build().ToList();
-                var inPort = inNodeInputs.First(p => (string)p.userData == c.InName);
+                var inPort = inNodeInputs.First(p => p.GetInputDescription().PortName == c.InName);
+                outPort.SetLastConnected(inNode.Data.Index, inPort.GetInputDescription());
 
                 var edge = outPort.ConnectTo(inPort);
                 AddElement(edge);
@@ -330,7 +332,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             var outputNode = edge.output.node as BTNode;
             var inputNode = edge.input.node as BTNode;
-            return outputNode.Data.TryFindIndexOfConnection((int)edge.output.userData, inputNode.Data.Index, (string)edge.input.userData, out index);
+            var outDesc = edge.output.GetOutDescription();
+            var inputDesc = edge.input.GetInputDescription();
+            return outputNode.Data.TryFindIndexOfConnection(outDesc.Index, inputNode.Data.Index, inputDesc.PortName, out index);
         }
 
         // Remove connections in data and return modified nodes
@@ -361,8 +365,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             var outputNode = edge.output.node as BTNode;
             var inputNode = edge.input.node as BTNode;
-            // Port user data is output index
-            outputNode.Data.AddConnection((int)edge.output.userData, inputNode.Data.Index, (string)edge.input.userData);
+            var outDesc = edge.output.GetOutDescription();
+            var inputDesc = edge.input.GetInputDescription();
+            outputNode.Data.AddConnection(outDesc.Index, inputNode.Data.Index, inputDesc.PortName, inputDesc.PortType);
         }
 
         private IEnumerable<BTNode> ToNodes(IEnumerable<GraphElement> elements)

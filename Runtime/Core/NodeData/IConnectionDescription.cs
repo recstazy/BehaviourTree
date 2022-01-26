@@ -8,7 +8,6 @@ namespace Recstazy.BehaviourTree
     internal interface IConnectionDescription
     {
         string PortName { get; }
-        object UserData { get; }
         Type PortType { get; }
     }
 }

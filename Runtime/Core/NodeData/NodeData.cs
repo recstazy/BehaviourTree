@@ -72,13 +72,13 @@ namespace Recstazy.BehaviourTree
             SetConnections(newArray);
         }
 
-        public bool AddConnection(int outPin, int inNode, string inName)
+        public bool AddConnection(int outPin, int inNode, string inName, System.Type connectionType = null)
         {
             bool hasConnections = _connections != null && _connections.Length > 0;
-            if (hasConnections && _connections.Any(c => c.OutPin == outPin && c.InNode == inNode)) return false;
+            if (hasConnections && _connections.Any(c => c.OutPin == outPin && c.InNode == inNode && c.InName == inName)) return false;
 
             var currentConnections = _connections == null ? new TaskConnection[0] : _connections;
-            var connection = new TaskConnection(outPin, inNode, inName);
+            var connection = new TaskConnection(outPin, inNode, inName, connectionType);
             var newArray = currentConnections.Concat(new TaskConnection[] { connection }).ToArray();
             newArray = PostProcessConnectionsAfterChange(newArray);
 

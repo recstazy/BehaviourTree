@@ -19,22 +19,4 @@ namespace Recstazy.BehaviourTree
             Name = name;
         }
     }
-
-    internal struct TaskOutDescription : IConnectionDescription
-    {
-        public readonly string Name;
-        public readonly int Index;
-        public readonly Type OutType;
-
-        public object UserData => Index;
-        public string PortName => Name;
-        public Type PortType => OutType;
-
-        public TaskOutDescription(int index, string name, Type outType)
-        {
-            Name = name;
-            Index = index;
-            OutType = outType == null ? typeof(ExecutionPin) : outType;
-        }
-    }
 }

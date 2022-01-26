@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using System;
 
 namespace Recstazy.BehaviourTree.EditorScripts
@@ -41,6 +42,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             return inputs;
+        }
+
+        public static InputDescription GetInputDescription(this Port inPort)
+        {
+            return (InputDescription)inPort.userData;
         }
     }
 }
