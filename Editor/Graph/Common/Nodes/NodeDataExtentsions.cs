@@ -21,14 +21,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             else return null;
         }
 
-        public static void RemoveConnectionByLastInput(this NodeData data, OutputDescription outDesc)
-        {
-            if (data.TryFindIndexOfConnection(outDesc.Index, outDesc.LastConnectedNode, outDesc.LastConnectedInput.IdName, out int oldIndex))
-            {
-                data.RemoveConnectionsWithIndices(oldIndex);
-            }
-        }
-
         public static OutputDescription[] GetOuts(this BTNode node)
         {
             return node?.Data?.GetOuts();

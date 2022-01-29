@@ -14,7 +14,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public string PortName => Name;
         public Type PortType => OutType;
-        public InputDescription LastConnectedInput { get; set; }
         public int LastConnectedNode { get; set; }
 
         public OutputDescription(int index, string name, Type outType)
@@ -22,7 +21,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Name = name;
             Index = index;
             OutType = outType == null ? typeof(ExecutionPin) : outType;
-            LastConnectedInput = default;
             LastConnectedNode = -1;
         }
     }
@@ -32,14 +30,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public static OutputDescription GetOutDescription(this Port outPort)
         {
             return (OutputDescription)outPort.userData;
-        }
-
-        public static void SetLastConnected(this Port outPort, int node, InputDescription inputDesc)
-        {
-            var outDescription = outPort.GetOutDescription();
-            outDescription.LastConnectedInput = inputDesc;
-            outDescription.LastConnectedNode = node;
-            outPort.userData = outDescription;
         }
     }
 

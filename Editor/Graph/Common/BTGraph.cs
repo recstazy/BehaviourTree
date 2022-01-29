@@ -220,7 +220,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var inNode = _nodes.First(node => node.Data.Index == c.InNode);
                 var inNodeInputs = inNode.inputContainer.Query<Port>().Build().ToList();
                 var inPort = inNodeInputs.First(p => p.GetInputDescription().IdName == c.InName);
-                outPort.SetLastConnected(inNode.Data.Index, inPort.GetInputDescription());
 
                 var edge = outPort.ConnectTo(inPort);
                 AddElement(edge);
