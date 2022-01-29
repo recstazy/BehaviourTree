@@ -22,6 +22,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
             return null;
         }
 
+        public static List<InputDescription> GetInputs(this NodeData nodeData)
+        {
+            if (nodeData is TaskNodeData taskData)
+            {
+                return taskData.TaskImplementation.GetInputs();
+            }
+            else return new List<InputDescription>();
+        }
+
         public static List<InputDescription> GetInputs(this BehaviourTask task)
         {
             var inputs = new List<InputDescription>();

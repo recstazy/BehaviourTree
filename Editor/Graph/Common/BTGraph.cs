@@ -219,7 +219,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var outPort = nodeOutputs.First(p => p.GetOutDescription().Index == c.OutPin);
                 var inNode = _nodes.First(node => node.Data.Index == c.InNode);
                 var inNodeInputs = inNode.inputContainer.Query<Port>().Build().ToList();
-                var inPort = inNodeInputs.First(p => p.GetInputDescription().PortName == c.InName);
+                var inPort = inNodeInputs.First(p => p.GetInputDescription().IdName == c.InName);
                 outPort.SetLastConnected(inNode.Data.Index, inPort.GetInputDescription());
 
                 var edge = outPort.ConnectTo(inPort);
@@ -334,7 +334,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var inputNode = edge.input.node as BTNode;
             var outDesc = edge.output.GetOutDescription();
             var inputDesc = edge.input.GetInputDescription();
-            return outputNode.Data.TryFindIndexOfConnection(outDesc.Index, inputNode.Data.Index, inputDesc.PortName, out index);
+            return outputNode.Data.TryFindIndexOfConnection(outDesc.Index, inputNode.Data.Index, inputDesc.IdName, out index);
         }
 
         // Remove connections in data and return modified nodes
@@ -367,7 +367,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var inputNode = edge.input.node as BTNode;
             var outDesc = edge.output.GetOutDescription();
             var inputDesc = edge.input.GetInputDescription();
-            outputNode.Data.AddConnection(outDesc.Index, inputNode.Data.Index, inputDesc.PortName, inputDesc.PortType);
+            outputNode.Data.AddConnection(outDesc.Index, inputNode.Data.Index, inputDesc.IdName, inputDesc.PortType);
         }
 
         private IEnumerable<BTNode> ToNodes(IEnumerable<GraphElement> elements)

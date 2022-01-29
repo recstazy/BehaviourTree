@@ -142,44 +142,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void ValidateConnections()
         {
-            bool shouldReconnect = false;
-            var outPorts = outputContainer.Query<Port>().Build().ToList();
-
-            foreach (var outPort in outPorts)
-            {
-                if (outPort.connected)
-                {
-                    foreach (var edge in outPort.connections)
-                    {
-                        bool shouldRemoveConnectionFromData = false;
-                        var outDesc = outPort.GetOutDescription();
-
-                        if (edge.input == null || edge.input.parent == null)
-                        {
-                            shouldRemoveConnectionFromData = true;
-                        }
-                        else
-                        {
-                            var inDescription = edge.input.GetInputDescription();
-                            bool validNameBinding = inDescription.PortName == outDesc.LastConnectedInput.PortName;
-                            bool validTyping = inDescription.PortType == outDesc.LastConnectedInput.PortType;
-
-                            if (!validNameBinding || !validTyping) shouldRemoveConnectionFromData = true;
-                        }
-
-                        if (shouldRemoveConnectionFromData)
-                        {
-                            Data.RemoveConnectionByLastInput(outDesc);
-                            shouldReconnect = true;
-                        }
-                    }
-                }
-            }
-
-            if (shouldReconnect)
-            {
-                Reconnect();
-            }
+            bool shouldReconnect = Data.ValideteOutputs(BTWindow.SharedTree.NodeData);
+            if (shouldReconnect) Reconnect();
         }
     }
 }

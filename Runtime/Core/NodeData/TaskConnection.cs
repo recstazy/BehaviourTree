@@ -26,7 +26,7 @@ namespace Recstazy.BehaviourTree
         public int OutPin => _outPin;
         public int InNode => _inNode;
         public bool IsValid { get; private set; }
-        public string OutTypeName { get => string.IsNullOrEmpty(_outTypeName) ? typeof(ExecutionPin).Name : _outTypeName; }
+        public string OutTypeName { get => string.IsNullOrEmpty(_outTypeName) ? typeof(ExecutionPin).FullName : _outTypeName; }
         public string InName => _inName;
 
         public TaskConnection(int outPin, int inNode, string inName, Type type = null)
@@ -34,7 +34,7 @@ namespace Recstazy.BehaviourTree
             _outPin = outPin;
             _inNode = inNode;
             _inName = inName;
-            _outTypeName = type == null ? typeof(ExecutionPin).Name : type.Name; 
+            _outTypeName = type == null ? typeof(ExecutionPin).FullName : type.FullName; 
             IsValid = true;
         }
     }

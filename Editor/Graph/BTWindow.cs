@@ -198,6 +198,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void InitializeGraph()
         {
             InitializeEntry();
+            ValidateNodeOuts();
             SetGraphTree();
         }
 
@@ -214,6 +215,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 SharedTree.CreateEntry();
                 EditorUtility.SetDirty(SharedTree);
             }
+        }
+
+        private void ValidateNodeOuts()
+        {
+            SharedTree.NodeData.ValidateOutputs();
         }
 
         private void UpdatePlaymodeWatcher()

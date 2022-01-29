@@ -17,6 +17,7 @@ namespace Recstazy.BehaviourTree
 
         public string PortName => DisplayName;
         public Type PortType => ValueType;
+        public bool IsValid { get; private set; }
 
         public InputDescription(Type valueType, bool isGetter, string idName, string displayName)
         {
@@ -24,6 +25,7 @@ namespace Recstazy.BehaviourTree
             IsGetter = isGetter;
             IdName = idName;
             DisplayName = displayName;
+            IsValid = true;
         }
     }
 }

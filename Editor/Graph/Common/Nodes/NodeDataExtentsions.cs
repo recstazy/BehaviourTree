@@ -23,7 +23,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static void RemoveConnectionByLastInput(this NodeData data, OutputDescription outDesc)
         {
-            if (data.TryFindIndexOfConnection(outDesc.Index, outDesc.LastConnectedNode, outDesc.LastConnectedInput.PortName, out int oldIndex))
+            if (data.TryFindIndexOfConnection(outDesc.Index, outDesc.LastConnectedNode, outDesc.LastConnectedInput.IdName, out int oldIndex))
             {
                 data.RemoveConnectionsWithIndices(oldIndex);
             }
@@ -47,6 +47,68 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public static IEnumerable<BTNode> OnlyNodes(this IEnumerable<GraphElement> elements)
         {
             return elements.Where(e => e is BTNode).Select(e => (BTNode)e);
+        }
+
+        public static void ValidateOutputs(this TreeNodeData treeData)
+        {
+            var enumerator = treeData.GetSumDataEnumerator();
+
+            while (enumerator.MoveNext())
+            {
+                enumerator.Current.ValideteOutputs(treeData);
+            }
+        }
+
+        public static bool ValideteOutputs(this NodeData nodeData, TreeNodeData treeData)
+        {
+            var enumerator = treeData.GetSumDataEnumerator();
+            var connectionsToRemove = new List<int>();
+
+            for (int i = 0; i < nodeData.Connections.Length; i++)
+            {
+                var connection = nodeData.Connections[i];
+                if (connection.InName == InputDescription.ExecutionInName) continue;
+
+                NodeData inNode = null;
+                enumerator.Reset();
+
+                while (enumerator.MoveNext())
+                {
+                    if (enumerator.Current.Index == connection.InNode)
+                    {
+                        inNode = enumerator.Current;
+                        break;
+                    }
+                }
+
+                if (inNode == null)
+                {
+                    connectionsToRemove.Add(i);
+                }
+                else
+                {
+                    var inputs = inNode.GetInputs();
+                    var connectedInput = inputs.FirstOrDefault(input => input.IdName == connection.InName);
+
+                    if (connectedInput.IsValid)
+                    {
+                        if (connectedInput.PortType.FullName != connection.OutTypeName)
+                        {
+                            connectionsToRemove.Add(i);
+                        }
+                    }
+                    else connectionsToRemove.Add(i);
+                }
+            }
+
+            bool changed = connectionsToRemove.Count > 0;
+
+            if (changed)
+            {
+                nodeData.RemoveConnectionsWithIndices(connectionsToRemove.ToArray());
+            }
+
+            return changed;
         }
 
         public static OutputDescription[] GetOuts(this NodeData data)
