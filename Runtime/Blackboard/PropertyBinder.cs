@@ -4,9 +4,21 @@ using UnityEngine;
 using System;
 using System.Reflection;
 
-namespace Recstazy.BehaviourTree
+namespace Recstazy.BehaviourTree.PropertyBinding
 {
-    internal static class PropertyBindHelper
+    public class PropertyAccessor<T> where T : Delegate
+    {
+        public T Accessor { get; private set; }
+        public Type PropertyType { get; private set; }
+
+        public PropertyAccessor(T accessor, Type propertyType)
+        {
+            Accessor = accessor;
+            PropertyType = propertyType;
+        }
+    }
+
+    internal static class PropertyBinder
     {
         public static Func<object, object> CreateGetter(PropertyInfo property)
         {
@@ -17,7 +29,7 @@ namespace Recstazy.BehaviourTree
             if (getter == null)
                 throw new ArgumentException("The specified property does not have a public accessor.");
 
-            var genericMethod = typeof(PropertyBindHelper).GetMethod("CreateGetterGeneric");
+            var genericMethod = typeof(PropertyBinder).GetMethod("CreateGetterGeneric");
             MethodInfo genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
             return (Func<object, object>)genericHelper.Invoke(null, new object[] { getter });
         }
@@ -38,7 +50,7 @@ namespace Recstazy.BehaviourTree
             if (setter == null)
                 throw new ArgumentException("The specified property does not have a public setter.");
 
-            var genericMethod = typeof(PropertyBindHelper).GetMethod("CreateSetterGeneric");
+            var genericMethod = typeof(PropertyBinder).GetMethod("CreateSetterGeneric");
             MethodInfo genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
             return (Action<object, object>)genericHelper.Invoke(null, new object[] { setter });
         }
