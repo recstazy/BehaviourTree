@@ -122,6 +122,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, outDesc.OutType);
             port.portName = ObjectNames.NicifyVariableName(outDesc.Name);
             port.userData = outDesc;
+
+            if (outDesc.PortType == typeof(ExecutionPin))
+            {
+                StylizeExecutionPort(port);
+            }
+
             outputContainer.Add(port);
             return port;
         }
@@ -135,8 +141,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
             var port = InstantiatePort(Orientation.Horizontal, Direction.Input, capacity, description.ValueType);
             port.portName = isExecution ? string.Empty : ObjectNames.NicifyVariableName(description.IdName);
             port.userData = description;
-            inputContainer.Add(port);
 
+            if (description.PortType == typeof(ExecutionPin))
+            {
+                StylizeExecutionPort(port);
+            }
+
+            inputContainer.Add(port);
             return port;
         }
 
@@ -144,6 +155,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             bool shouldReconnect = Data.ValideteOutputs(BTWindow.SharedTree.NodeData);
             if (shouldReconnect) Reconnect();
+        }
+
+        private void StylizeExecutionPort(Port port)
+        {
+            port.Q(name: "connector").name = "connectorExec";
         }
     }
 }
