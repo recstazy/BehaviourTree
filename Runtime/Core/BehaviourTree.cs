@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Recstazy.BehaviourTree
 {
@@ -56,7 +57,7 @@ namespace Recstazy.BehaviourTree
         {
             var instance = Instantiate(this);
             instance.InitializeRuntime(coroutineRunner, blackboard);
-            instance.InitializeTasksWithConnections();
+            instance.InitializeNodesWithConnections();
             instance.IsRuntime = true;
             return instance;
         }
@@ -90,11 +91,11 @@ namespace Recstazy.BehaviourTree
         }
 
         [RuntimeInstanced]
-        private void InitializeTasksWithConnections()
+        private void InitializeNodesWithConnections()
         {
-            foreach (var d in _nodeData.TaskData)
+            foreach (var data in _nodeData)
             {
-                d.InitialzeConnections(_nodeData.TaskData);
+                data.InitialzeConnections(_nodeData, _blackboard);
             }
         }
     }

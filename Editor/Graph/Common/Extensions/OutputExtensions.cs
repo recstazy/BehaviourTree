@@ -9,17 +9,15 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         public static void ValidateOutputs(this TreeNodeData treeData)
         {
-            var enumerator = treeData.GetSumDataEnumerator();
-
-            while (enumerator.MoveNext())
+            foreach (var data in treeData)
             {
-                enumerator.Current.ValideteOutputs(treeData);
+                data.ValideteOutputs(treeData);
             }
         }
 
         public static bool ValideteOutputs(this NodeData nodeData, TreeNodeData treeData)
         {
-            var enumerator = treeData.GetSumDataEnumerator();
+            var enumerator = treeData.GetEnumerator();
             var connectionsToRemove = new List<int>();
 
             for (int i = 0; i < nodeData.Connections.Length; i++)

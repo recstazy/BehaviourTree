@@ -6,7 +6,7 @@ using System.Linq;
 namespace Recstazy.BehaviourTree
 {
     [System.Serializable]
-    internal class TreeNodeData
+    internal class TreeNodeData : IEnumerable<NodeData>
     {
         [SerializeField]
         private TaskNodeData[] _taskData;
@@ -29,9 +29,14 @@ namespace Recstazy.BehaviourTree
             VarData = varData;
         }
 
-        public IEnumerator<NodeData> GetSumDataEnumerator()
+        public IEnumerator<NodeData> GetEnumerator()
         {
             return new NodeDataEnumerator(_taskData, _varData);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         public void AddData(params NodeData[] data)

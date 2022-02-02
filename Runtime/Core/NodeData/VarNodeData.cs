@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 namespace Recstazy.BehaviourTree
 {
-    [System.Serializable]
+    [Serializable]
     internal class VarNodeData : NodeData, ISerializationCallbackReceiver
     {
         [SerializeField]
@@ -40,6 +41,26 @@ namespace Recstazy.BehaviourTree
         public void OnAfterDeserialize()
         {
             VariableType = Type.GetType(_variableTypeName);
+        }
+
+        [RuntimeInstanced]
+        internal override void InitialzeConnections(IEnumerable<NodeData> nodeData, Blackboard blackboard)
+        {
+            base.InitialzeConnections(nodeData, blackboard);
+
+            foreach (var c in Connections)
+            {
+                var nodeWithIndex = nodeData.FirstOrDefault(n => n.Index == c.InNode);
+
+                if (nodeWithIndex != null)
+                {
+                    if (blackboard.GetterValues.TryGetValue(_variableName, out var accessor))
+                    {
+                        var input = nodeWithIndex.GetGetter(c.InName);
+                        input?.InitializeMethod(accessor.GenericDelegate);
+                    }
+                }
+            }
         }
     }
 }

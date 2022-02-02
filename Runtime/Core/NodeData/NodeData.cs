@@ -92,6 +92,6 @@ namespace Recstazy.BehaviourTree
         }
 
         [RuntimeInstanced]
-        internal virtual void InitialzeConnections(NodeData[] nodeData) { }
+        internal virtual void InitialzeConnections(IEnumerable<NodeData> nodeData, Blackboard blackboard) { }
     }
 }

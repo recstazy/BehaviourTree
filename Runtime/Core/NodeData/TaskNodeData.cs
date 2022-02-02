@@ -39,9 +39,9 @@ namespace Recstazy.BehaviourTree
         }
 
         [RuntimeInstanced]
-        internal override void InitialzeConnections(NodeData[] nodeData)
+        internal override void InitialzeConnections(IEnumerable<NodeData> nodeData, Blackboard blackboard)
         {
-            base.InitialzeConnections(nodeData);
+            base.InitialzeConnections(nodeData, blackboard);
 
             if (TaskImplementation != null)
             {

@@ -6,7 +6,7 @@ using System;
 namespace Recstazy.BehaviourTree
 {
     [Serializable]
-    public class InputGet<T> : InputBase
+    public class Getter<T> : GetterBase
     {
         #region Fields
 
@@ -25,6 +25,13 @@ namespace Recstazy.BehaviourTree
         public void InitializeMethod(Func<T> getMethod)
         {
             _getMethod = getMethod;
+        }
+
+        [RuntimeInstanced]
+        public override void InitializeMethod(Delegate getterDelegate)
+        {
+            var getMethod = (Func<T>)getterDelegate;
+            InitializeMethod(getMethod);
         }
     }
 }
