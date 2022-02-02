@@ -93,7 +93,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static void Initialize(BehaviourTree tree)
         {
-            if (s_currentTree != tree)
+            if (s_currentTree != tree || s_container == null)
             {
                 s_container = ScriptableObject.CreateInstance<BTUndoContainer>();
                 s_currentTree = tree;
@@ -114,6 +114,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (s_currentTree != tree || s_container == null || !s_container.WasDeserialized) return false;
             s_container.Apply(tree);
             return true;
+        }
+
+        internal static void LogUndo()
+        {
+            Debug.Log($"{s_container}, {s_currentTree?.name}");
         }
     }
 }
