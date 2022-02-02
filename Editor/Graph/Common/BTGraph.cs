@@ -18,7 +18,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         #region Fields
 
         private List<BTNode> _nodes;
-        private List<EdgeReference> _edges;
         private bool _isInitialized;
         private BTMousePosProvider _mousePosProvider;
         private bool _isPlaymode;
@@ -32,7 +31,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public float CurrentZoom => viewTransform.scale.x;
 
         internal ReadOnlyCollection<BTNode> BtNodes => _nodes.AsReadOnly();
-        internal ReadOnlyCollection<EdgeReference> Edges => _edges.AsReadOnly();
 
         protected override bool canCutSelection => !_isPlaymode;
         protected override bool canDeleteSelection => !_isPlaymode;
@@ -78,14 +76,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public void ClearAll()
         {
-            if (_edges != null)
-            {
-                foreach (var e in _edges)
-                {
-                    RemoveElement(e.Edge);
-                }
-            }
-            
+            edges.ForEach(e => RemoveElement(e));
+
             if (_nodes != null)
             {
                 foreach (var n in _nodes)
@@ -97,7 +89,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             _nodes = null;
-            _edges = null;
             Tree = null;
         }
 
@@ -127,6 +118,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public void PlaymodeChanged(bool isPlaymode)
         {
             _isPlaymode = isPlaymode;
+            edges.ForEach(e => e.SetEnabled(!isPlaymode));
+            nodes.ForEach(e => e.SetEnabled(!isPlaymode));
         }
 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
@@ -202,8 +195,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void CreateEdges()
         {
-            _edges = new List<EdgeReference>();
-
             foreach (var n in _nodes)
             {
                 CreateEdgesForNode(n);
@@ -223,14 +214,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                 var edge = outPort.ConnectTo(inPort);
                 AddElement(edge);
-                _edges.Add(new EdgeReference(edge));
             }
         }
 
         private void ReconnectNode(BTNode node)
         {
             var ports = node.outputContainer.Query<Port>().Build().ToList();
-            var removedEdgesSet = new HashSet<Edge>();
 
             foreach (var p in ports)
             {
@@ -240,12 +229,10 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 {
                     edge.input.Disconnect(edge);
                     edge.output.Disconnect(edge);
-                    edge.RemoveFromHierarchy();
-                    removedEdgesSet.Add(edge);
+                    RemoveElement(edge);
                 }
             }
 
-            _edges = _edges.Where(edg => !removedEdgesSet.Contains(edg.Edge)).ToList();
             node.UpdateAllPorts();
             CreateEdgesForNode(node);
         }
@@ -263,9 +250,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 if (edges.Length > 0)
                 {
                     var nodesToUpdate = RemoveConnectionsByEdges(edges);
-                    var removedSet = new HashSet<Edge>(edges);
-                    _edges = _edges.Where(edg => !removedSet.Contains(edg.Edge)).ToList();
-
                     BTWindow.SetDirty("Delete Connections");
 
                     foreach (var n in nodesToUpdate)

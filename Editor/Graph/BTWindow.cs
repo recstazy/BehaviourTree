@@ -224,13 +224,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         private void UpdatePlaymodeWatcher()
         {
-            var edges = _graph.Edges.ToArray();
-            var nodes = _graph.BtNodes.Select(n => (IPlaymodeDependent)n).ToArray();
-
-            _playmodeWatcher.SetDependencies(
-                edges.Concat(nodes)
-                .Concat(new IPlaymodeDependent[] { this, _graph, _treeSelector, _nodeHighlighter })
-                .ToArray());
+            _playmodeWatcher.SetDependencies(new IPlaymodeDependent[] { this, _graph, _treeSelector, _nodeHighlighter });
         }
 
         private void TreeSelectorTreeChanged(BehaviourTree newTree)
