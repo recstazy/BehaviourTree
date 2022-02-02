@@ -184,8 +184,7 @@ namespace Recstazy.BehaviourTree
 
             foreach (var getterProp in publicGetters)
             {
-                var getterFunc = PropertyBinder.CreateGetter(getterProp);
-                _getters.Add(getterProp.Name, new PropertyAccessor<Func<object>>(() => getterFunc(this), getterProp.PropertyType));
+                _getters.Add(getterProp.Name, PropertyBinder.CreateGetter(getterProp, this));
             }
 
             var publicSetters = bindableProperties.Where(p => p.CanWrite && p.GetSetMethod() != null && p.GetSetMethod().IsPublic).ToArray();
@@ -194,7 +193,7 @@ namespace Recstazy.BehaviourTree
             foreach (var setterProp in publicSetters)
             {
                 var setterAction = PropertyBinder.CreateSetter(setterProp);
-                _setters.Add(setterProp.Name, new PropertyAccessor<Action<object>>((value) => setterAction(this, value), setterProp.PropertyType));
+                _setters.Add(setterProp.Name, new PropertyAccessor<Action<object>>((value) => setterAction(this, value), null, setterProp.PropertyType));
             }
         }
 

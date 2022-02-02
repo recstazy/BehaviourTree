@@ -10,17 +10,19 @@ namespace Recstazy.BehaviourTree.PropertyBinding
     {
         public T Accessor { get; private set; }
         public Type PropertyType { get; private set; }
+        public Delegate GenericDelegate { get; }
 
-        public PropertyAccessor(T accessor, Type propertyType)
+        public PropertyAccessor(T accessor, Delegate genericDel, Type propertyType)
         {
             Accessor = accessor;
             PropertyType = propertyType;
+            GenericDelegate = genericDel;
         }
     }
 
     internal static class PropertyBinder
     {
-        public static Func<object, object> CreateGetter(PropertyInfo property)
+        public static PropertyAccessor<Func<object>> CreateGetter(PropertyInfo property, Blackboard target)
         {
             if (property == null)
                 throw new ArgumentNullException("Property is null");
@@ -30,11 +32,30 @@ namespace Recstazy.BehaviourTree.PropertyBinding
                 throw new ArgumentException("The specified property does not have a public accessor.");
 
             var genericMethod = typeof(PropertyBinder).GetMethod("CreateGetterGeneric");
-            MethodInfo genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
-            return (Func<object, object>)genericHelper.Invoke(null, new object[] { getter });
+            var genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
+            var genericGetter = (Delegate)genericHelper.Invoke(null, new object[] { getter, target });
+
+            var boxedMethod = typeof(PropertyBinder).GetMethod("CreateGetterBoxed");
+            var boxedHelper = boxedMethod.MakeGenericMethod(property.PropertyType);
+            var boxedGetter = (Func<object>)boxedHelper.Invoke(null, new object[] { genericGetter });
+
+            var accessor = new PropertyAccessor<Func<object>>(boxedGetter, genericGetter, property.PropertyType);
+            return accessor;
         }
 
-        public static Func<object, object> CreateGetterGeneric<T, R>(MethodInfo getter) where T : class
+        public static Func<TResult> CreateGetterGeneric<T, TResult>(MethodInfo getter, Blackboard target) where T : Blackboard
+        {
+            var getterDelegate = (Func<T, TResult>)Delegate.CreateDelegate(typeof(Func<T, TResult>), getter);
+            var upcastedBB = (T)target;
+            return () => getterDelegate.Invoke(upcastedBB);
+        }
+
+        public static Func<object> CreateGetterBoxed<T>(Func<T> func)
+        {
+            return () => func();
+        }
+
+        public static Func<object, object> CreateGetterBoxedFromMethod<T, R>(MethodInfo getter) where T : class
         {
             Func<T, R> getterTypedDelegate = (Func<T, R>)Delegate.CreateDelegate(typeof(Func<T, R>), getter);
             Func<object, object> getterDelegate = (Func<object, object>)((object instance) => getterTypedDelegate((T)instance));
