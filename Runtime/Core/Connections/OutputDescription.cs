@@ -1,10 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor.Experimental.GraphView;
 using System;
 
-namespace Recstazy.BehaviourTree.EditorScripts
+namespace Recstazy.BehaviourTree
 {
     internal struct OutputDescription : IConnectionDescription
     {
@@ -24,13 +23,4 @@ namespace Recstazy.BehaviourTree.EditorScripts
             LastConnectedNode = -1;
         }
     }
-
-    internal static class OutpuExtensions
-    {
-        public static OutputDescription GetOutDescription(this Port outPort)
-        {
-            return (OutputDescription)outPort.userData;
-        }
-    }
-
 }

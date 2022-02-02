@@ -1,27 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using System;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
     internal static class InputExtensions 
     {
-        public static Type GetValueType(this InputBase input)
-        {
-            var type = input.GetType();
-
-            if (type.IsGenericType)
-            {
-                var typeArgument = type.GetGenericArguments()[0];
-                return typeArgument;
-            }
-
-            return null;
-        }
-
         public static List<InputDescription> GetInputs(this NodeData nodeData)
         {
             if (nodeData is TaskNodeData taskData)
@@ -51,11 +36,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
 
             return inputs;
-        }
-
-        public static InputDescription GetInputDescription(this Port inPort)
-        {
-            return (InputDescription)inPort.userData;
         }
     }
 }
