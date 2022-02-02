@@ -192,8 +192,7 @@ namespace Recstazy.BehaviourTree
 
             foreach (var setterProp in publicSetters)
             {
-                var setterAction = PropertyBinder.CreateSetter(setterProp);
-                _setters.Add(setterProp.Name, new PropertyAccessor<Action<object>>((value) => setterAction(this, value), null, setterProp.PropertyType));
+                _setters.Add(setterProp.Name, PropertyBinder.CreateSetter(setterProp, this));
             }
         }
 

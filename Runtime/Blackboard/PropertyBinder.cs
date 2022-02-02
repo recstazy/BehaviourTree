@@ -62,7 +62,7 @@ namespace Recstazy.BehaviourTree.PropertyBinding
             return getterDelegate;
         }
 
-        public static Action<object, object> CreateSetter(PropertyInfo property)
+        public static PropertyAccessor<Action<object>> CreateSetter(PropertyInfo property, Blackboard target)
         {
             if (property == null)
                 throw new ArgumentNullException("Property is null");
@@ -72,11 +72,30 @@ namespace Recstazy.BehaviourTree.PropertyBinding
                 throw new ArgumentException("The specified property does not have a public setter.");
 
             var genericMethod = typeof(PropertyBinder).GetMethod("CreateSetterGeneric");
-            MethodInfo genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
-            return (Action<object, object>)genericHelper.Invoke(null, new object[] { setter });
+            var genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
+            var genericSetter = (Delegate)genericHelper.Invoke(null, new object[] { setter, target });
+
+            var boxedMethod = typeof(PropertyBinder).GetMethod("CreateSetterBoxed");
+            var boxedHelper = boxedMethod.MakeGenericMethod(property.PropertyType);
+            var boxedSetter = (Action<object>)boxedHelper.Invoke(null, new object[] { genericSetter });
+
+            var accessor = new PropertyAccessor<Action<object>>(boxedSetter, genericSetter, property.PropertyType);
+            return accessor;
         }
 
-        public static Action<object, object> CreateSetterGeneric<T, V>(MethodInfo setter) where T : class
+        public static Action<TValue> CreateSetterGeneric<T, TValue>(MethodInfo setter, Blackboard target) where T : Blackboard
+        {
+            var setterDelegate = (Action<T, TValue>)Delegate.CreateDelegate(typeof(Action<T, TValue>), setter);
+            var upcastedBB = (T)target;
+            return (value) => setterDelegate.Invoke(upcastedBB, value);
+        }
+
+        public static Action<object> CreateSetterBoxed<T>(Action<T> setAction)
+        {
+            return (value) => setAction((T)value);
+        }
+
+        public static Action<object, object> CreateSetterGenericFromMethod<T, V>(MethodInfo setter) where T : class
         {
             Action<T, V> setterTypedDelegate = (Action<T, V>)Delegate.CreateDelegate(typeof(Action<T, V>), setter);
             Action<object, object> setterDelegate = (Action<object, object>)((object instance, object value) => { setterTypedDelegate((T)instance, (V)value); });
