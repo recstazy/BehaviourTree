@@ -23,6 +23,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public NodeData Data { get; private set; }
         public abstract bool IsEntry { get; }
+        public BTGraph Owner { get; set; }
 
         #endregion
 
@@ -74,7 +75,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             OnValidateConnections -= ValidateConnections;
         }
 
-        public virtual void UpdateEdges() { }
+        public virtual void EdgesChangedExternally() { }
         public virtual void UpdateAllPorts() { }
 
         protected void UpdatePorts(VisualElement container, IConnectionDescription[] newPorts, Func<IConnectionDescription, Port> createPortAction)

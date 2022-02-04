@@ -107,8 +107,22 @@ namespace Recstazy.BehaviourTree.EditorScripts
             // Get only type-compatable ports
             var availablePorts = ports.ToList()
                 .Where(p => p.direction != startPort.direction && p.node != startPort.node)
-                .Where(c => c.portType == startPort.portType)
                 .ToArray();
+
+            // Get only type-compatable ports
+            // I know I can better but...
+            if (startPort.portType == typeof(AnyValueType))
+            {
+                availablePorts = availablePorts
+                    .Where(p => p.portType != typeof(ExecutionPin) && !typeof(UnityEngine.Object).IsAssignableFrom(p.portType))
+                    .ToArray();
+            }
+            else
+            {
+                availablePorts = availablePorts
+                    .Where(p => p.portType == startPort.portType)
+                    .ToArray();
+            }
 
             var connectedPorts = startPort.connections.Select(c => startPort.direction == Direction.Input ? c.output : c.input).ToArray();
             // Remove all ports which we already are connected with to avoid multi-edge generation on both in and out ports multi capacity
@@ -127,6 +141,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (!_isPlaymode)
             {
                 evt.menu.AppendAction("Create Task", ContextCreateTaskAndNode, DropdownMenuAction.Status.Normal);
+                evt.menu.AppendAction("Create Value", ContextualCreateTreeValueAndNode, DropdownMenuAction.Status.Normal);
 
                 if (Tree.Blackboard != null)
                 {
@@ -134,7 +149,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     foreach (var n in getterNames)
                     {
-                        evt.menu.AppendAction($"Get/{n}", ContextCreateVariableAndNode, (evt) => DropdownMenuAction.Status.Normal, n);
+                        evt.menu.AppendAction($"Get/{n}", ContextCreateBbValueAndNode, (evt) => DropdownMenuAction.Status.Normal, n);
                     }
                 }
 
@@ -150,12 +165,19 @@ namespace Recstazy.BehaviourTree.EditorScripts
             ContextCreateNode(data);
         }
 
-        private void ContextCreateVariableAndNode(DropdownMenuAction args)
+        private void ContextCreateBbValueAndNode(DropdownMenuAction args)
         {
             var variableName = (string)args.userData;
             var accessor = Tree.Blackboard.GetterValues[variableName];
             var func = new BbValueFunc(accessor.PropertyType, variableName);
             var data = new FuncNodeData(GetAvailableNodeIndex(), func, null);
+            ContextCreateNode(data);
+        }
+
+        private void ContextualCreateTreeValueAndNode(DropdownMenuAction args)
+        {
+            var impl = new TreeValueFunc();
+            var data = new FuncNodeData(GetAvailableNodeIndex(), impl, null);
             ContextCreateNode(data);
         }
 
@@ -173,12 +195,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             _nodes = new List<BTNode>();
             var nodeData = tree.NodeData;
 
-            foreach (var n in nodeData.TaskData)
-            {
-                GenerateNode(n);
-            }
-
-            foreach (var n in nodeData.FuncData)
+            foreach (var n in nodeData)
             {
                 GenerateNode(n);
             }
@@ -187,6 +204,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private BTNode GenerateNode(NodeData data)
         {
             var node = data.CreateGraphNode();
+            node.Owner = this;
             _nodes.Add(node);
             node.OnReconnect += ReconnectNode;
             AddElement(node);
@@ -255,7 +273,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     foreach (var n in nodesToUpdate)
                     {
-                        n.UpdateEdges();
+                        n.EdgesChangedExternally();
                     }
                 }
 
@@ -299,13 +317,12 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     CreateConnectionByEdge(e);
                 }
 
-                BTWindow.SetDirty("Connect Nodes");
-
                 foreach (var n in nodesToUpdate)
                 {
-                    n.UpdateEdges();
+                    n.EdgesChangedExternally();
                 }
 
+                BTWindow.SetDirty("Connect Nodes");
                 OnStructureChanged?.Invoke();
             }
 
