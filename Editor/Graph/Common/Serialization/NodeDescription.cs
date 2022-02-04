@@ -20,10 +20,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             IsFuncData = data is FuncNodeData;
             Index = data.Index;
-            var type = data.Implementation?.GetType();
-            ImplTypeString = type?.FullName;
-            ImplJson = JsonUtility.ToJson(data.Implementation);
-
+            JsonHelper.Serialize(data.Implementation, out ImplJson, out ImplTypeString);
             Connections = data.Connections.ToArray();
             Position = data.Position;
         }
@@ -43,15 +40,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public NodeData GenerateData()
         {
-            object implementation = null;
-            string typeName = ImplTypeString;
-            var type = TypeCache.GetTypesDerivedFrom<INodeImplementation>().FirstOrDefault(t => t.FullName == typeName);
-
-            if (type != null)
-            {
-                implementation = JsonUtility.FromJson(ImplJson, type);
-            }
-
+            object implementation = JsonHelper.Deserialize(ImplJson, ImplTypeString);
             var data = CreateData(implementation);
             data.Position = Position;
             return data;

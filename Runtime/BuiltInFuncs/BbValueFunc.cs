@@ -29,14 +29,14 @@ namespace Recstazy.BehaviourTree
         {
             _variableName = valueName;
             VariableType = valueType;
-            _variableTypeName = valueType?.FullName;
+            _variableTypeName = JsonHelper.GetTypeString(valueType);
         }
 
         public BbValueFunc(string typeName, string valueName)
         {
             _variableName = valueName;
             _variableTypeName = typeName;
-            VariableType = Type.GetType(typeName);
+            VariableType = JsonHelper.StringToType(_variableTypeName);
         }
 
         public override FuncOut[] GetOuts()
