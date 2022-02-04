@@ -5,38 +5,29 @@ using System;
 
 namespace Recstazy.BehaviourTree
 {
-    public class BbValueFunc : BehaviourFunc, ISerializationCallbackReceiver
+    public class BbValueFunc : VariableFunc
     {
         #region Fields
 
         [SerializeField]
         private string _variableName;
 
-        [SerializeField]
-        private string _variableTypeName;
-
         #endregion
 
         #region Properties
 
         public string VariableName { get => _variableName; }
-        public Type VariableType { get; private set; }
-        public string VariableTypeName { get => _variableTypeName; }
-
+        
         #endregion
 
-        public BbValueFunc(Type valueType, string valueName)
+        public BbValueFunc(Type valueType, string valueName) : base(valueType)
         {
             _variableName = valueName;
-            VariableType = valueType;
-            _variableTypeName = JsonHelper.GetTypeString(valueType);
         }
 
-        public BbValueFunc(string typeName, string valueName)
+        public BbValueFunc(string typeName, string valueName) : base(typeName)
         {
             _variableName = valueName;
-            _variableTypeName = typeName;
-            VariableType = JsonHelper.StringToType(_variableTypeName);
         }
 
         public override FuncOut[] GetOuts()
@@ -54,14 +45,6 @@ namespace Recstazy.BehaviourTree
             return null;
         }
 
-        public void OnBeforeSerialize()
-        {
-            _variableTypeName = VariableType?.FullName;
-        }
-
-        public void OnAfterDeserialize()
-        {
-            VariableType = Type.GetType(_variableTypeName);
-        }
+        
     }
 }
