@@ -12,7 +12,7 @@ namespace Recstazy.BehaviourTree
     }
 
     [Serializable]
-    public abstract class GetterBase : InputBase
+    public abstract class InputValueBase : InputBase
     {
         public abstract void InitializeMethod(Delegate getterDelegate);
     }

@@ -7,7 +7,7 @@ namespace Recstazy.BehaviourTree
 {
     internal static class NodeDataExtensions
     {
-        public static GetterBase GetGetter(this NodeData data, string name)
+        public static InputValueBase GetGetter(this NodeData data, string name)
         {
             if (data is TaskNodeData taskData)
             {
@@ -18,7 +18,7 @@ namespace Recstazy.BehaviourTree
 
                     if (field != null)
                     {
-                        return field.GetValue(taskData.TaskImplementation) as GetterBase;
+                        return field.GetValue(taskData.TaskImplementation) as InputValueBase;
                     }
                 }
             }

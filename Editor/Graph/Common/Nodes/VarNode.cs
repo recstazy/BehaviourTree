@@ -19,7 +19,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public VarNode() : base() { }
 
-        public VarNode(VarNodeData data) : base(data)
+        public VarNode(FuncNodeData data) : base(data)
         {
             ImportLayout();
             CreateOuts();

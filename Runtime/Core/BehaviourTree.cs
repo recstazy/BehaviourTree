@@ -88,6 +88,14 @@ namespace Recstazy.BehaviourTree
                     runtimeNodeData[i].TaskImplementation.SetCoroutineRunner(coroutineRunner);
                 }
             }
+
+            foreach (var d in _nodeData.FuncData)
+            {
+                if (d.FuncImplementation != null)
+                {
+                    d.FuncImplementation.SetBlackboard(_blackboard);
+                }
+            }
         }
 
         [RuntimeInstanced]
@@ -95,7 +103,7 @@ namespace Recstazy.BehaviourTree
         {
             foreach (var data in _nodeData)
             {
-                data.InitialzeConnections(_nodeData, _blackboard);
+                data.InitialzeConnections(_nodeData);
             }
         }
     }

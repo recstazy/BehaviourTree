@@ -14,7 +14,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 return new TaskNode(taskData);
             }
-            else if (data is VarNodeData varData)
+            else if (data is FuncNodeData varData)
             {
                 return new VarNode(varData);
             }

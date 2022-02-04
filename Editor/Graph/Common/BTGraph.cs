@@ -154,7 +154,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             var variableName = (string)args.userData;
             var accessor = Tree.Blackboard.GetterValues[variableName];
-            var data = new VarNodeData(GetAvailableNodeIndex(), variableName, accessor.PropertyType, null);
+            var func = new BbValueFunc(accessor.PropertyType, variableName);
+            var data = new FuncNodeData(GetAvailableNodeIndex(), func, null);
             ContextCreateNode(data);
         }
 
@@ -177,7 +178,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 GenerateNode(n);
             }
 
-            foreach (var n in nodeData.VarData)
+            foreach (var n in nodeData.FuncData)
             {
                 GenerateNode(n);
             }

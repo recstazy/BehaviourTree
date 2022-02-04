@@ -18,6 +18,7 @@ namespace Recstazy.BehaviourTree
         #region Properties
 
         public BehaviourTask TaskImplementation { get => _taskImplementation; internal set => _taskImplementation = value; }
+        internal override object Implementation { get => _taskImplementation; }
 
         #endregion
 
@@ -39,9 +40,9 @@ namespace Recstazy.BehaviourTree
         }
 
         [RuntimeInstanced]
-        internal override void InitialzeConnections(IEnumerable<NodeData> nodeData, Blackboard blackboard)
+        internal override void InitialzeConnections(IEnumerable<NodeData> nodeData)
         {
-            base.InitialzeConnections(nodeData, blackboard);
+            base.InitialzeConnections(nodeData);
 
             if (TaskImplementation != null)
             {

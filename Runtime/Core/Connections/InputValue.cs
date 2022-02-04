@@ -6,7 +6,7 @@ using System;
 namespace Recstazy.BehaviourTree
 {
     [Serializable]
-    public class Getter<T> : GetterBase
+    public class InputValue<T> : InputValueBase
     {
         #region Fields
 
