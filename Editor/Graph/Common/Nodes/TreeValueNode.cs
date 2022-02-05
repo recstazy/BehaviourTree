@@ -14,12 +14,16 @@ namespace Recstazy.BehaviourTree.EditorScripts
     {
         #region Fields
 
+        private PropertyFieldElement _field;
+        private const string FuncImplName = "_funcImplementation";
+
         #endregion
 
         #region Properties
 
         public override bool IsEntry => false;
         public FuncNodeData FuncData { get; private set; }
+        private BehaviourTree Tree => BTWindow.SharedTree;
 
         #endregion
 
@@ -30,6 +34,14 @@ namespace Recstazy.BehaviourTree.EditorScripts
             FuncData = data;
             ImportLayout();
             CreateOuts();
+            
+            if (FuncData.FuncImplementation is VariableFunc varFunc)
+            {
+                if (varFunc.VariableType != typeof(AnyValueType))
+                {
+                    CreatePropertyField();
+                }
+            }
         }
 
         private void ImportLayout()
@@ -57,12 +69,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         .First(p => p.GetInputDescription().IdName == connection.InName);
 
                     var valueType = input.portType;
-                    var valueInstance = FormatterServices.GetUninitializedObject(valueType);
-                    FuncData.FuncImplementation = new TreeValueFunc(valueInstance, valueType);
+                    var valueInstance = JsonUtility.FromJson("{}", valueType);
 
+                    FuncData.FuncImplementation = new TreeValueFunc(valueInstance, valueType);
                     var newOuts = Data.GetOuts().Select(o => (IConnectionDescription)o).ToArray();
                     UpdatePorts(outputContainer, newOuts, (desc) => CreateOutputPort((OutputDescription)desc));
                     Reconnect();
+                    CreatePropertyField();
                 }
             }
         }
@@ -76,6 +89,48 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 var port = CreateOutputPort(o);
                 port.portName = "Connect Me";
             }
+        }
+
+        private void CreatePropertyField()
+        {
+            using(var sObject = new SerializedObject(Tree))
+            {
+                using(var sProp = GetValueProperty(sObject))
+                {
+                    if (sProp != null)
+                    {
+                        _field = new PropertyFieldElement();
+                        _field.HideUnsupported = true;
+                        _field.SetProperty(sProp, true);
+
+                        var port = outputContainer.Q<Port>();
+                        var container = port.Q<Label>().parent;
+                        container.Add(_field);
+                    }
+                }
+            }
+        }
+
+        private SerializedProperty GetValueProperty(SerializedObject sObject)
+        {
+            int dataIndex = -1;
+
+            for (int i = 0; i < Tree.NodeData.FuncData.Length; i++)
+            {
+                if (Tree.NodeData.FuncData[i].Index == Data.Index)
+                {
+                    dataIndex = i;
+                    break;
+                }
+            }
+
+            if (dataIndex >= 0)
+            {
+                var datasArray = sObject.FindProperty("_nodeData._funcData");
+                return datasArray.GetArrayElementAtIndex(dataIndex).FindPropertyRelative($"{FuncImplName}._value");
+            }
+
+            return null;
         }
     }
 }
