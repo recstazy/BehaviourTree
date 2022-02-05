@@ -76,7 +76,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                 using (property)
                 {
                     Label = new Label(_displayName);
-                    IsComplex = FieldUtility.IsComplex(property.propertyType);
+                    IsComplex = FieldUtility.IsComplex(property);
                     IsArrayAndNotString = property.isArray && property.propertyType != SerializedPropertyType.String;
 
                     if (_unwrap || !IsComplex) FieldsContainer = this;
