@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using System;
+using System.Runtime.Serialization;
 using System.Linq;
 
 namespace Recstazy.BehaviourTree.EditorScripts
@@ -56,10 +57,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         .First(p => p.GetInputDescription().IdName == connection.InName);
 
                     var valueType = input.portType;
-                    var valueInstance = Activator.CreateInstance(valueType);
+                    var valueInstance = FormatterServices.GetUninitializedObject(valueType);
                     FuncData.FuncImplementation = new TreeValueFunc(valueInstance, valueType);
-
-
 
                     var newOuts = Data.GetOuts().Select(o => (IConnectionDescription)o).ToArray();
                     UpdatePorts(outputContainer, newOuts, (desc) => CreateOutputPort((OutputDescription)desc));
