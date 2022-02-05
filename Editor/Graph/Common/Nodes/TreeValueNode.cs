@@ -44,6 +44,21 @@ namespace Recstazy.BehaviourTree.EditorScripts
             }
         }
 
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            if (_field != null)
+            {
+                _field.OnChanged -= FieldChanged;
+            }
+        }
+
+        private void FieldChanged()
+        {
+            BTWindow.SetDirty("Change Tree Value");
+        }
+
         private void ImportLayout()
         {
             titleContainer.Clear();
@@ -87,7 +102,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
             foreach (var o in outs)
             {
                 var port = CreateOutputPort(o);
-                port.portName = "Connect Me";
             }
         }
 
@@ -106,6 +120,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         var port = outputContainer.Q<Port>();
                         var container = port.Q<Label>().parent;
                         container.Add(_field);
+
+                        _field.OnChanged += FieldChanged;
                     }
                 }
             }
