@@ -24,12 +24,7 @@ namespace Recstazy.BehaviourTree.PropertyBinding
     {
         public static PropertyAccessor<Func<object>> CreateGetter(PropertyInfo property, object target)
         {
-            if (property == null)
-                throw new ArgumentNullException("Property is null");
-
-            var getter = property.GetGetMethod();
-            if (getter == null)
-                throw new ArgumentException("The specified property does not have a public accessor.");
+            var getter = GetGetMethod(property);
 
             var genericMethod = typeof(PropertyBinder).GetMethod("CreateGetterGeneric");
             var genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
@@ -41,6 +36,23 @@ namespace Recstazy.BehaviourTree.PropertyBinding
 
             var accessor = new PropertyAccessor<Func<object>>(boxedGetter, genericGetter, property.PropertyType);
             return accessor;
+        }
+
+        public static Delegate CreateGenericFuncForceType(PropertyInfo property, object target, Type funcReturnType)
+        {
+            var getter = GetGetMethod(property);
+            var genericMethod = typeof(PropertyBinder).GetMethod("CreateGetterGeneric");
+            var genericHelper = genericMethod.MakeGenericMethod(property.DeclaringType, property.PropertyType);
+            var genericGetter = (Delegate)genericHelper.Invoke(null, new object[] { getter, target });
+
+            if (getter.ReturnType != funcReturnType)
+            {
+                var castMethod = typeof(PropertyBinder).GetMethod("CastFuncToType");
+                var castHelper = castMethod.MakeGenericMethod(funcReturnType, getter.ReturnType);
+                var castedGetter = (Delegate)castHelper.Invoke(null, new object[] { genericGetter });
+                return castedGetter;
+            }
+            else return genericGetter;
         }
 
         public static Func<TResult> CreateGetterGeneric<T, TResult>(MethodInfo getter, object target) where T : class
@@ -55,11 +67,28 @@ namespace Recstazy.BehaviourTree.PropertyBinding
             return () => func();
         }
 
+        public static Func<TResult> CastFuncToType<TResult, TInput>(Func<TInput> func) where TResult : TInput
+        {
+            return () => (TResult)func();
+        }
+
         public static Func<object, object> CreateGetterBoxedFromMethod<T, R>(MethodInfo getter) where T : class
         {
             Func<T, R> getterTypedDelegate = (Func<T, R>)Delegate.CreateDelegate(typeof(Func<T, R>), getter);
             Func<object, object> getterDelegate = (Func<object, object>)((object instance) => getterTypedDelegate((T)instance));
             return getterDelegate;
+        }
+
+        private static MethodInfo GetGetMethod(PropertyInfo property)
+        {
+            if (property == null)
+                throw new ArgumentNullException("Property is null");
+
+            var getter = property.GetGetMethod();
+            if (getter == null)
+                throw new ArgumentException("The specified property does not have a public accessor.");
+
+            return getter;
         }
 
         public static PropertyAccessor<Action<object>> CreateSetter(PropertyInfo property, object target)

@@ -1,7 +1,9 @@
 using System;
+using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Recstazy.BehaviourTree.PropertyBinding;
 
 namespace Recstazy.BehaviourTree
 {
@@ -36,7 +38,37 @@ namespace Recstazy.BehaviourTree
 
         public override Delegate GetValueGetter(FuncOut funcOut)
         {
-            return null;
+            string propertyName = GetPropertyName();
+            var property = typeof(SerializedValue).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+            Type funcReturnType;
+
+            if (_value.EnumType != SerializedValue.ValueType.Complex)
+            {
+                funcReturnType = property.PropertyType;
+            }
+            else
+            {
+                funcReturnType = JsonHelper.StringToType(_value.ValueTypeString);
+            }
+
+            return PropertyBinder.CreateGenericFuncForceType(property, _value, funcReturnType);
+        }
+
+        private string GetPropertyName()
+        {
+            switch (_value.EnumType)
+            {
+                case SerializedValue.ValueType.Bool:
+                    return "BoolValue";
+                case SerializedValue.ValueType.Float:
+                    return "FloatValue";
+                case SerializedValue.ValueType.Int:
+                    return "IntValue";
+                case SerializedValue.ValueType.String:
+                    return "StringValue";
+                default:
+                    return "ComplexValue";
+            }
         }
     }
 }

@@ -26,10 +26,20 @@ namespace Recstazy.BehaviourTree
         private object _complexValue;
 
         [SerializeField]
+        private string _valueTypeString;
+
+        [SerializeField]
         private ValueType _enumType;
 
         public object Value { get => GetValue(); set => SetValue(value); }
         public ValueType EnumType { get => _enumType; }
+
+        public bool BoolValue { get => _boolValue; set => _boolValue = value; }
+        public float FloatValue { get => _floatValue; set => _floatValue = value; }
+        public int IntValue { get => _intValue; set => _intValue = value; }
+        public string StringValue { get => _stringValue; set => _stringValue = value; }
+        public object ComplexValue { get => _complexValue; set => _complexValue = value; }
+        public string ValueTypeString { get => _valueTypeString; }
 
         public SerializedValue(object value)
         {
@@ -81,6 +91,7 @@ namespace Recstazy.BehaviourTree
                     break;
                 case ValueType.Complex:
                     _complexValue = value;
+                    _valueTypeString = JsonHelper.GetTypeAsString(value);
                     break;
                 default:
                     break;
