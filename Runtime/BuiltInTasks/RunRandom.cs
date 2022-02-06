@@ -19,7 +19,7 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        protected override int GetCurrentOutIndex()
+        protected override int GetNextOutIndex()
         {
             return Random.Range(0, Connections.Count);
         }

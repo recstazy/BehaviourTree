@@ -17,7 +17,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #endregion
 
-        protected override int GetCurrentOutIndex()
+        protected override int GetNextOutIndex()
         {
             return 2;
         }

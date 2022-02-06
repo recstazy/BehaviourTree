@@ -41,7 +41,7 @@ namespace Recstazy.BehaviourTree
             Succeed = allSucceed;
         }
 
-        protected override int GetCurrentOutIndex()
+        protected override int GetNextOutIndex()
         {
             return NoOut;
         }

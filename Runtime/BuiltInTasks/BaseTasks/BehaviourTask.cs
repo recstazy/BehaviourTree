@@ -52,7 +52,7 @@ namespace Recstazy.BehaviourTree
         /// <summary> Ask this task to provide out index to go further </summary>
         public int GetCurrentOut()
         {
-            int nextOutIndex = GetCurrentOutIndex();
+            int nextOutIndex = GetNextOutIndex();
             return nextOutIndex;
         }
 
@@ -70,7 +70,7 @@ namespace Recstazy.BehaviourTree
         protected virtual void Initialized() { }
 
         /// <summary> What out index to choose after task completion </summary>
-        protected virtual int GetCurrentOutIndex()
+        protected virtual int GetNextOutIndex()
         {
             return 0;
         }
