@@ -7,7 +7,7 @@ namespace Recstazy.BehaviourTree
     /// <summary>
     /// Log a string to console from BehaviourTree
     /// </summary>
-    [TaskOut(0)]
+    [TaskOut]
     [TaskMenu("Debug/Log")]
     public class Log : BaseLogTask
     {
@@ -21,11 +21,6 @@ namespace Recstazy.BehaviourTree
         #region Properties
 
         #endregion
-
-        public override string GetDescription()
-        {
-            return $"{_logType}: {_logString}";
-        }
 
         protected override string GetLogString()
         {

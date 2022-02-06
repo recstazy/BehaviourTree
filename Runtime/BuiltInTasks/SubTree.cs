@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)][TaskMenu("Tasks/SubTree")]
+    [TaskOut][TaskMenu("Tasks/SubTree")]
     public class SubTree : BehaviourTask
     {
         #region Fields
@@ -12,26 +12,22 @@ namespace Recstazy.BehaviourTree
         [SerializeField]
         private BehaviourTree _tree;
 
-        private TreePlayer _treePlayer;
+        [SerializeField]
+        private string _displayName = "Sub Tree";
 
-        private static readonly Color s_backColor = new Color(0.1f, 0.2f, 0.3f, 0.5f);
+        private TreePlayer _treePlayer;
 
         #endregion
 
         #region Properties
 
-        protected override Color Color => s_backColor;
+        public string DisplayName { get => _displayName; }
 
         #endregion
 
-        public override string GetDescription()
-        {
-            return $"Play {(_tree == null ? "tree" : _tree.name)} as SubTree";
-        }
-
         protected override void Initialized()
         {
-            _treePlayer = new TreePlayer(_tree, _tree.Blackboard, CoroutineRunner, $"SubTree");
+            _treePlayer = new TreePlayer(_tree, _tree.Blackboard, CoroutineRunner, _displayName);
         }
 
         protected override IEnumerator TaskRoutine()

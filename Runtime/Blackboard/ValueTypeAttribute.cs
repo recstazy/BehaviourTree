@@ -21,7 +21,7 @@ namespace Recstazy.BehaviourTree
 
         public ValueTypeAttribute(params Type[] compatableTypes)
         {
-            CompatableTypes = compatableTypes is null ? new Type[0] : compatableTypes;
+            CompatableTypes = compatableTypes == null ? new Type[0] : compatableTypes;
         }
     }
 }

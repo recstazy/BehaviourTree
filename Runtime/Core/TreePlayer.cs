@@ -30,9 +30,14 @@ namespace Recstazy.BehaviourTree
         public string FullName => GetFullName();
         public bool Succeed => _treeBranchPlayer.BranchSucceed;
 
-        internal static List<TreePlayer> PlayersCache { get; private set; } = new List<TreePlayer>();
+        internal static List<TreePlayer> PlayersCache { get; private set; }
 
         #endregion
+
+        static TreePlayer()
+        {
+            if (Application.isEditor) PlayersCache = new List<TreePlayer>();
+        }
 
         public TreePlayer(BehaviourTree tree, Blackboard blackboard, CoroutineRunner coroutineRunner, string name)
         {
@@ -40,7 +45,8 @@ namespace Recstazy.BehaviourTree
             _coroutineRunner = coroutineRunner;
             SharedTree = tree;
             Tree = tree.CreateRuntimeImplementation(coroutineRunner, blackboard);
-            AddTreePlayer(this);
+
+            if (Application.isEditor) AddTreePlayer(this);
         }
 
         public IEnumerator PlayTreeRoutine()
@@ -53,10 +59,12 @@ namespace Recstazy.BehaviourTree
 
         internal void Destroyed()
         {
-            RemoveTreePlayer(this);
+            if (Application.isEditor) RemoveTreePlayer(this);
         }
 
+#if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+#endif
         internal static void ClearPlayersCache()
         {
             PlayersCache.Clear();

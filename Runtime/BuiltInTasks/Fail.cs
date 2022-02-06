@@ -19,11 +19,6 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        public override string GetDescription()
-        {
-            return "Always fails";
-        }
-
         protected override IEnumerator TaskRoutine()
         {
             yield return null;

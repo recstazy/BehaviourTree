@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     [ExcludeFromTaskSelector]
     [NoInspector]
     internal sealed class EntryTask : BehaviourTask { }
