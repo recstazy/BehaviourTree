@@ -103,6 +103,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             foreach (var o in outs)
             {
                 var port = CreateOutputPort(o);
+                port.portName = "Connect Me";
             }
         }
 
@@ -115,13 +116,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     if (sProp != null)
                     {
                         _field = new PropertyFieldElement();
-                        _field.HideUnsupported = true;
                         _field.SetProperty(sProp, true);
 
                         var port = outputContainer.Q<Port>();
                         var container = port.Q<Label>().parent;
                         container.Add(_field);
-
+                        port.style.height = new StyleLength(StyleKeyword.Auto);
+                        port.portName = " ";
                         _field.OnChanged += SetDirty;
                     }
                 }

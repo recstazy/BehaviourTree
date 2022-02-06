@@ -34,7 +34,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
         protected Label Label { get; private set; }
         protected VisualElement FieldsContainer { get; private set; }
         protected FieldInfo FieldInfo => _fieldInfo;
-        
+        protected bool Unwrap => _unwrap;
+
         #endregion
 
         public BasePropertyFieldElement()

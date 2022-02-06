@@ -93,7 +93,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             simpleField.AddToClassList("simple-prop-value");
             var simpleContainer = new VisualElement();
             simpleContainer.AddToClassList("simple-prop-container");
-            simpleContainer.Add(Label);
+            if (!Unwrap) simpleContainer.Add(Label);
             simpleContainer.Add(simpleField);
             FieldsContainer.Add(simpleContainer);
         }
