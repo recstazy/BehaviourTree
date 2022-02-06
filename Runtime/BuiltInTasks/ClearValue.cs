@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     [TaskMenu("Value/Clear Value")]
     public class ClearValue : BehaviourTask
     {
@@ -18,11 +18,6 @@ namespace Recstazy.BehaviourTree
         #region Properties
 
         #endregion
-
-        public override string GetDescription()
-        {
-            return $"Clear {_name}";
-        }
 
         protected override IEnumerator TaskRoutine()
         {

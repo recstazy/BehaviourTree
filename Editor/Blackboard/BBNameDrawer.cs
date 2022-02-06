@@ -14,7 +14,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private SerializedProperty _property;
         private GUIContent _label;
         private Blackboard _currentBB;
-        private const float NameValueRatio = 0.4f;
 
         #endregion
 
@@ -46,12 +45,6 @@ namespace Recstazy.BehaviourTree.EditorScripts
         private void DrawEnumedName()
         {
             var rect = _rect;
-            rect.width *= NameValueRatio;
-            EditorGUI.LabelField(rect, _label);
-
-            rect.x += rect.width;
-            rect.width = _rect.width - rect.width;
-
             var valueTypings = fieldInfo.GetCustomAttributes(typeof(ValueTypeAttribute), true) as ValueTypeAttribute[];
             bool hasTyping = valueTypings != null && valueTypings.Length > 0;
             BlackboardProperty propType = _property.type.Contains("Setter") ? BlackboardProperty.Setter : BlackboardProperty.Getter;
@@ -59,17 +52,18 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             if (names != null && names.Length > 0)
             {
+                var options = names.Select(n => new GUIContent(n)).ToArray();
                 var currentNameProp = _property.FindPropertyRelative("_name");
                 int currentNameIndex = Array.IndexOf(names, currentNameProp.stringValue);
                 currentNameIndex = Mathf.Clamp(currentNameIndex, 0, names.Length - 1);
 
-                currentNameIndex = EditorGUI.Popup(rect, currentNameIndex, names);
+                currentNameIndex = EditorGUI.Popup(rect, _label, currentNameIndex, options);
                 currentNameProp.stringValue = names[currentNameIndex];
             }
             else
             {
                 string message = hasTyping ? "No Compatable value" : "Blackboard Empty";
-                EditorGUI.LabelField(rect, $"[{message}]");
+                EditorGUI.LabelField(rect, _label, $"[{message}]");
             }
         }
     }

@@ -9,6 +9,7 @@ namespace Recstazy.BehaviourTree
     /// </summary>
     [NoInspector]
     [TaskMenu("Multiout/Paraleller")]
+    [TaskOut("Main Task")]
     public class Paraleller : MultioutTask
     {
         #region Fields
@@ -36,7 +37,7 @@ namespace Recstazy.BehaviourTree
             Succeed = _mainBranch.BranchSucceed;
         }
 
-        protected override int GetCurrentOutIndex()
+        protected override int GetNextOutIndex()
         {
             return NoOut;
         }

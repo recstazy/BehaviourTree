@@ -7,15 +7,14 @@ namespace Recstazy.BehaviourTree
     /// <summary>
     /// Succeed if blackboard boolean is true, else fail
     /// </summary>
-    [TaskOut(0)]
+    [TaskOut]
     [TaskMenu("Gate/Bool Gate")]
     public class BoolGate : BaseGateTask
     {
         #region Fields
 
         [SerializeField]
-        [ValueType(typeof(bool))]
-        private BlackboardGetter _valueName;
+        private InputValue<bool> _bool;
 
         #endregion
 
@@ -23,18 +22,9 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        protected override string GetGateDescription()
-        {
-            return $"{_valueName} is true";
-        }
-
         protected override bool CheckGateCondition()
         {
-            if (Blackboard.TryGetValue(_valueName, out bool bbValue))
-            {
-                return bbValue;
-            }
-            else return false;
+            return _bool.Value;
         }
     }
 }

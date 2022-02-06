@@ -19,7 +19,7 @@ namespace Recstazy.BehaviourTree
         private BehaviourTree _tree;
 
         [SerializeField]
-        private bool _playOnAwake;
+        private bool _playOnStart = true;
 
         private TreePlayer _treePlayer;
         private Coroutine _playRoutine;
@@ -40,19 +40,16 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        // Dummy to show enabled checkmark
-        private void Start() { }
-
         private void Reset()
         {
-            _playOnAwake = true;
+            _playOnStart = true;
         }
 
-        private void Awake()
+        private void Start()
         {
             _coroutineRunner = gameObject.AddComponent<CoroutineRunner>();
 
-            if (_playOnAwake)
+            if (_playOnStart)
             {
                 Initialize(_tree);
                 Play();

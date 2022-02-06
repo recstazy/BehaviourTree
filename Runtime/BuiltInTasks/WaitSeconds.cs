@@ -7,7 +7,7 @@ namespace Recstazy.BehaviourTree
     /// <summary>
     /// Wait seconds and succeed
     /// </summary>
-    [TaskOut(0)]
+    [TaskOut]
     public class WaitSeconds : BehaviourTask
     {
         #region Fields
@@ -22,11 +22,6 @@ namespace Recstazy.BehaviourTree
         public float Time { get => _time; set => _time = value; }
 
         #endregion
-
-        public override string GetDescription()
-        {
-            return $"Wait {_time} seconds";
-        }
 
         protected override IEnumerator TaskRoutine()
         {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     [TaskMenu("Debug/Log Variable")]
     public class LogVariable : BaseLogTask
     {
@@ -18,11 +18,6 @@ namespace Recstazy.BehaviourTree
         #region Properties
 
         #endregion
-
-        public override string GetDescription()
-        {
-            return $"{_logType}: {_name}";
-        }
 
         protected override string GetLogString()
         {

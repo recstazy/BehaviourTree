@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     [NoInspector]
     [TaskMenu("Debug/Break")]
     public class DebugBreak : BehaviourTask
@@ -16,11 +16,6 @@ namespace Recstazy.BehaviourTree
         #region Properties
 
         #endregion
-
-        public override string GetDescription()
-        {
-            return "Pause Playmode";
-        }
 
         protected override IEnumerator TaskRoutine()
         {

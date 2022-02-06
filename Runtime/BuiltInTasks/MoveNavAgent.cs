@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     [TaskMenu("Navigation/Move To")]
     public class MoveNavAgent : NavAgentTask
     {
@@ -24,11 +24,6 @@ namespace Recstazy.BehaviourTree
         #region Properties
 
         #endregion
-
-        public override string GetDescription()
-        {
-            return $"Move to {_destination}";
-        }
 
         protected override IEnumerator NavAgentTaskRoutine(NavMeshAgent navAgent)
         {
