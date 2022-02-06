@@ -51,9 +51,9 @@ namespace Recstazy.BehaviourTree
                 _coroutineRunner.StopCoroutine(_branchRountine);
             }
 
-            if (_root != null)
+            if (_currentTask != null)
             {
-                _root.ForceFinishTask(false);
+                _currentTask.ForceFinishTask(false);
             }
 
             IsRunning = false;
