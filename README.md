@@ -12,21 +12,13 @@ Write simple task with fields
 ```csharp
 using Recstazy.BehaviourTree;
 
-[TaskOut] // This creates execution output so you can connect next task. 
+[TaskOut] // This creates executable output. 
 [TaskMenu("My Awesome Tasks/Hello World")]
 public class HelloWorld : BehaviourTask
 {
-    #region Fields
-
     // Fields just like you normally do
     [SerializeField]
     private string _logString = "Hello World";
-
-    #endregion
-
-    #region Properties
-
-    #endregion
 
     // What we do in this task
     protected override IEnumerator TaskRoutine()
@@ -54,17 +46,9 @@ using Recstazy.BehaviourTree;
 [TaskOut("True"), TaskOut("False")] // Name your outputs
 public class Branch : BehaviourTask
 {
-    #region Fields
-
     // Input connection pin with a bool value
     [SerializeField]
     private InputValue<bool> _bool;
-
-    #endregion
-
-    #region Properties
-
-    #endregion
 
     protected override int GetNextOutIndex()
     {
