@@ -152,6 +152,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         evt.menu.AppendAction($"Get/{n}", ContextCreateBbValueAndNode, (evt) => DropdownMenuAction.Status.Normal, n);
                     }
                 }
+                else evt.menu.AppendAction("Get", null, DropdownMenuAction.Status.Disabled);
 
                 evt.menu.AppendSeparator();
             }
