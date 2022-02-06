@@ -125,9 +125,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             Dispose();
         }
 
-        protected Port CreateOutputPort(OutputDescription outDesc)
+        protected Port CreateOutputPort(OutputDescription outDesc, Port.Capacity capacity = Port.Capacity.Single)
         {
-            var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, outDesc.OutType);
+            var port = InstantiatePort(Orientation.Horizontal, Direction.Output, capacity, outDesc.OutType);
             port.portName = ObjectNames.NicifyVariableName(outDesc.Name);
             port.userData = outDesc;
 

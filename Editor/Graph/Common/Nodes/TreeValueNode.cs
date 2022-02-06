@@ -102,7 +102,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             foreach (var o in outs)
             {
-                var port = CreateOutputPort(o);
+                var port = CreateOutputPort(o, Port.Capacity.Multi);
                 port.portName = "Connect Me";
             }
         }

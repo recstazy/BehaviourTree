@@ -38,7 +38,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             foreach (var o in outs)
             {
-                CreateOutputPort(o);
+                CreateOutputPort(o, UnityEditor.Experimental.GraphView.Port.Capacity.Multi);
             }
         }
 
