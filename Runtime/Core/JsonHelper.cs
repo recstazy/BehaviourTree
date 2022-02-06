@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 namespace Recstazy.BehaviourTree
 {
@@ -38,7 +39,7 @@ namespace Recstazy.BehaviourTree
 
         public static string GetTypeString(Type type)
         {
-            var asmName = type.Assembly.FullName;
+            var asmName = type.Assembly.FullName.Split(',').FirstOrDefault();
             var typeName = type.FullName;
             return $"{typeName}, {asmName}";
         }

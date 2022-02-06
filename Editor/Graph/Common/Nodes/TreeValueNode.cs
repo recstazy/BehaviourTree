@@ -24,7 +24,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public override bool IsEntry => false;
         public FuncNodeData FuncData { get; private set; }
         private BehaviourTree Tree => BTWindow.SharedTree;
-
+        
         #endregion
 
         public TreeValueNode() : base() { }
@@ -50,11 +50,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             if (_field != null)
             {
-                _field.OnChanged -= FieldChanged;
+                _field.OnChanged -= SetDirty;
             }
         }
 
-        private void FieldChanged()
+        private void SetDirty()
         {
             BTWindow.SetDirty("Change Tree Value");
         }
@@ -85,8 +85,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
                     var valueType = input.portType;
                     var valueInstance = JsonUtility.FromJson("{}", valueType);
-
                     FuncData.FuncImplementation = new TreeValueFunc(valueInstance, valueType);
+                    BTWindow.SetDirty("Set Tree Value Type");
+
                     var newOuts = Data.GetOuts().Select(o => (IConnectionDescription)o).ToArray();
                     UpdatePorts(outputContainer, newOuts, (desc) => CreateOutputPort((OutputDescription)desc));
                     Reconnect();
@@ -121,7 +122,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
                         var container = port.Q<Label>().parent;
                         container.Add(_field);
 
-                        _field.OnChanged += FieldChanged;
+                        _field.OnChanged += SetDirty;
                     }
                 }
             }
@@ -143,7 +144,22 @@ namespace Recstazy.BehaviourTree.EditorScripts
             if (dataIndex >= 0)
             {
                 var datasArray = sObject.FindProperty("_nodeData._funcData");
-                return datasArray.GetArrayElementAtIndex(dataIndex).FindPropertyRelative($"{FuncImplName}._value");
+                var valueProp = datasArray.GetArrayElementAtIndex(dataIndex).FindPropertyRelative($"{FuncImplName}._value");
+                var serValue = (FuncData.FuncImplementation as TreeValueFunc).Value;
+
+                switch (serValue.EnumType)
+                {
+                    case SerializedValue.ValueType.Bool:
+                        return valueProp.FindPropertyRelative("_boolValue");
+                    case SerializedValue.ValueType.Float:
+                        return valueProp.FindPropertyRelative("_floatValue");
+                    case SerializedValue.ValueType.Int:
+                        return valueProp.FindPropertyRelative("_intValue");
+                    case SerializedValue.ValueType.String:
+                        return valueProp.FindPropertyRelative("_stringValue");
+                    default:
+                        return valueProp.FindPropertyRelative("_complexValue");
+                }
             }
 
             return null;

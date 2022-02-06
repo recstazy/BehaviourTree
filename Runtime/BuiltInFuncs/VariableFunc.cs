@@ -35,12 +35,12 @@ namespace Recstazy.BehaviourTree
 
         public void OnBeforeSerialize()
         {
-            _variableTypeName = VariableType?.FullName;
+            _variableTypeName = JsonHelper.GetTypeString(VariableType);
         }
 
         public void OnAfterDeserialize()
         {
-            VariableType = Type.GetType(_variableTypeName);
+            VariableType = JsonHelper.StringToType(_variableTypeName);
         }
     }
 }

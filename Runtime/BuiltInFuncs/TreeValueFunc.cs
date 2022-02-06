@@ -11,22 +11,22 @@ namespace Recstazy.BehaviourTree
     {
         #region Fields
 
-        [SerializeReference]
-        private object _value;
+        [SerializeField]
+        private SerializedValue _value;
 
         #endregion
 
         #region Properties
 
-        public object Value { get => _value; }
+        public SerializedValue Value { get => _value; set => _value = value; }
 
         #endregion
 
         public TreeValueFunc() : base(typeof(AnyValueType)) { }
 
-        public TreeValueFunc(object value, Type valueType) : base(valueType)
+        public TreeValueFunc(object value, Type type) : base(type)
         {
-            _value = value;
+            _value = new SerializedValue(value);
         }
 
         public override FuncOut[] GetOuts()
