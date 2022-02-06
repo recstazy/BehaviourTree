@@ -51,9 +51,9 @@ namespace Recstazy.BehaviourTree
                 _coroutineRunner.StopCoroutine(_branchRountine);
             }
 
-            if (_root != null)
+            if (_currentTask != null)
             {
-                _root.ForceFinishTask(false);
+                _currentTask.ForceFinishTask(false);
             }
 
             IsRunning = false;
@@ -72,9 +72,10 @@ namespace Recstazy.BehaviourTree
 
                 if (_currentTask.Succeed)
                 {
-                    var next = _currentTask.GetConnectionSafe(_currentTask.GetCurrentOut());
+                    var newOut = _currentTask.GetCurrentOut();
+                    var next = _currentTask.GetConnectionSafe(newOut);
 
-                    if (next is null)
+                    if (next == null)
                     {
                         BranchSucceed = true;
                         break;

@@ -8,28 +8,49 @@ namespace Recstazy.BehaviourTree
     /// Base task to derive if you want a variable count of outputs
     /// </summary>
     [ExcludeFromTaskSelector]
-    public class MultioutTask : BehaviourTask
+    public abstract class MultioutTask : BehaviourTask
     {
         #region Fields
-
-        [SerializeField]
-        [HideInInspector]
-        private int _outsCount;
-
-        private static readonly Color s_backColor = new Color(0.1f, 0.1f, 0.175f, 0.5f);
 
         #endregion
 
         #region Properties
 
-        public int OutsCount => _outsCount;
-        protected override Color Color => s_backColor;
-
         #endregion
 
-        internal void ChangeOutsCount(int newCount)
+        internal override TaskConnection[] PostProcessConnectionsAfterChange(TaskConnection[] connections)
         {
-            _outsCount = newCount;
+            if (connections == null || connections.Length == 0) return connections;
+
+            // Find from witch connection we can start output recalculation
+            System.Array.Sort(connections, (c, next) => c.OutPin > next.OutPin ? 1 : -1);
+            int reordablesStartIndex = 0;
+            int concreteOutsCount = GetType().GetCustomAttributes(typeof(TaskOutAttribute), true).Length;
+
+            for (int i = 0; i < connections.Length; i++)
+            {
+                if (connections[i].OutPin < concreteOutsCount)
+                {
+                    reordablesStartIndex++;
+                }
+                else break;
+            }
+
+            var reordableOuts = new TaskConnection[connections.Length - reordablesStartIndex];
+
+            for (int i = reordablesStartIndex; i < connections.Length; i++)
+            {
+                reordableOuts[i - reordablesStartIndex] = connections[i];
+            }
+
+            for (int i = 0; i < reordableOuts.Length; i++)
+            {
+                var newConnection = new TaskConnection(i + concreteOutsCount, reordableOuts[i].InNode, InputDescription.ExecutionInName);
+                reordableOuts[i] = newConnection;
+            }
+
+            reordableOuts.CopyTo(connections, reordablesStartIndex);
+            return connections;
         }
     }
 }

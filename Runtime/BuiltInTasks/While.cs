@@ -4,24 +4,20 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    [TaskOut(0, "Condition")][TaskOut(1, "Execute")][TaskOut(2, "Exit")]
+    [TaskOut("Condition")][TaskOut("Execute")][TaskOut("Exit")]
     [NoInspector]
-    [TaskMenu("Multiout/While Loop")]
+    [TaskMenu("Tasks/While Loop")]
     public class While : BehaviourTask
     {
         #region Fields
-
-        private static readonly Color s_backColor = new Color(0.1f, 0.05f, 0.15f, 0.5f);
 
         #endregion
 
         #region Properties
 
-        protected override Color Color => s_backColor;
-
         #endregion
 
-        protected override int GetCurrentOutIndex()
+        protected override int GetNextOutIndex()
         {
             return 2;
         }

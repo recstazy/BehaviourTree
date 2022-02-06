@@ -1,0 +1,20 @@
+ListPropertyElement {
+    height: 100%;
+    width: 100%;
+}
+
+.simple-prop-container {
+    flex-direction: row;
+    justify-content: space-between;
+    -unity-text-align: middle-left;
+}
+
+.simple-prop-value {
+    min-width: 14px;
+}
+
+.complex-prop-container {
+    padding-left: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}

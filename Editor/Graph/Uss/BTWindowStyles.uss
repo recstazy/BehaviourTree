@@ -1,0 +1,171 @@
+BTGraph {
+    width: 100%;
+    height: 100%;
+}
+
+BTNode:disabled, TaskNode:disabled, TreeValueNode:disabled, BbValueNode:disabled {
+    opacity: 0.9;
+}
+
+NodeTaskProvider {
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: rgb(40, 40, 40);
+}
+
+NodeTaskProvider:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.task-container {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+}
+
+.task-container-noeditor {
+    width: 0px;
+    height: 0px;
+    padding: 0px;
+}
+
+.node-title-container {
+    flex-direction: row;
+    width: 100%;
+}
+
+.node-task-button {
+    height: 100%;
+    width: 100%;
+    -unity-text-align: middle-left;
+    padding-left: 5px;
+}
+
+.port > #connectorExec {
+    border-radius: 0px, 6px, 6px, 0px;
+    width: 8px;
+    height: 8px;
+    border-width: 1px;
+    margin-left: 4px;
+    margin-right: 4px;
+    align-items: center;
+    justify-content: center;
+    border-color: #848DE7;
+}
+
+.port > #connectorExec > #cap {
+    border-radius: 0px, 4px, 4px, 0px;
+    width: 4px;
+    height: 4px;
+}
+
+PlaymodeWatcher {
+    height: 100%;
+    width: 55px;
+    background-color: rgba(0, 0, 0, 0.1);
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+TreeSelector {
+    height: 100%;
+    width: 100%;
+    border-radius: 3px;
+    padding-left: 5px;
+    background-color: rgba(0, 0, 0, 0.1);
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.tree-selector-dropdown {
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(40, 40, 40);
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.tree-selector-dropdown:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.window-toolbar {
+    background-color: rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 20px;
+    align-items: stretch;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+}
+
+.playmode-label {
+    -unity-text-align: middle-center;
+    font-size: 14px;
+}
+
+.target-label {
+    -unity-text-align: middle-left;
+    font-size: 14px;
+}
+
+.node-highlight {
+    position: absolute;
+    width: 102%;
+    height: 102%;
+    border-color: #848DE7;
+    border-width: 2px;
+    border-radius: 8px;
+    align-self: center;
+}
+
+.node-highlight:disabled {
+    opacity: 1;
+}
+
+.node-highlight-error {
+    position: absolute;
+    width: 102%;
+    height: 102%;
+    border-color: #E0504B;
+    border-width: 2px;
+    border-radius: 8px;
+    align-self: center;
+}
+
+.bb-container {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+}
+
+.bb-name-dropdown {
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(40, 40, 40);
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+}
+
+.bb-name-dropdown:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}

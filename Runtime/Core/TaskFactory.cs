@@ -16,6 +16,7 @@ namespace Recstazy.BehaviourTree
 
         #region Properties
 
+        public const string NoTaskLabel = "None";
         public static string[] Names { get; private set; }
         public static Type[] Types { get; private set; }
         public static string[] NamesEditor { get; private set; }
@@ -51,33 +52,18 @@ namespace Recstazy.BehaviourTree
             return null;
         }
 
-        public static GenericMenu CreateGenericMenu(BehaviourTask selectedTask, GenericMenu.MenuFunction2 onSelected)
+        public static int GetIndex(Type type)
         {
-            var selectedType = selectedTask == null ? null : selectedTask.GetType();
-            var menu = new GenericMenu();
-
-            for (int i = 0; i < TypesEditor.Length; i++)
-            {
-                string path = string.IsNullOrEmpty(PathsEditor[i]) ? ObjectNames.NicifyVariableName(NamesEditor[i]) : PathsEditor[i];
-                menu.AddItem(new GUIContent(path), Equals(TypesEditor[i], selectedType), onSelected, i);
-            }
-
-            return menu;
+            if (type == null) return 0;
+            return Array.IndexOf(TypesEditor, type);
         }
 
         private static void FindTaskTypes()
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            IEnumerable<Type> types = new List<Type>();
-
-            foreach (var a in assemblies)
-            {
-                types = types.Concat(a.GetTypes()
+            var types = TypeCache.GetTypesDerivedFrom<BehaviourTask>()
                 .Where(t => !t.IsAbstract)
-                .Where(t => t.IsSubclassOf(typeof(BehaviourTask)))
-                .Where(t => t.GetCustomAttribute(typeof(ExcludeFromTaskSelectorAttribute)) is null))
+                .Where(t => t.GetCustomAttribute(typeof(ExcludeFromTaskSelectorAttribute)) == null)
                 .OrderBy(t => t.Name);
-            }
 
             Types = types.ToArray();
             TypesEditor = new Type[] { null }.Concat(Types).ToArray();
@@ -86,7 +72,7 @@ namespace Recstazy.BehaviourTree
         private static void CreateTaskNames()
         {
             Names = Types.Select(t => t.Name).ToArray();
-            NamesEditor = new string[] { "Empty" }.Concat(Names).ToArray();
+            NamesEditor = new string[] { NoTaskLabel }.Concat(Names).ToArray();
         }
 
         private static void CreateTaskPaths()

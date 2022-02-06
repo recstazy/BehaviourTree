@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace Recstazy.BehaviourTree
 {
-    [TaskOut(0)]
+    [TaskOut]
     [TaskMenu("Gate/Is Set Gate")]
     public class ValueSetGate : BaseGateTask
     {
         #region Fields
 
         [SerializeField]
-        private BlackboardGetter _valueName;
+        private BlackboardGetter _value;
 
         #endregion
 
@@ -19,14 +19,9 @@ namespace Recstazy.BehaviourTree
 
         #endregion
 
-        protected override string GetGateDescription()
-        {
-            return $"{_valueName} is set";
-        }
-
         protected override bool CheckGateCondition()
         {
-            var isSet = Blackboard.IsValueSetAndNotNull(_valueName);
+            var isSet = Blackboard.IsValueSetAndNotNull(_value);
             return isSet;
         }
     }

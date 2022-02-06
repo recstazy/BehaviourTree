@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Recstazy.BehaviourTree
 {
@@ -38,16 +39,16 @@ namespace Recstazy.BehaviourTree
         internal TreeNodeData NodeData { get => _nodeData; set => _nodeData = value; }
         internal Vector2 GraphPosition { get => _graphPosition; set => _graphPosition = value; }
         internal float Zoom { get => _zoom; set => _zoom = value; }
-        internal NodeData EntryNode => _nodeData?.Data == null || _nodeData.Data.Length == 0 ? null : _nodeData.Data[0];
+        internal TaskNodeData EntryNode => _nodeData?.TaskData == null || _nodeData.TaskData.Length == 0 ? null : _nodeData.TaskData[0];
         internal bool SnapEnabled { get => _snapEnabled; set => _snapEnabled = value; }
 
         #endregion
 
         internal void CreateEntry()
         {
-            if (_nodeData != null && _nodeData.Data != null && _nodeData.Data.Length == 0)
+            if (_nodeData != null && _nodeData.TaskData != null && _nodeData.TaskData.Length == 0)
             {
-                _nodeData.Data = new NodeData[] { new NodeData(0, new EntryTask()) };
+                _nodeData.TaskData = new TaskNodeData[] { new TaskNodeData(0, new EntryTask()) };
             }
         }
 
@@ -56,7 +57,7 @@ namespace Recstazy.BehaviourTree
         {
             var instance = Instantiate(this);
             instance.InitializeRuntime(coroutineRunner, blackboard);
-            instance.InitializeTasksWithConnections();
+            instance.InitializeNodesWithConnections();
             instance.IsRuntime = true;
             return instance;
         }
@@ -77,7 +78,7 @@ namespace Recstazy.BehaviourTree
         {
             _blackboard = Instantiate(blackboard);
             _blackboard.InitializeAtRuntime(coroutineRunner.gameObject);
-            var runtimeNodeData = _nodeData.Data;
+            var runtimeNodeData = _nodeData.TaskData;
 
             for (int i = 0; i < runtimeNodeData.Length; i++)
             {
@@ -87,14 +88,22 @@ namespace Recstazy.BehaviourTree
                     runtimeNodeData[i].TaskImplementation.SetCoroutineRunner(coroutineRunner);
                 }
             }
+
+            foreach (var d in _nodeData.FuncData)
+            {
+                if (d.FuncImplementation != null)
+                {
+                    d.FuncImplementation.SetBlackboard(_blackboard);
+                }
+            }
         }
 
         [RuntimeInstanced]
-        private void InitializeTasksWithConnections()
+        private void InitializeNodesWithConnections()
         {
-            foreach (var d in _nodeData.Data)
+            foreach (var data in _nodeData)
             {
-                d.InitialzeConnections(_nodeData.Data);
+                data.InitialzeConnections(_nodeData);
             }
         }
     }

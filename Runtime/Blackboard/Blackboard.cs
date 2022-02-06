@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using UnityEngine.AI;
+using Recstazy.BehaviourTree.PropertyBinding;
 
 namespace Recstazy.BehaviourTree
 {
@@ -12,18 +13,6 @@ namespace Recstazy.BehaviourTree
     /// </summary>
     public class Blackboard : ScriptableObject
     {
-        public class PropertyAccessor<T> where T : Delegate
-        {
-            public T Accessor { get; private set; }
-            public Type PropertyType { get; private set; }
-
-            public PropertyAccessor(T accessor, Type propertyType)
-            {
-                Accessor = accessor;
-                PropertyType = propertyType;
-            }
-        }
-
         #region Fields
 
         private bool _logErrors;
@@ -195,8 +184,7 @@ namespace Recstazy.BehaviourTree
 
             foreach (var getterProp in publicGetters)
             {
-                var getterFunc = PropertyBindHelper.CreateGetter(getterProp);
-                _getters.Add(getterProp.Name, new PropertyAccessor<Func<object>>(() => getterFunc(this), getterProp.PropertyType));
+                _getters.Add(getterProp.Name, PropertyBinder.CreateGetter(getterProp, this));
             }
 
             var publicSetters = bindableProperties.Where(p => p.CanWrite && p.GetSetMethod() != null && p.GetSetMethod().IsPublic).ToArray();
@@ -204,8 +192,7 @@ namespace Recstazy.BehaviourTree
 
             foreach (var setterProp in publicSetters)
             {
-                var setterAction = PropertyBindHelper.CreateSetter(setterProp);
-                _setters.Add(setterProp.Name, new PropertyAccessor<Action<object>>((value) => setterAction(this, value), setterProp.PropertyType));
+                _setters.Add(setterProp.Name, PropertyBinder.CreateSetter(setterProp, this));
             }
         }
 

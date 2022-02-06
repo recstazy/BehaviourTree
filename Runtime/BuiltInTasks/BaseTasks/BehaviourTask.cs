@@ -8,10 +8,13 @@ namespace Recstazy.BehaviourTree
     /// <summary>
     /// Base class to derive to make your own tasks
     /// </summary>
-    [TaskOut(0)]
+    [TaskOut]
     [System.Serializable]
-    public class BehaviourTask
+    public class BehaviourTask : INodeImplementation
     {
+        public event System.Action<BehaviourTask> OnStarted;
+        public event System.Action<BehaviourTask> OnFinished;
+
         #region Fields
 
         /// <summary> Return -1 in <c>GetCurrentOutIndex</c> to tell player that no out can be selected to go further </summary>
@@ -28,8 +31,6 @@ namespace Recstazy.BehaviourTree
         private HashSet<Coroutine> _currentTaskCoroutines = new HashSet<Coroutine>();
         private HashSet<BranchPlayer> _currentTaskBranches = new HashSet<BranchPlayer>();
 
-        protected static readonly Color s_DefaultColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
-
         #endregion
 
         #region Properties
@@ -42,25 +43,17 @@ namespace Recstazy.BehaviourTree
 
         public bool IsRunning { get; private set; }
         public Blackboard Blackboard { get => GetBlackboard(); set => SetBlackboard(value); }
-        protected virtual Color Color => s_DefaultColor;
 
-        internal int LastReturnedOut { get; private set; }
         internal CoroutineRunner CoroutineRunner { get; private set; }
+        internal int Index { get; set; }
 
         #endregion
 
         /// <summary> Ask this task to provide out index to go further </summary>
         public int GetCurrentOut()
         {
-            int nextOutIndex = GetCurrentOutIndex();
-            LastReturnedOut = nextOutIndex;
+            int nextOutIndex = GetNextOutIndex();
             return nextOutIndex;
-        }
-
-        /// <summary> Provide description to show in behaviour tree </summary>
-        public virtual string GetDescription()
-        {
-            return null;
         }
 
         /// <summary> Finish task without waiting to it's end and force to succeed or fail </summary>
@@ -77,7 +70,7 @@ namespace Recstazy.BehaviourTree
         protected virtual void Initialized() { }
 
         /// <summary> What out index to choose after task completion </summary>
-        protected virtual int GetCurrentOutIndex()
+        protected virtual int GetNextOutIndex()
         {
             return 0;
         }
@@ -188,6 +181,7 @@ namespace Recstazy.BehaviourTree
             StopAllBranches();
             _taskBodyRoutine = null;
             IsRunning = false;
+            OnFinished?.Invoke(this);
         }
 
         internal void Initialize()
@@ -211,6 +205,8 @@ namespace Recstazy.BehaviourTree
             IsRunning = true;
             Succeed = true;
             _taskBodyIsRunning = true;
+            OnStarted?.Invoke(this);
+
             _taskBodyRoutine = CoroutineRunner.StartCoroutine(TaskBodyCoroutine());
             yield return new WaitUntil(() => !_taskBodyIsRunning);
             AfterBodyFinished();
@@ -232,11 +228,6 @@ namespace Recstazy.BehaviourTree
             return copy as BehaviourTask;
         }
 
-        internal Color GetColor()
-        {
-            return Color;
-        }
-
         [RuntimeInstanced]
         internal void SetRuntimeConnections(List<BehaviourTask> connections)
         {
@@ -247,6 +238,11 @@ namespace Recstazy.BehaviourTree
         internal void SetCoroutineRunner(CoroutineRunner runner)
         {
             CoroutineRunner = runner;
+        }
+
+        internal virtual TaskConnection[] PostProcessConnectionsAfterChange(TaskConnection[] connections)
+        {
+            return connections;
         }
     }
 }
