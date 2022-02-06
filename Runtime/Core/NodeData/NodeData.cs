@@ -6,7 +6,7 @@ using System.Linq;
 namespace Recstazy.BehaviourTree
 {
     [System.Serializable]
-    internal class NodeData
+    internal abstract class NodeData
     {
         #region Fields
 
@@ -26,6 +26,7 @@ namespace Recstazy.BehaviourTree
         public int Index => _index;
         internal TaskConnection[] Connections { get => _connections; set => _connections = value; }
         internal Vector2 Position { get => _position; set => _position = value; }
+        internal abstract object Implementation { get; }
 
         #endregion
 
@@ -92,6 +93,6 @@ namespace Recstazy.BehaviourTree
         }
 
         [RuntimeInstanced]
-        internal virtual void InitialzeConnections(IEnumerable<NodeData> nodeData, Blackboard blackboard) { }
+        internal virtual void InitialzeConnections(IEnumerable<NodeData> nodeData) { }
     }
 }

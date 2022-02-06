@@ -54,7 +54,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             public NodeData[] GenerateData()
             {
                 if (Nodes == null) return new NodeData[0];
-                var data = Nodes.Select(n => n.GenerateData(false)).ToArray();
+                var data = Nodes.Select(n => n.GenerateData()).ToArray();
                 return data;
             }
         }

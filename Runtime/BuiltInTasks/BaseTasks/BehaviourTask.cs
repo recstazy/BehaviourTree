@@ -10,7 +10,7 @@ namespace Recstazy.BehaviourTree
     /// </summary>
     [TaskOut]
     [System.Serializable]
-    public class BehaviourTask
+    public class BehaviourTask : INodeImplementation
     {
         public event System.Action<BehaviourTask> OnStarted;
         public event System.Action<BehaviourTask> OnFinished;

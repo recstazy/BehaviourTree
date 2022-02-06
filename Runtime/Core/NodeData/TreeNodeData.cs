@@ -12,26 +12,26 @@ namespace Recstazy.BehaviourTree
         private TaskNodeData[] _taskData;
 
         [SerializeField]
-        private VarNodeData[] _varData;
+        private FuncNodeData[] _funcData;
 
         public TaskNodeData[] TaskData { get => _taskData; internal set => _taskData = value; }
-        public VarNodeData[] VarData { get => _varData; internal set => _varData = value; }
+        public FuncNodeData[] FuncData { get => _funcData; internal set => _funcData = value; }
 
         public TreeNodeData() 
         {
             TaskData = new TaskNodeData[0];
-            VarData = new VarNodeData[0];
+            FuncData = new FuncNodeData[0];
         }
 
-        public TreeNodeData(TaskNodeData[] data, params VarNodeData[] varData)
+        public TreeNodeData(TaskNodeData[] data, params FuncNodeData[] varData)
         {
             TaskData = data;
-            VarData = varData;
+            FuncData = varData;
         }
 
         public IEnumerator<NodeData> GetEnumerator()
         {
-            return new NodeDataEnumerator(_taskData, _varData);
+            return new NodeDataEnumerator(_taskData, _funcData);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -44,26 +44,26 @@ namespace Recstazy.BehaviourTree
             var taskData = data.Select(d => d as TaskNodeData).Where(d => d != null).ToArray();
             _taskData = _taskData.Concat(taskData).ToArray();
 
-            var varData = data.Select(d => d as VarNodeData).Where(d => d != null).ToArray();
-            _varData = _varData.Concat(varData).ToArray();
+            var varData = data.Select(d => d as FuncNodeData).Where(d => d != null).ToArray();
+            _funcData = _funcData.Concat(varData).ToArray();
         }
 
         public void RemoveData(params NodeData[] data)
         {
             _taskData = _taskData.Where(d => !data.Contains(d)).ToArray();
-            _varData = _varData.Where(d => !data.Contains(d)).ToArray();
+            _funcData = _funcData.Where(d => !data.Contains(d)).ToArray();
         }
 
         public class NodeDataEnumerator : IEnumerator<NodeData>
         {
             private TaskNodeData[] _taskData;
-            private VarNodeData[] _varData;
+            private FuncNodeData[] _varData;
             private int _curIndex;
             private int _sumLength;
             public NodeData Current => GetCurrent();
             object IEnumerator.Current => Current;
 
-            public NodeDataEnumerator(TaskNodeData[] taskData, VarNodeData[] varData)
+            public NodeDataEnumerator(TaskNodeData[] taskData, FuncNodeData[] varData)
             {
                 _taskData = taskData;
                 _varData = varData;

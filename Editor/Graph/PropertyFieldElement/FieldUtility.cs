@@ -16,13 +16,20 @@ namespace Recstazy.BehaviourTree.EditorScripts
         public static VisualElement NotSupportedLabel => new Label("Not Supported");
         public static VisualElement NoneLabel => new Label("None");
 
-        public static bool IsComplex(SerializedPropertyType type)
+        public static bool IsComplex(SerializedProperty sProp)
         {
+            var type = sProp.propertyType;
+
             switch (type)
             {
                 case SerializedPropertyType.Generic:
-                case SerializedPropertyType.ManagedReference:
                     return true;
+                case SerializedPropertyType.ManagedReference:
+                    {
+                        var objValue = PropertyValueHelper.GetTargetObjectOfProperty(sProp);
+                        var simpleDrawer = GetSimpleDrawerForManagedReference(objValue?.GetType(), objValue, null);
+                        return simpleDrawer == null;
+                    }
             }
 
             return false;
@@ -45,7 +52,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         public static VisualElement GetFieldByType(SerializedProperty property, object curValue, Action<object, object> onValueChanged)
         {
-            if (IsComplex(property.propertyType)) return ComplexLabel;
+            if (IsComplex(property)) return ComplexLabel;
             else return CreateFieldByPropertyType(property, curValue, onValueChanged);
         }
 
@@ -267,27 +274,17 @@ namespace Recstazy.BehaviourTree.EditorScripts
         // woa
         private static VisualElement CreateFieldByPropertyType(SerializedProperty property, object curValue, Action<object, object> onValueChanged)
         {
+            var simpleField = CreateFieldByPropertyTypeSimple(property.propertyType, curValue, onValueChanged);
+            if (simpleField != null) return simpleField;
             var type = property.propertyType;
 
             switch (type)
             {
-                case SerializedPropertyType.Integer:
-                    return BindChange(new IntegerField() { value = (int)curValue, isDelayed = true }, onValueChanged);
-                case SerializedPropertyType.Boolean:
-                    return BindChange(new Toggle() { value = (bool)curValue }, onValueChanged);
-                case SerializedPropertyType.Float:
-                    return BindChange(new FloatField() { value = (float)curValue, isDelayed = true }, onValueChanged);
-                case SerializedPropertyType.String:
-                    return BindChange(new TextField() { value = (string)curValue, isDelayed = true }, onValueChanged);
                 case SerializedPropertyType.Color:
                     return BindChange(new ColorField() { value = (Color)curValue }, onValueChanged);
                 case SerializedPropertyType.ObjectReference:
                     PropertyValueHelper.GetTargetObjectOfProperty(property, out Type fieldType);
                     return BindChange(new ObjectField() { value = (UnityEngine.Object)curValue, objectType = fieldType, allowSceneObjects = false }, onValueChanged);
-                case SerializedPropertyType.LayerMask:
-                    return BindChange(new LayerMaskField() { value = (LayerMask)curValue }, onValueChanged);
-                case SerializedPropertyType.Enum:
-                    return BindChange(new EnumField(defaultValue: (Enum)PropertyValueHelper.GetTargetObjectOfProperty(property)), onValueChanged);
                 case SerializedPropertyType.Vector2:
                     return BindChange(new Vector2Field() { value = (Vector2)curValue }, onValueChanged);
                 case SerializedPropertyType.Vector3:
@@ -298,8 +295,8 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     return BindChange(new RectField() { value = (Rect)curValue }, onValueChanged);
                 case SerializedPropertyType.ArraySize:
                     return BindChange(new IntegerField() { value = (int)curValue, isDelayed = true }, onValueChanged);
-                case SerializedPropertyType.Character:
-                    return BindChange(new TextField(1, false, false, '.') { value = (string)curValue, isDelayed = true }, onValueChanged);
+                case SerializedPropertyType.Enum:
+                    return BindChange(new EnumField(defaultValue: (Enum)PropertyValueHelper.GetTargetObjectOfProperty(property)), onValueChanged);
                 case SerializedPropertyType.AnimationCurve:
                     return BindChange(new CurveField() { value = (AnimationCurve)curValue }, onValueChanged);
                 case SerializedPropertyType.Bounds:
@@ -312,9 +309,73 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     return BindChange(new RectIntField() { value = (RectInt)curValue }, onValueChanged);
                 case SerializedPropertyType.BoundsInt:
                     return BindChange(new BoundsIntField() { value = (BoundsInt)curValue }, onValueChanged);
+                case SerializedPropertyType.ManagedReference:
+                    var objValue = PropertyValueHelper.GetTargetObjectOfProperty(property);
+                    var simpleDrawer = GetSimpleDrawerForManagedReference(objValue?.GetType(), objValue, onValueChanged);
+                    if (simpleDrawer != null) return simpleDrawer;
+                    else return NotSupportedLabel;
                 default:
                     return NotSupportedLabel;
             }
+        }
+
+        private static VisualElement CreateFieldByPropertyTypeSimple(SerializedPropertyType type, object curValue, Action<object, object> onValueChanged)
+        {
+            switch (type)
+            {
+                case SerializedPropertyType.Integer:
+                    return BindChange(new IntegerField() { value = (int)curValue, isDelayed = true }, onValueChanged);
+                case SerializedPropertyType.Boolean:
+                    return BindChange(new Toggle() { value = (bool)curValue }, onValueChanged);
+                case SerializedPropertyType.Float:
+                    return BindChange(new FloatField() { value = (float)curValue, isDelayed = true }, onValueChanged);
+                case SerializedPropertyType.String:
+                    return BindChange(new TextField() { value = (string)curValue, isDelayed = true }, onValueChanged);
+                case SerializedPropertyType.LayerMask:
+                    return BindChange(new LayerMaskField() { value = (LayerMask)curValue }, onValueChanged);
+                case SerializedPropertyType.Character:
+                    return BindChange(new TextField(1, false, false, '.') { value = (string)curValue, isDelayed = true }, onValueChanged);
+                default:
+                    return null;
+            }
+        }
+
+        private static VisualElement GetSimpleDrawerForManagedReference(Type objType, object curValue, Action<object, object> onValueChanged)
+        {
+            if (objType == null) return null;
+            var typeCode = Type.GetTypeCode(objType);
+
+            switch (typeCode)
+            {
+                case TypeCode.Boolean:
+                    return CreateFieldByPropertyTypeSimple(SerializedPropertyType.Boolean, curValue, onValueChanged);
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return CreateFieldByPropertyTypeSimple(SerializedPropertyType.Integer, curValue, onValueChanged);
+                case TypeCode.Char:
+                    return CreateFieldByPropertyTypeSimple(SerializedPropertyType.Character, curValue, onValueChanged);
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return CreateFieldByPropertyTypeSimple(SerializedPropertyType.Float, curValue, onValueChanged);
+                case TypeCode.String:
+                    return CreateFieldByPropertyTypeSimple(SerializedPropertyType.String, curValue, onValueChanged);
+            }
+
+            if (objType.IsEnum)
+            {
+                var enumIndex = (int)curValue;
+                var value = Enum.GetValues(objType).GetValue(enumIndex);
+                return BindChange(new EnumField(defaultValue: (Enum)value), onValueChanged);
+            }
+
+            return null;
         }
     }
 }

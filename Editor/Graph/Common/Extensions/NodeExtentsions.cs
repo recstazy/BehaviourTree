@@ -14,11 +14,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 return new TaskNode(taskData);
             }
-            else if (data is VarNodeData varData)
+            else if (data is FuncNodeData funcData)
             {
-                return new VarNode(varData);
+                if (funcData.Implementation is BbValueFunc) return new BbValueNode(funcData);
+                else if (funcData.Implementation is TreeValueFunc) return new TreeValueNode(funcData);
             }
-            else return null;
+
+            return null;
         }
 
         public static OutputDescription GetOutDescription(this Port outPort)

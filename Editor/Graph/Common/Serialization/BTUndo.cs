@@ -56,7 +56,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             public TreeNodeDataDescription(TreeNodeData nodeData)
             {
-                var sumData = ((NodeData[])nodeData.TaskData).Concat(nodeData.VarData).ToArray();
+                var sumData = ((NodeData[])nodeData.TaskData).Concat(nodeData.FuncData).ToArray();
                 _dataArray = new NodeDescription[sumData.Length];
 
                 for (int i = 0; i < _dataArray.Length; i++)
@@ -67,9 +67,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
             public TreeNodeData CreateNodeData()
             {
-                var dataArray = _dataArray.Select(d => d.GenerateData(true)).ToArray();
+                var dataArray = _dataArray.Select(d => d.GenerateData()).ToArray();
                 var taskData = dataArray.Select(d => d as TaskNodeData).Where(d => d != null).ToArray();
-                var varData = dataArray.Select(d => d as VarNodeData).Where(d => d != null).ToArray();
+                var varData = dataArray.Select(d => d as FuncNodeData).Where(d => d != null).ToArray();
                 var data = new TreeNodeData(taskData, varData);
                 return data;
             }

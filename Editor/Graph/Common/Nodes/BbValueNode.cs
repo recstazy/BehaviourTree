@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace Recstazy.BehaviourTree.EditorScripts
 {
-    internal class VarNode : BTNode
+    internal class BbValueNode : BTNode
     {
         #region Fields
 
@@ -17,9 +17,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
 
         #endregion
 
-        public VarNode() : base() { }
+        public BbValueNode() : base() { }
 
-        public VarNode(VarNodeData data) : base(data)
+        public BbValueNode(FuncNodeData data) : base(data)
         {
             ImportLayout();
             CreateOuts();

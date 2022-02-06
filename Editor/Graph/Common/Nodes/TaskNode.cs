@@ -64,9 +64,9 @@ namespace Recstazy.BehaviourTree.EditorScripts
             titleContainer.Clear();
         }
 
-        public override void UpdateEdges()
+        public override void EdgesChangedExternally()
         {
-            base.UpdateEdges();
+            base.EdgesChangedExternally();
             Reconnect();
         }
 
@@ -118,7 +118,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
             TaskData.TaskImplementation = TaskFactory.CreateTaskImplementationEditor(_taskProvider.CurrentIndex);
             BTWindow.SetDirty("Change Task");
             UpdateTaskDependencies();
-            UpdateEdges();
+            EdgesChangedExternally();
             ValidateOuts();
         }
     }
