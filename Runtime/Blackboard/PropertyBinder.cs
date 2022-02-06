@@ -22,7 +22,7 @@ namespace Recstazy.BehaviourTree.PropertyBinding
 
     internal static class PropertyBinder
     {
-        public static PropertyAccessor<Func<object>> CreateGetter(PropertyInfo property, Blackboard target)
+        public static PropertyAccessor<Func<object>> CreateGetter(PropertyInfo property, object target)
         {
             if (property == null)
                 throw new ArgumentNullException("Property is null");
@@ -43,11 +43,11 @@ namespace Recstazy.BehaviourTree.PropertyBinding
             return accessor;
         }
 
-        public static Func<TResult> CreateGetterGeneric<T, TResult>(MethodInfo getter, Blackboard target) where T : Blackboard
+        public static Func<TResult> CreateGetterGeneric<T, TResult>(MethodInfo getter, object target) where T : class
         {
             var getterDelegate = (Func<T, TResult>)Delegate.CreateDelegate(typeof(Func<T, TResult>), getter);
-            var upcastedBB = (T)target;
-            return () => getterDelegate.Invoke(upcastedBB);
+            var upcastedTarget = (T)target;
+            return () => getterDelegate.Invoke(upcastedTarget);
         }
 
         public static Func<object> CreateGetterBoxed<T>(Func<T> func)
@@ -62,7 +62,7 @@ namespace Recstazy.BehaviourTree.PropertyBinding
             return getterDelegate;
         }
 
-        public static PropertyAccessor<Action<object>> CreateSetter(PropertyInfo property, Blackboard target)
+        public static PropertyAccessor<Action<object>> CreateSetter(PropertyInfo property, object target)
         {
             if (property == null)
                 throw new ArgumentNullException("Property is null");
@@ -83,11 +83,11 @@ namespace Recstazy.BehaviourTree.PropertyBinding
             return accessor;
         }
 
-        public static Action<TValue> CreateSetterGeneric<T, TValue>(MethodInfo setter, Blackboard target) where T : Blackboard
+        public static Action<TValue> CreateSetterGeneric<T, TValue>(MethodInfo setter, object target) where T : class
         {
             var setterDelegate = (Action<T, TValue>)Delegate.CreateDelegate(typeof(Action<T, TValue>), setter);
-            var upcastedBB = (T)target;
-            return (value) => setterDelegate.Invoke(upcastedBB, value);
+            var upcastedTarget = (T)target;
+            return (value) => setterDelegate.Invoke(upcastedTarget, value);
         }
 
         public static Action<object> CreateSetterBoxed<T>(Action<T> setAction)
