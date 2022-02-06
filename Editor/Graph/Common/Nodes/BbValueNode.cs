@@ -23,6 +23,7 @@ namespace Recstazy.BehaviourTree.EditorScripts
         {
             ImportLayout();
             CreateOuts();
+            ValidateBbValue(data);
         }
 
         private void ImportLayout()
@@ -39,6 +40,20 @@ namespace Recstazy.BehaviourTree.EditorScripts
             {
                 CreateOutputPort(o);
             }
+        }
+
+        private void ValidateBbValue(FuncNodeData data)
+        {
+            var func = data.FuncImplementation as BbValueFunc;
+
+            if (func != null && !string.IsNullOrEmpty(func.VariableName))
+            {
+                bool? isValidName = BTWindow.SharedTree.Blackboard?.GetterValues.TryGetValue(func?.VariableName, out var accessor);
+
+                if (isValidName.HasValue && isValidName.Value == true) return;
+            }
+
+            AddErrorHighlight(this);
         }
     }
 }

@@ -37,6 +37,13 @@ namespace Recstazy.BehaviourTree.EditorScripts
             OnValidateConnections?.Invoke();
         }
 
+        public static void AddErrorHighlight(BTNode node)
+        {
+            var highlight = new VisualElement();
+            highlight.AddToClassList("node-highlight-error");
+            node.Add(highlight);
+        }
+
         public BTNode() : base() { }
 
         public BTNode(NodeData data) : base()

@@ -91,11 +91,11 @@ namespace Recstazy.BehaviourTree.EditorScripts
                     descriptions = descriptions.Concat(generated).ToArray();
                 }
             }
-            else if (data is FuncNodeData varData)
+            else if (data is FuncNodeData funcData)
             {
-                if (varData.FuncImplementation != null)
+                if (funcData.FuncImplementation != null)
                 {
-                    var outs = varData.FuncImplementation.GetOuts();
+                    var outs = funcData.FuncImplementation.GetOuts();
                     descriptions = new OutputDescription[outs.Length];
 
                     for (int i = 0; i < outs.Length; i++)
